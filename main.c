@@ -1,17 +1,16 @@
 #include "main.h"
 #include "game.h"
 
-//PROBLEM:
-//The DMA gets all the way through currentFrame, and then runs out of data.
-//Set up IRQ (interrupts) and a callback so the CPU then tells it to start reading
-//from the beginning of the other array, and flip/flopping back and forth.
+//NEXT:
+// - state machine starting -- make it so that all 3 state machines start at the same time
+// - TEST! cut up a vga cable, tie it to a monitor, actually display an image
 
 uint8_t frame[2][240][320];
+uint8_t activeFrame = 0;
 
 int dmaChan;
 
 static void updateDMA() {
-    static uint8_t activeFrame = 0;
     static bool currentLineDoubled = false;
     static uint8_t currentLine = 0;
 
@@ -22,7 +21,7 @@ static void updateDMA() {
 
     activeFrame = (activeFrame + 1) % 2; //swap activeFrame between 0 and 1
     if(currentLineDoubled) { //handle line doubling
-        currentLine++; 
+        currentLine = (currentLine + 1) % 240; 
         currentLineDoubled = false;
     }
     else currentLineDoubled = true;

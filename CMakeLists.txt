@@ -17,6 +17,7 @@ pico_sdk_init()
 add_executable(${PROJECT_NAME} 
     main.c
     game.c
+    sprites.c
 )
 
 # Create C header file with the name <pio program>.pio.h

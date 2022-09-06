@@ -14,4 +14,5 @@
 #include "hsync.pio.h"
 
 extern uint8_t frame[2][240][320]; //2 frames, 240 rows by 320 columns. 76.8KB per frame, 153.6KB for the entire array.
+extern uint8_t activeFrame; //the frame currently being printed
 #endif

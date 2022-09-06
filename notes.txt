@@ -1,0 +1,41 @@
+NOTES:
+
+http://tinyvga.com/vga-timing/640x480@60Hz
+
+640x480 image size, 8 bit color depth, stored as RGB: 307kb -- TOO BIG!
+Displaying a 640x480@60hz image: 25.175MHz pixel frequency
+                                 31.46kHz vertical refresh
+
+VGA has 15 pins, but really we only care about 5:
+- Red
+- Green
+- Blue
+- Horizontal Sync
+- Vertical Sync
+
+Challenge:
+- Make an array-to-vga converter -- data is loaded into a massive 640x480x3 array (3 for r,g,b), and then displayed correctly and timed correctly.
+
+Ben Eater Vid notes:
+- You can go from full digital to 8-bit analog color with JUST RESISTORS
+  - Each VGA color wants a range from 0-0.7 volts, where 0 is off and 0.7v is full brightness
+  - If you do the math (or watch the vid), you can divide this range into 4, 8, or even 16 zones, and address
+    them with the appropriate number of bits
+  - So, if you do a 8 division (3 parallel resistors) for red and green, and a 4 division (2 resistors) for blue,
+    then you can get full 8 bit color with no additional logic necessary.
+  - BONUS -- it makes converting from images WAY easier.
+
+NO DAC!
+But.... it's still too big for the pico's ram.
+
+640x480 / 2 = 320x240 line doubled (every pixel displayed twice and every line displayed twice)
+Size, at 8 bit color depth: 76.8k -- GOOD!
+
+
+PIO/VGA Driver notes:
+- In memory:
+  - Working frame -- the one that is currently being worked on by the cpu, where sprites are being moved, etc
+  - Display frame -- the frame that is currently being pushed out to the monitor
+  - This exists because if you are modifying a frame at the same time it is being displayed, you may cause problems 
+    and accidentally access teh same piece of memory with 2 parts of the cpu at the same time
+- You get 32 instructions in one PIO

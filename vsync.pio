@@ -1,0 +1,50 @@
+; Drive a 320x240 @ 60Hz (upscaled to 640x480) 8-bit-color VGA signal over 5 digital IO pins.
+;  - vsync.pio manages the VSYNC line of the VGA signal.
+
+.program vsync
+    irq set 6 ; Lock the color state machine OFF
+.wrap_target
+    nop [31] ; Vertical Back Porch Delay
+    irq clear 6 ; Set the VSYNC interrupt to 0 -- tells the color state machine to start
+    nop [31] ; Frame is being displayed, wait
+    irq set 6 ; Set the VSYNC interrupt to 1 -- locks the color state machine
+    nop [31] ; Vertical Front Porch Delay
+    set pins, 1
+    nop [31] ; Vertical Sync Pulse Length
+    set pins, 0
+.wrap
+
+% c-sdk {
+
+// Helper function (for use in C program) to initialize this PIO program
+
+static inline void vsync_program_init(PIO pio, uint sm, uint offset, uint dataPin) {
+    //Initialize VSYNC pin
+    pio_gpio_init(pio, dataPin);
+
+    //Set pin to outputs
+    pio_sm_set_consecutive_pindirs(pio, sm, dataPin, 1, true);
+
+    //Get default state machine configuration
+    pio_sm_config c = vsync_program_get_default_config(offset);
+
+    //Set pin to 'set'
+    sm_config_set_set_pins(&c, dataPin, 1);
+
+    //Setup FIFO
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+    
+    //Setup state machine clock divider
+    int cyclesPerBit = 3;
+    float clkDiv = clock_get_hz(clk_sys)/(25175000*cyclesPerBit); //25.175Mhz pixel clock
+    sm_config_set_clkdiv(&c, clkDiv);
+    
+    //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
+    sm_config_set_out_shift(&c, true, true, 32);
+
+    //Start state machine with this configuration
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+%}

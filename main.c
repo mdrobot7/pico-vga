@@ -6,6 +6,8 @@
 //Set up IRQ (interrupts) and a callback so the CPU then tells it to start reading
 //from the beginning of the other array, and flip/flopping back and forth.
 
+uint8_t frame[2][240][320];
+
 int dmaChan;
 
 static void updateDMA() {

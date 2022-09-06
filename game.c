@@ -3,5 +3,6 @@
 
 void game()
 {
+    frame[0][0][0] = 1;
     return;
 }

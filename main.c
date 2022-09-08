@@ -75,7 +75,9 @@ int main() {
     irq_set_exclusive_handler(DMA_IRQ_0, updateDMA);
     irq_set_enabled(DMA_IRQ_0, true);
 
-    //dma_channel_set_read_addr(dma_chan, frame[0], true);
+    //starts all 3 state machines at once, syncs clocks
+    pio_enable_sm_mask_in_sync(pio0, ((1u << 0) | (1u << 1) | (1u << 2)));
+
     updateDMA(); //trigger the DMA manually
 
     game();

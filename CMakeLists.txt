@@ -13,11 +13,13 @@ set(CMAKE_CXX_STANDARD 17)
 # Creates a pico-sdk subdirectory in our project for the libraries
 pico_sdk_init()
 
-# Tell CMake where to find the executable source file
+# Tell CMake where to find the executable source files
+FILE(GLOB gameSources ./game/*.c)
+
 add_executable(${PROJECT_NAME} 
     main.c
-    game.c
-    sprites.c
+    ${gameSources} # NOTE! This line is dangerous. It tells CMake to build every .c file in /game/. If build
+                   #       happen, it's likely this line.
 )
 
 # Create C header file with the name <pio program>.pio.h

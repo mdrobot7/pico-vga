@@ -1,5 +1,5 @@
 #include "main.h"
-#include "game.h"
+#include "game/game.h"
 
 //NEXT:
 // - state machine starting -- make it so that all 3 state machines start at the same time

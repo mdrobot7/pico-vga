@@ -2,8 +2,9 @@
 #include "game/game.h"
 
 //NEXT:
-// - state machine starting -- make it so that all 3 state machines start at the same time
+// - Timing for state machines, clock divider?
 // - TEST! cut up a vga cable, tie it to a monitor, actually display an image
+
 
 uint8_t frame[2][240][320];
 uint8_t activeFrame = 0;
@@ -40,14 +41,14 @@ int main() {
     // return with the memory offset of the program.
     uint offset = pio_add_program(pio0, &color_program);
 
-    // Initialize color pio program, start PIO state machine
+    // Initialize color pio program, but DON'T enable PIO state machine
     color_program_init(pio0, 0, offset, 0);
 
-    offset = pio_add_program(pio0, &vsync_program);
-    vsync_program_init(pio0, 1, offset, 8);
-
     offset = pio_add_program(pio0, &hsync_program);
-    hsync_program_init(pio0, 2, offset, 9);
+    hsync_program_init(pio0, 1, offset, 8);
+
+    offset = pio_add_program(pio0, &vsync_program);
+    vsync_program_init(pio0, 2, offset, 9);
 
 
     //DMA!
@@ -62,7 +63,7 @@ int main() {
     dma_channel_configure(
         dmaChan,
         &dmaConf,
-        &pio0_hw->txf[0], // Write address (only need to set this once)
+        &pio0_hw->txf[0], // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0
         frame,             // Don't provide a read address yet
         sizeof(frame[0][0]), // Transfer a line, then halt and interrupt
         false             // Don't start yet
@@ -75,7 +76,7 @@ int main() {
     irq_set_exclusive_handler(DMA_IRQ_0, updateDMA);
     irq_set_enabled(DMA_IRQ_0, true);
 
-    //starts all 3 state machines at once, syncs clocks
+    //start all 3 state machines at once, sync clocks
     pio_enable_sm_mask_in_sync(pio0, ((1u << 0) | (1u << 1) | (1u << 2)));
 
     updateDMA(); //trigger the DMA manually

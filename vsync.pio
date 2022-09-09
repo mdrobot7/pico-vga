@@ -1,17 +1,23 @@
 ; Drive a 320x240 @ 60Hz (upscaled to 640x480) 8-bit-color VGA signal over 5 digital IO pins.
 ;  - vsync.pio manages the VSYNC line of the VGA signal.
 
+; 1 clock cycle = 1 line, 800px including nonvisible area (1/800 of pixel clock)
+
 .program vsync
-    irq set 6 ; Lock the color state machine OFF
+
 .wrap_target
-    nop [31] ; Vertical Back Porch Delay
-    irq clear 6 ; Set the VSYNC interrupt to 0 -- tells the color state machine to start
-    nop [31] ; Frame is being displayed, wait
-    irq set 6 ; Set the VSYNC interrupt to 1 -- locks the color state machine
-    nop [31] ; Vertical Front Porch Delay
-    set pins, 1
-    nop [31] ; Vertical Sync Pulse Length
-    set pins, 0
+    irq clear 7 [30] ; Set the VSYNC interrupt to 0 -- tells the color state machine to start
+
+    set x 14         ; Active frame (480 lines, 480 cycles, 31 from irq line + 1 from set + 14*32 from loop)
+waitloop:
+    nop [30]         ; 32 cycle loop -- nop + 30 + jmp = 32
+    jmp x-- waitloop
+
+    irq set 7        ; Set the VSYNC interrupt to 1 -- locks the color state machine
+    nop [9]          ; Vertical Front Porch Delay (10 ln, 10 cycles, nop + irq reset)
+    set pins, 0 [1]  ; Sync Pulse Length (2 ln, 2 cycles)
+    set pins, 1 [31] ; Vertical Back Porch Delay (33 ln, 33 cycles, set pins + nop)
+    nop
 .wrap
 
 % c-sdk {
@@ -31,12 +37,18 @@ static inline void vsync_program_init(PIO pio, uint sm, uint offset, uint dataPi
     //Set pin to 'set'
     sm_config_set_set_pins(&c, dataPin, 1);
 
+    //Preset pin to HIGH
+    pio_sm_set_pins(pio, sm, 1);
+
     //Setup FIFO
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+
+    //Clear Interrupts
+    pio_interrupt_clear(pio, 6);
+    pio_interrupt_clear(pio, 7);
     
     //Setup state machine clock divider
-    int cyclesPerBit = 3;
-    float clkDiv = clock_get_hz(clk_sys)/(25175000*cyclesPerBit); //25.175Mhz pixel clock
+    float clkDiv = clock_get_hz(clk_sys)/(25175000/800); //25.175Mhz pixel clock / 800 gets line freq
     sm_config_set_clkdiv(&c, clkDiv);
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR

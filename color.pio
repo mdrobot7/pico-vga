@@ -2,10 +2,10 @@
 ;  - color.pio manages the 8 color pins, for 8 bit color. The hsync and vsync lines are managed separately.
 
 .program color
-    nop [31] ; Make sure the interrupts are set by the other state machines before running the main code
+     ; out pins 8 ; Shift the first 8 bits of data -- add this in if needed
 .wrap_target
-    wait 0 irq 6 ; Wait until Interrupt 6 (only visible to state machines) is pulled LOW -- VSYNC signal
-    wait 0 irq 7 ; Wait until Interrupt 7 (state machines only) is pulled LOW -- HSYNC signal
+    wait 0 irq 6 ; Wait until Interrupt 6 (only visible to state machines) is pulled LOW -- HSYNC signal
+    wait 0 irq 7 ; Wait until Interrupt 7 (state machines only) is pulled LOW -- VSYNC signal
     out pins 8 ; Shift 8 bits of data from the OSR to the pins.
 .wrap
 
@@ -33,8 +33,15 @@ static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPi
     //Set all 8 pins to 'out' pins
     sm_config_set_out_pins(&c, dataPin, 8);
 
+    //Preset pins to LOW
+    pio_sm_set_pins(pio, sm, 0);
+
     //Setup FIFO
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+
+    //Clear Interrupts
+    pio_interrupt_clear(pio, 6);
+    pio_interrupt_clear(pio, 7);
     
     //Setup state machine clock divider
     int cyclesPerBit = 3;

@@ -41,6 +41,23 @@ PIO/VGA Driver notes:
 - You get 32 instructions in one PIO
 
 
+VGA timing:
+Time of 1 pixel (sec) = p
+
+Current Hsync clock = p*16 = h
+Front porch = h
+Sync pulse = 6*h
+Back porch = 3*h
+Visible area = 40*h
+
+-------------
+
+Hsync clock = p*8 = h
+Front porch = 2h
+Sync pulse = 12h
+Back porch = 6h
+Visible area = 80h
+
 -----------------------
 
 Hardware:

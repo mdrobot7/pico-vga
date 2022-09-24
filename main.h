@@ -8,6 +8,7 @@
 #include "hardware/clocks.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
+#include "hardware/gpio.h"
 
 #include "color.pio.h"
 #include "vsync.pio.h"

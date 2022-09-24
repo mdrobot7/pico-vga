@@ -34,17 +34,18 @@ pico_generate_pio_header(${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/vsync.pio
 )
 
-# Create map/bin/hex/uf2 files
-pico_add_extra_outputs(${PROJECT_NAME})
-
 # Link to pico_stdlib (gpio, time, etc. functions)
 target_link_libraries(${PROJECT_NAME} 
     pico_stdlib
     hardware_pio
     hardware_dma
     hardware_irq
+    hardware_gpio
 )
 
 # Enable usb output, disable uart output
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
-pico_enable_stdio_uart(${PROJECT_NAME} 1)
+pico_enable_stdio_uart(${PROJECT_NAME} 0)
+
+# Create map/bin/hex/uf2 files
+pico_add_extra_outputs(${PROJECT_NAME})

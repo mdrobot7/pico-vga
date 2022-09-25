@@ -58,6 +58,18 @@ Sync pulse = 12h
 Back porch = 6h
 Visible area = 80h
 
+notes from scope testing:
+ - 1 less cycle of delay in visible area of hsync
+
+ - hsync is perfect, down to a hundredth of a us, vsync is too slow by 1.3us
+   - tried to adjust clock speed of pio state machine to correct -- successful
+
+- issue: when outputting color, the frequency is WAY too slow.
+  - note: is it? plug it back into a scope to see. period of alternating line graph should be 2x line time
+  - note: the fastest signal that you can make with PIO (125MHz sys_clk) is 62.5MHz, I think? Because CPU
+    only executes on the rising OR falling edge of sys_clk, and it takes 2 instructions to get the signal
+    (pin turn on, pin turn off), you are left with half of the frequency
+
 -----------------------
 
 Hardware:

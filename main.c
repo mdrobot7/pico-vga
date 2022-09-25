@@ -25,30 +25,36 @@ static void updateDMA() {
     static bool currentLineDoubled = false;
     static uint8_t currentLine = 0;
 
-    // Clear the interrupt request.
-    dma_hw->ints0 = 1u << dmaChan;
-    // Give the channel a new frame address to read from, and re-trigger it
-    dma_channel_set_read_addr(dmaChan, frame[activeFrame][currentLine], true);
-
-    activeFrame = (activeFrame + 1) % 2; //swap activeFrame between 0 and 1
+    //currentLineDoubled = false;
     if(currentLineDoubled) { //handle line doubling
         currentLine = (currentLine + 1) % 240; 
         currentLineDoubled = false;
     }
     else currentLineDoubled = true;
+
+    // Clear the interrupt request.
+    dma_hw->ints0 = 1u << dmaChan;
+    // Give the channel a new frame address to read from, and re-trigger it
+    dma_channel_set_read_addr(dmaChan, frame[activeFrame][currentLine], true);
+
+    if(currentLine == 239 && currentLineDoubled) activeFrame = (activeFrame + 1) % 2; //swap activeFrame between 0 and 1
 }
 
 int main() {
     stdio_init_all();
     for(uint8_t i = 0; i < 32; i++) { //8 seconds to open serial communication
-        printf("Waiting for user to open serial...\n");
-        sleep_ms(250);
+        printf("Waiting for user to open serial...");
+        printf("%d\n", clock_get_hz(clk_sys));
+        //sleep_ms(250);
     }
     
     for(uint8_t i = 0; i < 2; i++) {
         for(uint8_t j = 0; j < 240; j++) {
-            for(uint16_t k = 0; k < 320; k++) {
-                frame[i][j][k] = 0; //fill the frame array
+            if(j % 2 == 0) {
+                for(uint16_t k = 0; k < 320; k++) frame[i][j][k] = 255; //fill the frame array
+            }
+            else {
+                for(uint16_t k = 0; k < 320; k++) frame[i][j][k] = 0; //fill the frame array
             }
         }
     }
@@ -73,7 +79,7 @@ int main() {
     // SM0's TX FIFO, paced by the data request signal from that peripheral.
     dmaChan = dma_claim_unused_channel(true);
     dma_channel_config dmaConf = dma_channel_get_default_config(dmaChan);
-    channel_config_set_transfer_data_size(&dmaConf, DMA_SIZE_32); //the amount to shift the read position by
+    channel_config_set_transfer_data_size(&dmaConf, DMA_SIZE_8); //the amount to shift the read position by
     channel_config_set_read_increment(&dmaConf, true); //shift the "read position" every read
     channel_config_set_dreq(&dmaConf, DREQ_PIO0_TX0); //set where the data request will come from
 
@@ -81,8 +87,8 @@ int main() {
         dmaChan,
         &dmaConf,
         &pio0_hw->txf[0], // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
-        frame,             // Don't provide a read address yet
-        sizeof(frame[0][0]), // Transfer a line, then halt and interrupt
+        frame,             // Initial read address
+        320,              // Transfer a line (320 bytes), then halt and interrupt
         false             // Don't start yet
     );
 

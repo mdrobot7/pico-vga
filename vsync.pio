@@ -6,9 +6,9 @@
 .program vsync
 
 .wrap_target
-    irq clear 7 [30] ; Set the VSYNC interrupt to 0 -- tells the color state machine to start
+    irq clear 7 [29] ; Set the VSYNC interrupt to 0 -- tells the color state machine to start
 
-    set x 14         ; Active frame (480 lines, 480 cycles, 31 from irq line + 1 from set + 14*32 from loop)
+    set x 13         ; Active frame (480 lines, 480 cycles, 31 from irq line + 1 from set + 14*32 from loop) - -1 from register + 1 cycle from irq from real world scope testing
 waitloop:
     nop [30]         ; 32 cycle loop -- nop + 30 + jmp = 32
     jmp x-- waitloop
@@ -48,7 +48,7 @@ static inline void vsync_program_init(PIO pio, uint sm, uint offset, uint dataPi
     pio_interrupt_clear(pio, 7);
     
     //Setup state machine clock divider
-    float clkDiv = clock_get_hz(clk_sys)/(25175000/800); //25.175Mhz pixel clock / 800 gets line freq
+    float clkDiv = clock_get_hz(clk_sys)/(25175770.0/800.0); //25.175Mhz pixel clock / 800 gets line freq (adjusted based on real world testing)
     sm_config_set_clkdiv(&c, clkDiv);
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR

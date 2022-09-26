@@ -40,6 +40,14 @@ static void updateDMA() {
     if(currentLine == 239 && currentLineDoubled) activeFrame = (activeFrame + 1) % 2; //swap activeFrame between 0 and 1
 }
 
+void configHSync() {
+    return;
+}
+
+void configVSync() {
+    return;
+}
+
 int main() {
     stdio_init_all();
     for(uint8_t i = 0; i < 32; i++) { //8 seconds to open serial communication

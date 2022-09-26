@@ -9,6 +9,7 @@
 #include "hardware/dma.h"
 #include "hardware/irq.h"
 #include "hardware/gpio.h"
+#include "hardware/pwm.h"
 
 #include "color.pio.h"
 #include "vsync.pio.h"

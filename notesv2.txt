@@ -1,0 +1,35 @@
+                            Updated notes from a few weeks in:
+
+The highest resolution I can do is determined by the FREQUENCY, NOT by the resolution.
+
+Line doubling HALVES the pixel clock and buffered array size, because you are only outputting one out of every two pixels
+
+Highest resolution: 1280x1024 @ 60Hz, 8 bit color, NOT line doubled
+- Pixel clock: 108.0MHz
+- Full frame size: 1,310,720 bytes (1.3Mb, ish)
+- Single line size: 1024 bytes (1kb)
+
+Single line rendering (how this would work):
+- Rendering core would put sprites/"game objects" where it wants, and save the coordinates somewhere
+- Every line it would output to an array the memory locations for what to put there and the size of the object 
+  (number of pixels until the next object)
+- Other core would ONLY be responsible for listening for DMA's callbacks
+  - Start of line
+    - Give DMA the first memory location and num transfers, start it
+    - Wait for callback, PIO state machine outputs data to screen
+    - Repeat with next memory location and size
+  - End of line
+  - Other core: load next line data
+
+Full frame rendering (how the old system works):
+- Two cores working on rendering
+- DMA callback just loops to beginning of frame
+- Start of frame
+  - DMA loads frame data, chunk by chunk, into TX FIFO of PIO state machine
+  - Optional, but probably necessary: Do callback halfway down frame to tell renderer it can start rendering the 
+    top half of the frame out to the array
+  - DMA runs out of data, triggers callback, end of visible area
+  - During the VSync F. Porch, B. Porch, Sync, fill the frame with data
+  - Reload DMA
+- End of frame
+

@@ -2,14 +2,9 @@
 ;  - color.pio manages the 8 color pins, for 8 bit color. The hsync and vsync lines are managed separately.
 
 .program color
-     ; out pins 8 ; Shift the first 8 bits of data -- add this in if needed
+
 .wrap_target
-    ;wait 0 irq 6 ; Wait until Interrupt 6 (only visible to state machines) is pulled LOW -- HSYNC signal
-    ;wait 0 irq 7 ; Wait until Interrupt 7 (state machines only) is pulled LOW -- VSYNC signal
-    ;nop [1]
-    ;out pins 8 ; Shift 8 bits of data from the OSR to the pins.
-    set pins 7
-    set pins 0
+    out pins 8 ; Shift 8 bits of data from the OSR to the pins.
 .wrap
 
 % c-sdk {
@@ -21,20 +16,20 @@ static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPi
     pio_gpio_init(pio, dataPin);
     pio_gpio_init(pio, dataPin + 1);
     pio_gpio_init(pio, dataPin + 2);
-    //pio_gpio_init(pio, dataPin + 3);
-    //pio_gpio_init(pio, dataPin + 4);
-    //pio_gpio_init(pio, dataPin + 5);
-    //pio_gpio_init(pio, dataPin + 6);
-    //pio_gpio_init(pio, dataPin + 7);
+    pio_gpio_init(pio, dataPin + 3);
+    pio_gpio_init(pio, dataPin + 4);
+    pio_gpio_init(pio, dataPin + 5);
+    pio_gpio_init(pio, dataPin + 6);
+    pio_gpio_init(pio, dataPin + 7);
 
     //Set all 8 pins to outputs
-    pio_sm_set_consecutive_pindirs(pio, sm, dataPin, 3, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, dataPin, 8, true);
 
     //Get default state machine configuration
     pio_sm_config c = color_program_get_default_config(offset);
 
     //Set all 8 pins to 'out' pins
-    sm_config_set_set_pins(&c, dataPin, 3);
+    sm_config_set_out_pins(&c, dataPin, 8);
 
     //Preset pins to LOW
     pio_sm_set_pins(pio, sm, 0);
@@ -47,8 +42,7 @@ static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPi
     pio_interrupt_clear(pio, 7);
     
     //Setup state machine clock divider
-    float clkDiv = 1.0;
-    sm_config_set_clkdiv(&c, 1.0);
+    sm_config_set_clkdiv(&c, 8.0); //CPU Base clock (after reconfig): 100.7 MHz. 100.7/4 = 25.175 pixel clock, /2 again for line doubling
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);

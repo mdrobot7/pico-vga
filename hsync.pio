@@ -6,10 +6,8 @@
 .program hsync
 
 .wrap_target
-    irq clear 6     ; Set the HSYNC interrupt to 0 -- tells the color state machine to start
     nop [31]        ; Line is being displayed, wait
-    nop [5]         ; Line is being displayed (total 640px, 40 cycles delay, 32 + 7 + irq reset) - 1 (from real world scope testing)
-    irq set 6       ; Set the HSYNC interrupt to 1 -- locks the color state machine
+    nop [7]         ; Line is being displayed (total 640px, 40 cycles delay, 32 + 8) - 1 (from real world scope testing)
     nop             ; Horizontal Front Porch Delay (16px, 1 cycle)
     set pins, 0 [5] ; Sync Pulse Length (96px, 6 cycles)
     set pins, 1     ; How does the timing for this work?
@@ -46,8 +44,7 @@ static inline void hsync_program_init(PIO pio, uint sm, uint offset, uint dataPi
     //Setup state machine clock divider
     // - I want a single instruction to take as LONG as possible, while still being able to
     //   time stuff correctly
-    float clkDiv = clock_get_hz(clk_sys)/(25175000.0/16.0); //25.175Mhz pixel clock / 16, now F.Porch = 1 cycle, sync = 6, B.Porch = 3
-    sm_config_set_clkdiv(&c, clkDiv);
+    sm_config_set_clkdiv(&c, 64.0); //Base: 100.7MHz. /4 -> 25.175MHz pixel clock / 16, now F.Porch = 1 cycle, sync = 6, B.Porch = 3
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);

@@ -4,10 +4,24 @@ The highest resolution I can do is determined by the FREQUENCY, NOT by the resol
 
 Line doubling HALVES the pixel clock and buffered array size, because you are only outputting one out of every two pixels
 
-Highest resolution: 1280x1024 @ 60Hz, 8 bit color, NOT line doubled
-- Pixel clock: 108.0MHz
-- Full frame size: 1,310,720 bytes (1.3Mb, ish)
-- Single line size: 1024 bytes (1kb)
+Highest resolution: 800x600 @ 60Hz, 8 bit color, NOT line doubled
+- Pixel clock: 40MHz
+- Full frame size: 480,000 bytes (480kb)
+- Single line size: 800 bytes
+
+Why is this resolution the limit?
+- Pixel clock, pretty much.
+- The system clock of the pico is 125MHz. The CPU/any peripherals execute commands at 125MHz, meaning every
+  instruction is run on the rising edge of that clock signal. This means that if you turn on and off a set of
+  pins every cycle (aka telling PIO set pins 1, set pins 0), the fastest frequency you can generate is 62.5MHz,
+  because every on/off is executed on the rising edge of the main clock frequency.
+- Because of this, the fastest pixel clock I can possibly generate is 62.5MHz, at least with the methods I know
+  and the hardware peripherals I have access to. With lower level access to timers, I could execute at system clock
+  frequency (125MHz), but I don't have access to that on this chip.
+- Since I'm capped at 62.5MHz, I'm limited to 800x600
+- With a slight overclock, I could do 1024x768 @ 60Hz (pixel clock 65MHz)
+- Solution: I need to either be able to push to GPIO at system clock frequency, or buy a faster chip (teensy) and
+  use the lower level access and faster frequency on it to push the pixel clocks higher
 
 Single line rendering (how this would work):
 - Rendering core would put sprites/"game objects" where it wants, and save the coordinates somewhere

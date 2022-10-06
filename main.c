@@ -16,7 +16,7 @@ GPIO9 - VSync
 // - TEST! cut up a vga cable, tie it to a monitor, actually display an image
 
 
-uint8_t frame[2][240][320];
+uint8_t frame[2][FRAME_HEIGHT][FRAME_WIDTH];
 uint8_t activeFrame = 0;
 
 int dmaChan;
@@ -27,7 +27,7 @@ static void updateDMA() {
 
     //currentLineDoubled = false;
     if(currentLineDoubled) { //handle line doubling
-        currentLine = (currentLine + 1) % 240; 
+        currentLine = (currentLine + 1) % FRAME_HEIGHT; 
         currentLineDoubled = false;
     }
     else currentLineDoubled = true;
@@ -37,18 +37,14 @@ static void updateDMA() {
     // Give the channel a new frame address to read from, and re-trigger it
     dma_channel_set_read_addr(dmaChan, frame[activeFrame][currentLine], true);
 
-    if(currentLine == 239 && currentLineDoubled) activeFrame = (activeFrame + 1) % 2; //swap activeFrame between 0 and 1
-}
-
-void configHSync() {
-    return;
-}
-
-void configVSync() {
-    return;
+    if(currentLine == FRAME_HEIGHT - 1 && currentLineDoubled) activeFrame = (activeFrame + 1) % 2; //swap activeFrame between 0 and 1
 }
 
 int main() {
+    //Clock configuration
+    clocks_init();
+    set_sys_clock_pll(1512000000, 5, 3);
+
     stdio_init_all();
     for(uint8_t i = 0; i < 32; i++) { //8 seconds to open serial communication
         printf("Waiting for user to open serial...");
@@ -57,12 +53,10 @@ int main() {
     }
     
     for(uint8_t i = 0; i < 2; i++) {
-        for(uint8_t j = 0; j < 240; j++) {
-            if(j % 2 == 0) {
-                for(uint16_t k = 0; k < 320; k++) frame[i][j][k] = 255; //fill the frame array
-            }
-            else {
-                for(uint16_t k = 0; k < 320; k++) frame[i][j][k] = 0; //fill the frame array
+        for(uint8_t j = 0; j < FRAME_HEIGHT; j++) {
+            for(uint16_t k = 0; k < FRAME_WIDTH; k++) {
+                if(k % 2 == 0) frame[i][j][k] = 255; //fill the frame array
+                else frame[i][j][k] = 0;
             }
         }
     }
@@ -87,7 +81,7 @@ int main() {
     // SM0's TX FIFO, paced by the data request signal from that peripheral.
     dmaChan = dma_claim_unused_channel(true);
     dma_channel_config dmaConf = dma_channel_get_default_config(dmaChan);
-    channel_config_set_transfer_data_size(&dmaConf, DMA_SIZE_8); //the amount to shift the read position by
+    channel_config_set_transfer_data_size(&dmaConf, DMA_SIZE_32); //the amount to shift the read position by (4 bytes)
     channel_config_set_read_increment(&dmaConf, true); //shift the "read position" every read
     channel_config_set_dreq(&dmaConf, DREQ_PIO0_TX0); //set where the data request will come from
 
@@ -96,14 +90,14 @@ int main() {
         &dmaConf,
         &pio0_hw->txf[0], // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
         frame,             // Initial read address
-        320,              // Transfer a line (320 bytes), then halt and interrupt
+        FRAME_WIDTH/4,     // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
         false             // Don't start yet
     );
 
     // Tell the DMA to raise IRQ line 0 when the channel finishes a block
     dma_channel_set_irq0_enabled(dmaChan, true);
 
-    // Configure the processor to run dma_handler() when DMA IRQ 0 is asserted
+    // Configure the processor to run updateDMA() when DMA IRQ 0 is asserted
     irq_set_exclusive_handler(DMA_IRQ_0, updateDMA);
     irq_set_enabled(DMA_IRQ_0, true);
 

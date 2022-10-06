@@ -46,7 +46,9 @@ static inline void vsync_program_init(PIO pio, uint sm, uint offset, uint dataPi
     pio_interrupt_clear(pio, 7);
     
     //Setup state machine clock divider
-    sm_config_set_clkdiv(&c, 3200.0); //Raw pixel clk div (4.0) * 800 pixels per line
+    //Theoretical clock divider: 3200.0 -- Raw pixel clk div (4.0) * 800 pixels per line
+    //Real world clock divider after tests: 3197.0
+    sm_config_set_clkdiv(&c, 3200.0);
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);

@@ -44,7 +44,8 @@ static inline void hsync_program_init(PIO pio, uint sm, uint offset, uint dataPi
     //Setup state machine clock divider
     // - I want a single instruction to take as LONG as possible, while still being able to
     //   time stuff correctly
-    sm_config_set_clkdiv(&c, 64.0); //Base: 100.7MHz. /4 -> 25.175MHz pixel clock / 16, now F.Porch = 1 cycle, sync = 6, B.Porch = 3
+    //Theoretical clock divider: 64.0 -- Base: 100.7MHz. /4 -> 25.175MHz pixel clock / 16, now F.Porch = 1 cycle, sync = 6, B.Porch = 3
+    sm_config_set_clkdiv(&c, 64.0);
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);

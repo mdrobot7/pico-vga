@@ -1,21 +1,17 @@
-; Drive a 320x240 @ 60Hz (upscaled to 640x480) 8-bit-color VGA signal over 5 digital IO pins.
+; Drive a 400x300 @ 60Hz (upscaled to 800x600) 8-bit-color VGA signal over 8 digital IO pins.
 ;  - vsync.pio manages the VSYNC line of the VGA signal.
-
-; 1 clock cycle = 1 line, 800px including nonvisible area (1/800 of pixel clock)
 
 .program vsync
 
 .wrap_target
-    set x 13 [31]    ; Active frame (480 lines, 480 cycles, 32 from set + 14*32 from loop) + 1 cycle from real world scope testing
-    nop
+    set x 18 [23]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
 waitloop:
     nop [30]         ; 32 cycle loop -- nop + 30 + jmp = 32
     jmp x-- waitloop
 
-    nop [9]          ; Vertical Front Porch Delay (10 ln, 10 cycles)
-    set pins, 0 [1]  ; Sync Pulse Length (2 ln, 2 cycles)
-    set pins, 1 [31] ; Vertical Back Porch Delay (33 ln, 33 cycles, set pins + nop)
-    nop
+    nop              ; Vertical Front Porch Delay (1 ln, 1 cycle)
+    set pins, 1 [3]  ; Sync Pulse Length (4 ln, 4 cycles)
+    set pins, 0 [22] ; Vertical Back Porch Delay (23 ln, 23 cycles, set pins + 22)
 .wrap
 
 % c-sdk {
@@ -35,20 +31,15 @@ static inline void vsync_program_init(PIO pio, uint sm, uint offset, uint dataPi
     //Set pin to 'set'
     sm_config_set_set_pins(&c, dataPin, 1);
 
-    //Preset pin to HIGH
-    pio_sm_set_pins(pio, sm, 1);
+    //Preset pin to LOW
+    pio_sm_set_pins(pio, sm, 0);
 
     //Setup FIFO
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
-    //Clear Interrupts
-    pio_interrupt_clear(pio, 6);
-    pio_interrupt_clear(pio, 7);
-    
     //Setup state machine clock divider
-    //Theoretical clock divider: 3200.0 -- Raw pixel clk div (4.0) * 800 pixels per line
-    //Real world clock divider after tests: 3197.0
-    sm_config_set_clkdiv(&c, 3200.0);
+    //Theoretical clock divider: 3168.0 -- 120MHz Base clock, / 3 = 40MHz pixel clock, /1056 pixels per line
+    sm_config_set_clkdiv(&c, 3168.0);
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);

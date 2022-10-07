@@ -1,4 +1,4 @@
-; Drive a 320x240 @ 60Hz (upscaled to 640x480) 8-bit-color VGA signal over 5 digital IO pins.
+; Drive a 400x300 @ 60Hz (upscaled to 800x600) 8-bit-color VGA signal over 8 digital IO pins.
 ;  - color.pio manages the 8 color pins, for 8 bit color. The hsync and vsync lines are managed separately.
 
 .program color
@@ -36,16 +36,12 @@ static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPi
 
     //Setup FIFO
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
-
-    //Clear Interrupts
-    pio_interrupt_clear(pio, 6);
-    pio_interrupt_clear(pio, 7);
     
     //Setup state machine clock divider
-    sm_config_set_clkdiv(&c, 8.0); //CPU Base clock (after reconfig): 100.7 MHz. 100.7/4 = 25.175 pixel clock, /2 again for line doubling
+    sm_config_set_clkdiv(&c, 6.0); //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock, /2 again for line doubling
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
-    sm_config_set_out_shift(&c, true, true, 32);
+    sm_config_set_out_shift(&c, false, true, 32);
 
     //Start state machine with this configuration
     pio_sm_init(pio, sm, offset, &c);

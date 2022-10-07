@@ -16,34 +16,57 @@ GPIO9 - VSync
 // - TEST! cut up a vga cable, tie it to a monitor, actually display an image
 
 
-uint8_t frame[2][FRAME_HEIGHT][FRAME_WIDTH];
-uint8_t activeFrame = 0;
+/* Timing guide:
+- HSync and VSync are started, and then left alone. They just do their own thing.
+- Color needs to be stopped during the sync portions of the signal, otherwise it will keep outputting color
+  data when it can't be seen by the user.
+- It's controlled by 2 things: State machine enable/disable, and whether or not it has data (aka DMA enable/disable)
+- Currently, when it reaches the end of a line, it will keep outputting blank data from the frame array to fill
+  the space. When it reaches the end of the frame, it loads DMA with the first line of the next frame, but DOES NOT
+  start it.
+- colorHandler.pio is responsible for waiting the entire duration of the frame, and then when it reaches the end,
+  raising an IRQ to tell the CPU to restart DMA and feed the color PIO with data.
+
+*/
+
+
+uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
 
 int dmaChan;
 
 static void updateDMA() {
     static bool currentLineDoubled = false;
-    static uint8_t currentLine = 0;
+    static uint16_t currentLine = 0;
+    bool dmaStart = true;
 
-    //currentLineDoubled = false;
     if(currentLineDoubled) { //handle line doubling
-        currentLine = (currentLine + 1) % FRAME_HEIGHT; 
+        currentLine++; 
         currentLineDoubled = false;
     }
     else currentLineDoubled = true;
 
+    if(currentLine == FRAME_HEIGHT) { //if it reaches the end of the frame, reload DMA, but DON'T start yet
+        dmaStart = false;
+        currentLine = 0;
+    }
+
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << dmaChan;
     // Give the channel a new frame address to read from, and re-trigger it
-    dma_channel_set_read_addr(dmaChan, frame[activeFrame][currentLine], true);
+    dma_channel_set_read_addr(dmaChan, frame[currentLine], dmaStart);
+}
 
-    if(currentLine == FRAME_HEIGHT - 1 && currentLineDoubled) activeFrame = (activeFrame + 1) % 2; //swap activeFrame between 0 and 1
+static void restartColor() {
+    pio0_hw->irq = 0b1; //clear interrupt 0 (set bit 0)
+    dma_channel_start(dmaChan); //restart DMA -- the color PIO will stop if it runs out of data, this is how
+                                //I'm stopping it during sync periods
+    printf("x");
 }
 
 int main() {
     //Clock configuration
     clocks_init();
-    set_sys_clock_pll(1512000000, 5, 3);
+    set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
     stdio_init_all();
     for(uint8_t i = 0; i < 32; i++) { //8 seconds to open serial communication
@@ -52,15 +75,14 @@ int main() {
         //sleep_ms(250);
     }
     
-    for(uint8_t i = 0; i < 2; i++) {
-        for(uint8_t j = 0; j < FRAME_HEIGHT; j++) {
-            for(uint16_t k = 0; k < FRAME_WIDTH; k++) {
-                if(k % 2 == 0) frame[i][j][k] = 255; //fill the frame array
-                else frame[i][j][k] = 0;
-            }
+    for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
+        for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
+            if(j % 2 == 0) frame[i][j] = 255; //fill the frame array
+            else frame[i][j] = 0;
         }
     }
-    printf("finished filling frame array\n");
+
+    //PIO Configuration
 
     // Add PIO program to PIO instruction memory. SDK will find location and
     // return with the memory offset of the program.
@@ -75,8 +97,15 @@ int main() {
     offset = pio_add_program(pio0, &vsync_program);
     vsync_program_init(pio0, 2, offset, 9);
 
-    printf("pio programs added\n");
-    //DMA!
+    offset = pio_add_program(pio0, &colorHandler_program);
+    colorHandler_program_init(pio0, 3, offset);
+    pio_set_irq0_source_enabled(pio0, pis_interrupt0, true); //pipe pio0 interrupt 0 to the system
+    irq_set_exclusive_handler(PIO0_IRQ_0, restartColor); //tie pio0 irq channel 0 to restartColor()
+    irq_set_enabled(PIO0_IRQ_0, true); //enable irq
+
+
+    //DMA Configuration
+
     // Configure a channel to write the same word (32 bits) repeatedly to PIO0
     // SM0's TX FIFO, paced by the data request signal from that peripheral.
     dmaChan = dma_claim_unused_channel(true);
@@ -101,12 +130,10 @@ int main() {
     irq_set_exclusive_handler(DMA_IRQ_0, updateDMA);
     irq_set_enabled(DMA_IRQ_0, true);
 
-    //start all 3 state machines at once, sync clocks
-    pio_enable_sm_mask_in_sync(pio0, ((1u << 0) | (1u << 1) | (1u << 2)));
+    //start all 4 state machines at once, sync clocks
+    pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b1111);
 
-    printf("dma configured\n");
     updateDMA(); //trigger the DMA manually
-    printf("dma started\n");
 
     gpio_init(25);
     gpio_set_dir(25, true);

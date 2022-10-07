@@ -1,17 +1,17 @@
-; Drive a 320x240 @ 60Hz (upscaled to 640x480) 8-bit-color VGA signal over 5 digital IO pins.
+; Drive a 400x300 @ 60Hz (upscaled to 800x600) 8-bit-color VGA signal over 8 digital IO pins.
 ;  - hsync.pio manages the HSYNC line of the VGA signal.
-
-; 1 clock cycle = 16px (1/16 of pixel clock), so 40 cycles to get across screen
 
 .program hsync
 
 .wrap_target
     nop [31]        ; Line is being displayed, wait
-    nop [7]         ; Line is being displayed (total 640px, 40 cycles delay, 32 + 8) - 1 (from real world scope testing)
-    nop             ; Horizontal Front Porch Delay (16px, 1 cycle)
-    set pins, 0 [5] ; Sync Pulse Length (96px, 6 cycles)
-    set pins, 1     ; How does the timing for this work?
-    nop [1]         ; Horizontal Back Porch Delay (48px, 3 cycles, nop + 1 + set pins)
+    nop [31]        ; Line is being displayed, wait
+    nop [31]        ; Line is being displayed, wait
+    nop [4]         ; Line is being displayed (total 800px, 100 cycles delay, 32 + 32 + 32 + 4)
+    nop [3]         ; Horizontal Front Porch Delay (40px, 5 cycles)
+    set pins, 1 [15] ; Sync Pulse Length (128px, 16 cycles)
+    set pins, 0     ; How does the timing for this work?
+    nop [9]         ; Horizontal Back Porch Delay (88px, 11 cycles, set pins + nop + 9)
 .wrap
 
 % c-sdk {
@@ -31,21 +31,17 @@ static inline void hsync_program_init(PIO pio, uint sm, uint offset, uint dataPi
     //Set pin to 'set'
     sm_config_set_set_pins(&c, dataPin, 1);
 
-    //Preset pin to HIGH
-    pio_sm_set_pins(pio, sm, 1);
+    //Preset pin to LOW
+    pio_sm_set_pins(pio, sm, 0);
 
     //Setup FIFO
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
-
-    //Clear Interrupts
-    pio_interrupt_clear(pio, 6);
-    pio_interrupt_clear(pio, 7);
     
     //Setup state machine clock divider
     // - I want a single instruction to take as LONG as possible, while still being able to
     //   time stuff correctly
-    //Theoretical clock divider: 64.0 -- Base: 100.7MHz. /4 -> 25.175MHz pixel clock / 16, now F.Porch = 1 cycle, sync = 6, B.Porch = 3
-    sm_config_set_clkdiv(&c, 64.0);
+    //Theoretical clock divider: 24.0 -- Base: 120MHz. /3 -> 40Mhz pixel clock / 8, now F.Porch = 5 cycles, sync = 16, B.Porch = 11
+    sm_config_set_clkdiv(&c, 24.0);
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);

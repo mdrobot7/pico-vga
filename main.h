@@ -14,10 +14,10 @@
 #include "color.pio.h"
 #include "vsync.pio.h"
 #include "hsync.pio.h"
+#include "colorHandler.pio.h"
 
-#define FRAME_WIDTH 320
-#define FRAME_HEIGHT 240
+#define FRAME_WIDTH 400
+#define FRAME_HEIGHT 300
 
-extern uint8_t frame[2][FRAME_HEIGHT][FRAME_WIDTH]; //2 frames, 240 rows by 320 columns. 76.8KB per frame, 153.6KB for the entire array.
-extern uint8_t activeFrame; //the frame currently being printed
+extern uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH]; //1 frame, 300 rows by 400 columns. 120kB array.
 #endif

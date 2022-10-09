@@ -54,3 +54,4 @@ dkms.conf
 
 build/*
 .vscode/*
+pcb/pico-vga/pico-vga-backups/*

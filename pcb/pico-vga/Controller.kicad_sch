@@ -825,7 +825,7 @@
     (in_bom yes) (on_board yes)
     (uuid 729a9002-498f-4892-bd47-b1c5b6056eef)
     (property "Reference" "R26" (id 0) (at 146.05 91.44 90))
-    (property "Value" "R" (id 1) (at 146.05 88.9 90))
+    (property "Value" "1K" (id 1) (at 146.05 88.9 90))
     (property "Footprint" "" (id 2) (at 146.05 87.122 90)
       (effects (font (size 1.27 1.27)) hide)
     )

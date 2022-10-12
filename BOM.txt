@@ -1,0 +1,35 @@
+All ICs are SOIC package, if possible
+
+pico-vga
+-----------------------
+
+ICs:
+1x Raspberry Pi Pico -- https://www.digikey.com/en/products/detail/raspberry-pi/SC0915/13624793
+8x SN74LVC08A  -- Quad 3.3V 2-Input AND -- https://www.digikey.com/en/products/detail/texas-instruments/SN74LVC08ADR/377394
+4x CD4072B     -- Dual 3.3V 4-Input OR  -- https://www.digikey.com/en/products/detail/texas-instruments/CD4072BM96/1691320
+1x SN74LVC2G34 -- Dual 3.3V Non-Invert Buffer -- https://www.digikey.com/en/products/detail/nexperia-usa-inc/74LVC2G34GV-125/1231596?s=N4IgjCBcpgTAnBaIDGUBmBDANgZwKYA0IA9lANoiwBsA7AMzXUgC6xADgC5QgDKnAJwCWAOwDmIAL7EAtLCig0kQQFcipCiACsrSdKqbaAFmwA3FLDH0jrYs2RCAJjxlgADBA7dIIEMU4Anuz4PJi4aHpAA
+1x SN74LVC04A  -- Hex 3.3V Inverter -- https://www.digikey.com/en/products/detail/texas-instruments/SN74LVC04ADR/276861
+1x SN74LVC139A -- Dual 2->4 Demux -- https://www.digikey.com/en/products/detail/texas-instruments/SN74LVC139ADR/1591837
+
+Connectors:
+1x DB-15 HD Connector (DSub, VGA) -- https://www.digikey.com/en/products/detail/amphenol-cs-commercial-products/L77HDE15SD1CH4FVGA/4888525?s=N4IgjCBcoLQCxVAYygMwIYBsDOBTANCAPZQDaIATAKwCcIAugL6EwWIgqQAuATgK4FiZEFQaNmlYQDcA5ugAESIgDtluJFyI8xQA
+1x SJ1-3533NG -- 3.5mm TRS (stereo) Headphone Jack -- https://www.digikey.com/en/products/detail/cui-devices/SJ1-3533NG/738701
+4x 2171830001 -- USB-C Receptacle -- https://www.digikey.com/en/products/detail/molex/2171830001/13913751
+1x DM3AT-SF-PEJM5 -- MicroSD Slot -- https://www.digikey.com/en/products/detail/hirose-electric-co-ltd/DM3AT-SF-PEJM5/2533565
+
+
+Resistors:
+4x 4609X-101-103LF-ND -- 8x 10K Ohm Bussed Resistor Network -- https://www.digikey.com/en/products/detail/bourns-inc/4609X-101-103LF/2634616
+
+
+
+pico-vga Controller
+-----------------------
+Connectors:
+1x 2171830001 -- USB-C Receptacle, For Controller -- https://www.digikey.com/en/products/detail/molex/2171830001/13913751
+
+Resistors:
+
+LEDs:
+
+Buttons:

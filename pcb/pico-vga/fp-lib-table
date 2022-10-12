@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "pico-vga")(type "KiCad")(uri "${KIPRJMOD}/pico-vga.pretty")(options "")(descr ""))
+)

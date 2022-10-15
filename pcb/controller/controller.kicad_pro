@@ -346,7 +346,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "pico-vga.kicad_pro",
+    "filename": "controller.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -425,12 +425,8 @@
   },
   "sheets": [
     [
-      "63da5f0b-ebba-4db6-8888-4b7c10552696",
+      "c459b927-393a-4b58-a2f6-93cdd56aa25a",
       ""
-    ],
-    [
-      "ab8419ee-c340-452a-b70f-1668d864373f",
-      "ControllerInterface"
     ]
   ],
   "text_variables": {}

@@ -1,4 +1,4 @@
-20522092846696873
+20522093172230324
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -86288,21 +86288,21 @@ varistor
 0
 2
 2
-pico-vga
+controller
 Logo
 
 
 0
 0
 0
-pico-vga
-Raspberry_Pi_Pico
+controller
+SW_Push_1P1T_12MM_SMD_AND_THT
 
 
 0
-40
-40
-pico-vga
+8
+2
+controller
 USB_C_Receptacle_Molex_2171830001
 USB TYPE C, RA RCPT PCB, Hybrid, https://www.amphenolcanada.com/StockAvailabilityPrice.aspx?From=&PartNum=12401548E4%7e2A
 USB C Type-C Receptacle Hybrid

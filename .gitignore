@@ -54,4 +54,11 @@ dkms.conf
 
 build/*
 .vscode/*
+
+#Kicad backup files
 pcb/pico-vga/pico-vga-backups/*
+pcb/controller/controller-backups/*
+
+#Gerber PCB fab files, can be generated with Kicad
+pcb/pico-vga/gerber/*
+pcb/controller/gerber/*

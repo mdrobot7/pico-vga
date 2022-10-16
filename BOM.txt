@@ -2,7 +2,6 @@ All ICs are SOIC package, if possible
 
 pico-vga
 -----------------------
-
 ICs:
 1x Raspberry Pi Pico -- https://www.digikey.com/en/products/detail/raspberry-pi/SC0915/13624793
 8x SN74LVC08A  -- Quad 3.3V 2-Input AND -- https://www.digikey.com/en/products/detail/texas-instruments/SN74LVC08ADR/377394
@@ -20,6 +19,31 @@ Connectors:
 
 Resistors:
 4x 4609X-101-103LF-ND -- 8x 10K Ohm Bussed Resistor Network -- https://www.digikey.com/en/products/detail/bourns-inc/4609X-101-103LF/2634616
+2x 1.2K 0603 Resistor -- https://www.digikey.com/en/products/detail/rohm-semiconductor/SFR03EZPJ122/16180096
+2x 2.2k 0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ222V/135862
+2x 470  0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ471V/135784
+2x 33   0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3EKF33R0V/1746383
+1x 390  0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ391V/135774
+1x 47   0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3EKF47R0V/1746425
+6x 1k   0603 Resistor -- https://www.digikey.com/en/products/detail/nte-electronics-inc/SR1-0603-210/11648254
+2x 220  0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ221V/135719
+2x 1.8k 0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3EKF1801V/1746325
+2x 100  0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ101V/135659
+4x 1M   0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ105V/103146
+
+Capicitors:
+2x 47uF 0603 Cap -- https://www.digikey.com/en/products/detail/murata-electronics/GRM188D70E476ME01D/13996894
+3x 100nF (0.1uF) 0603 Cap -- https://www.digikey.com/en/products/detail/kyocera-avx/06035C104KAT4A/1600047
+
+Diodes:
+1x Red LED (P1) -- https://www.digikey.com/en/products/detail/bivar-inc/SM0805URC/528906
+1x Blue LED (P2) -- https://www.digikey.com/en/products/detail/bivar-inc/SM0805UBWC/2408548
+1x Yellow LED (P3) -- https://www.digikey.com/en/products/detail/bivar-inc/SM0805YCL/3095534
+1x Green LED (P4) -- https://www.digikey.com/en/products/detail/bivar-inc/SM0805GCL/3095527
+1x Amber LED (Power) -- https://www.digikey.com/en/products/detail/bivar-inc/SM0805AC/3095524
+
+Misc:
+1x Pushbutton (6mm square) -- https://www.digikey.com/en/products/detail/apem-inc/MJTP1230/1798037
 
 
 
@@ -29,7 +53,11 @@ Connectors:
 1x 2171830001 -- USB-C Receptacle, For Controller -- https://www.digikey.com/en/products/detail/molex/2171830001/13913751
 
 Resistors:
+1x 1k   0603 Resistor -- https://www.digikey.com/en/products/detail/nte-electronics-inc/SR1-0603-210/11648254
+1x 1M   0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ105V/103146
 
 LEDs:
+One of the LEDs from the main board, your choice of color
 
 Buttons:
+25 pack of 12mm buttons (5 each, red, yellow, green, blue, white) https://www.amazon.com/ACEIRMC-12x12x7-3mm-Momentary-Tactile-Arduino/dp/B091HL5YBD/ref=sr_1_16?crid=3UJJ6PJ4PZ4P1&keywords=arduino+buttons&qid=1665885175&qu=eyJxc2MiOiI0LjcxIiwicXNhIjoiNC4yNyIsInFzcCI6IjQuMDEifQ%3D%3D&sprefix=arduino+buttons%2Caps%2C109&sr=8-16

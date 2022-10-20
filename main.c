@@ -2,12 +2,38 @@
 #include "game/game.h"
 
 /*
-        PINOUT
+        PINOUT (OLD)
 GPIO0 - Color MSB (RED)
 GPIO 1-6 - Color
 GPIO7 - Color LSB (BLUE)
 GPIO8 - HSync
 GPIO9 - VSync
+*/
+
+/*
+        PINOUT (NEW)
+GPIO0 - Color LSB (BLUE 2)
+GPIO 1-6 - Color
+GPIO7 - Color MSB (RED 1)
+GPIO8 - HSync
+GPIO9 - VSync
+GPIO10 - DPad Up
+GPIO11 - DPad Down
+GPIO12 - DPad Left
+GPIO13 - DPad Right
+GPIO14 - A
+GPIO15 - B
+GPIO16 - SD Card MISO (RX)
+GPIO17 - SD Card Chip Select
+GPIO18 - SD Card CLK
+GPIO19 - SD Card MOSI (TX)
+GPIO20 - X
+GPIO21 - Y
+GPIO22 - Controller Select A
+
+GPIO26 - Controller Select B
+GPIO27 - Audio L
+GPIO28 - Audio R
 */
 
 
@@ -92,17 +118,17 @@ int main() {
     color_program_init(pio0, 0, offset, 0);
 
     offset = pio_add_program(pio0, &hsync_program);
-    hsync_program_init(pio0, 1, offset, 8);
+    hsync_program_init(pio0, 1, offset, HSYNC_PIN);
 
     offset = pio_add_program(pio0, &vsync_program);
-    vsync_program_init(pio0, 2, offset, 9);
+    vsync_program_init(pio0, 2, offset, VSYNC_PIN);
 
     offset = pio_add_program(pio0, &colorHandler_program);
     colorHandler_program_init(pio0, 3, offset);
+
     pio_set_irq0_source_enabled(pio0, pis_interrupt0, true); //pipe pio0 interrupt 0 to the system
     irq_set_exclusive_handler(PIO0_IRQ_0, restartColor); //tie pio0 irq channel 0 to restartColor()
     irq_set_enabled(PIO0_IRQ_0, true); //enable irq
-
 
     //DMA Configuration
 

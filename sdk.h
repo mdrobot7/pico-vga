@@ -10,11 +10,17 @@
 
 /*
     Chart for char type;
-'p' : point
+'p' : pixel
 'l' : line
 'r' : rectangle
 't' : triangle
 'o' : circle
+
+'R' : filled rectangle
+'T' : filled triangle
+'O' : filled circle
+
+'f' : fill entire screen
 
 'c' : char/string
 's' : sprite
@@ -86,38 +92,38 @@ typedef struct {
 
 Controller controller;
 
-void initController(); //zeroes out Controller struct
 void setController(Controller *c);
 
 
 //Basic Drawing
 //xN and yN are coordinates, in pixels, color is the color of the element.
 //draw functions just draw the element, fill elements draw and fill it in.
+//All functions return the index in the render queue that the element takes up.
 
-void drawPixel(uint16_t x, uint16_t y, uint8_t color);
-void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
-void drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
-void drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
-void drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
-void drawNPoints(uint16_t points[][2], uint8_t len, uint8_t color); //draws a path between all points in the list
+int16_t drawPixel(uint16_t x, uint16_t y, uint8_t color);
+int16_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
+int16_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
+int16_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
+int16_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
+int16_t drawNPoints(uint16_t points[][2], uint8_t len, uint8_t color); //draws a path between all points in the list
 
-void fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
-void fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
-void fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
+int16_t fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
+int16_t fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
+int16_t fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
 
-void fillScreen(uint8_t color);
+void fillScreen(uint8_t color, bool clearRenderQueue);
 void clearScreen();
 
 
 //Advanced drawing
 
 //Draws the chars from the default character library. Dimensions are 5x8 pixels each.
-void drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale);
+int16_t drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale);
 
 //Text helper functions:
-void setTextFont(uint8_t newFont[][8]);
+void setTextFont(uint8_t *newFont);
 
-void drawSprite(uint8_t *sprite, uint16_t dimX, uint16_t dimY);
+int16_t drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale);
 
 /*
 Draw text algorithm:

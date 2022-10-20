@@ -44,6 +44,7 @@ Diodes:
 
 Misc:
 1x Pushbutton (6mm square) -- https://www.digikey.com/en/products/detail/apem-inc/MJTP1230/1798037
+2x 1x20 female header pins
 
 
 

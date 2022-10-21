@@ -1,13 +1,26 @@
 #ifndef SDK_H
 #define SDK_H
 
-#include "main.h"
-#include "sdk-chars.h"
+#include <stdio.h>
 
-//This file includes all function headers for the pico-vga SDK.
-//The SDK is meant to help developers make games/programs for
-//the pico-vga hardware.
+#include "pico/stdlib.h"
+#include "hardware/pio.h"
+#include "hardware/clocks.h"
+#include "hardware/dma.h"
+#include "hardware/irq.h"
+#include "hardware/gpio.h"
+#include "pico/multicore.h"
 
+#include "pinout.h"
+
+//This file includes all function headers and dependencies for the pico-vga SDK.
+//The SDK is meant to help developers make games/programs for the pico-vga hardware.
+
+
+/*
+        Structs
+=======================
+*/
 /*
     Chart for char type;
 'p' : pixel
@@ -40,11 +53,6 @@ typedef struct {
     uint8_t color;
     uint8_t *obj;
 } RenderQueueItem;
-
-//This is the queue of items to be rendered onto the screen.
-//Item 0 will be rendered first, then item 1, etc etc
-#define RENDER_QUEUE_LEN 256
-RenderQueueItem renderQueue[RENDER_QUEUE_LEN];
 
 //The controller button struct -- read this to get controller button values
 typedef struct {
@@ -90,9 +98,23 @@ typedef struct {
     } C4;
 } Controller;
 
-Controller controller;
 
-void setController(Controller *c);
+/*
+        Functions
+=========================
+*/
+#define FRAME_WIDTH 400
+#define FRAME_HEIGHT 300
+
+void initPIO();
+void initSDK(Controller *c);
+
+//This is the queue of items to be rendered onto the screen.
+//Item 0 will be rendered first, then item 1, etc etc
+#define RENDER_QUEUE_LEN 256
+extern RenderQueueItem renderQueue[RENDER_QUEUE_LEN];
+
+extern Controller controller;
 
 
 //Basic Drawing
@@ -111,7 +133,7 @@ int16_t fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_
 int16_t fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
 int16_t fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
 
-void fillScreen(uint8_t color, bool clearRenderQueue);
+int16_t fillScreen(uint8_t color, bool clearRenderQueue);
 void clearScreen();
 
 

@@ -45,7 +45,7 @@ target_link_libraries(${PROJECT_NAME}
     hardware_dma
     hardware_irq
     hardware_gpio
-    hardware_pwm
+    pico_multicore
 )
 
 # Enable usb output, disable uart output

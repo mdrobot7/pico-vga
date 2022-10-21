@@ -52,8 +52,8 @@ Mkfile.old
 dkms.conf
 
 
-build/*
-.vscode/*
+build
+.vscode
 
 #Kicad backup files
 pcb/pico-vga/pico-vga-backups/*

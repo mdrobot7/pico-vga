@@ -2,6 +2,7 @@
 #define SDK_H
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
@@ -10,6 +11,7 @@
 #include "hardware/irq.h"
 #include "hardware/gpio.h"
 #include "pico/multicore.h"
+#include "pico/malloc.h"
 
 #include "pinout.h"
 
@@ -44,15 +46,19 @@ Special values:
 
 */
 
-typedef struct {
+//Linked list for the queue of items to be rendered to the screen
+struct RenderQueueItem {
+    struct RenderQueueItem *next;
     char type;
-    uint16_t x;
-    uint16_t y;
-    uint16_t h;
-    uint16_t w;
+    uint16_t x1; //rectangular bounding box for the item
+    uint16_t y1;
+    uint16_t x2;
+    uint16_t y2;
     uint8_t color;
     uint8_t *obj;
-} RenderQueueItem;
+};
+
+typedef struct RenderQueueItem RenderQueueItem;
 
 //The controller button struct -- read this to get controller button values
 typedef struct {
@@ -100,21 +106,27 @@ typedef struct {
 
 
 /*
-        Functions
+        Constants
 =========================
 */
 #define FRAME_WIDTH 400
 #define FRAME_HEIGHT 300
 
+#define COLOR_RED   0b11100000
+#define COLOR_GREEN 0b00011100
+#define COLOR_BLUE  0b00000011
+//Fill in rest of basic colors here
+
+
+/*
+        Functions
+=========================
+*/
 void initPIO();
 void initSDK(Controller *c);
 
-//This is the queue of items to be rendered onto the screen.
-//Item 0 will be rendered first, then item 1, etc etc
-#define RENDER_QUEUE_LEN 256
-extern RenderQueueItem renderQueue[RENDER_QUEUE_LEN];
-
 extern Controller controller;
+extern RenderQueueItem background;
 
 
 //Basic Drawing
@@ -122,30 +134,30 @@ extern Controller controller;
 //draw functions just draw the element, fill elements draw and fill it in.
 //All functions return the index in the render queue that the element takes up.
 
-int16_t drawPixel(uint16_t x, uint16_t y, uint8_t color);
-int16_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
-int16_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
-int16_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
-int16_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
-int16_t drawNPoints(uint16_t points[][2], uint8_t len, uint8_t color); //draws a path between all points in the list
+RenderQueueItem * drawPixel(uint16_t x, uint16_t y, uint8_t color);
+RenderQueueItem * drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
+RenderQueueItem * drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
+RenderQueueItem * drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
+RenderQueueItem * drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
+RenderQueueItem * drawNPoints(uint16_t points[][2], uint8_t len, uint8_t color); //draws a path between all points in the list
 
-int16_t fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
-int16_t fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
-int16_t fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
+RenderQueueItem * fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
+RenderQueueItem * fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
+RenderQueueItem * fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
 
-int16_t fillScreen(uint8_t color, bool clearRenderQueue);
+RenderQueueItem * fillScreen(uint8_t color, bool clearRenderQueue);
 void clearScreen();
 
 
 //Advanced drawing
 
 //Draws the chars from the default character library. Dimensions are 5x8 pixels each.
-int16_t drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale);
+RenderQueueItem * drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale);
 
 //Text helper functions:
 void setTextFont(uint8_t *newFont);
 
-int16_t drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale);
+RenderQueueItem * drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale);
 
 /*
 Draw text algorithm:

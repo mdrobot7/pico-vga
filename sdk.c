@@ -8,16 +8,27 @@ TODO:
 */
 
 /*
+Ideas:
+- GIMP can output C header, raw binary, etc files, make that the sprite format
+- Linked list for render queue -- each item contains a pointer to the next item, allows for insertions/deletions
+- malloc() to deal with allocating space for linked list stuff
+- dealloc() for garbage collection
+*/
+
+/*
         Initializers and Prototypes
 ===========================================
 */
-RenderQueueItem renderQueue[RENDER_QUEUE_LEN];
+RenderQueueItem background = { //First element of the linked list, can be reset to any background
+    .type = 'f',
+    .color = 0
+};
+static RenderQueueItem *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
 
 Controller controller;
 
 static int pioDMAChan = 0; //Reserve DMA Channel 0 for the color PIO block
 
-static uint16_t queueIndex = 0;
 static Controller *cPtr = &controller;
 
 //Prototypes, for functions not defined in sdk.h (NOT for use by the user)
@@ -230,11 +241,17 @@ static void initController() {
 //GARBAGE COLLECTOR
 void cleanRenderQueue() {
     //Remove indexes that contain removed elements, collapse render queue
-    for(int i = 0; i < RENDER_QUEUE_LEN; i++) {
-        if(renderQueue[i].type == 'n') {
-            for(int j = i; j < RENDER_QUEUE_LEN; j++) {
-                renderQueue[j] = renderQueue[j + 1]; //shift each index down by one
-            }
+    RenderQueueItem *previousItem = &background;
+    RenderQueueItem *currentItem = background.next; //start with the index after background, DON'T DELETE THE FIRST ELEMENT
+    while(currentItem != NULL) {
+        if(currentItem->type == 'n') {
+            previousItem->next = currentItem->next; //tell the previous item to link to the next one (delete the current one)
+            free(currentItem);
+            currentItem = previousItem->next; //increment the linked list
+        }
+        else {
+            previousItem = currentItem; //increment the linked list
+            currentItem = currentItem->next;
         }
     }
 
@@ -247,123 +264,145 @@ void cleanRenderQueue() {
         Drawing Functions
 =================================
 */
-//If the render queue is full, returns false. Else true.
-static bool renderQueueAvailable(uint16_t index) {
-    if(index == RENDER_QUEUE_LEN) return false;
-    else return true;
+RenderQueueItem * drawPixel(uint16_t x, uint16_t y, uint8_t color) {
+    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(item == NULL) return NULL;
+
+    item->type = 'p';
+    item->x1 = x;
+    item->y1 = y;
+    item->color = color;
+    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+    lastItem->next = item; //Link the last item to this one
+    lastItem = item; //Reset lastItem
+
+    return item;
 }
 
-int16_t drawPixel(uint16_t x, uint16_t y, uint8_t color) {
-    if(!renderQueueAvailable) return -1;
+RenderQueueItem * drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
+    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(item == NULL) return NULL;
 
-    renderQueue[queueIndex].type = 'p';
-    renderQueue[queueIndex].x = x;
-    renderQueue[queueIndex].y = y;
-    renderQueue[queueIndex].w = 1;
-    renderQueue[queueIndex].h = 1;
-    renderQueue[queueIndex].color = color;
-    queueIndex++;
+    item->type = 'l';
+    item->x1 = x1 < x2 ? x1 : x2; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
+    item->y1 = y1 < y2 ? y1 : y2;
+    item->x2 = x1 > x2 ? x1 : x2;
+    item->y2 = y1 > y2 ? y1 : y2;
+    item->color = color;
+    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    
+    lastItem->next = item; //Link the last item to this one
+    lastItem = item; //Reset lastItem
 
-    return queueIndex - 1;
+    return item;
 }
 
-int16_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
-    if(!renderQueueAvailable) return -1;
+RenderQueueItem * drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
+    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(item == NULL) return NULL;
 
-    renderQueue[queueIndex].type = 'l';
-    renderQueue[queueIndex].x = x1;
-    renderQueue[queueIndex].y = y1;
-    renderQueue[queueIndex].w = x2;
-    renderQueue[queueIndex].h = y2;
-    renderQueue[queueIndex].color = color;
-    queueIndex++;
+    item->type = 'r';
+    item->x1 = x1 < x2 ? x1 : x2; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
+    item->y1 = y1 < y2 ? y1 : y2;
+    item->x2 = x1 > x2 ? x1 : x2;
+    item->y2 = y1 > y2 ? y1 : y2;
+    item->color = color;
+    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    
+    lastItem->next = item; //Link the last item to this one
+    lastItem = item; //Reset lastItem
 
-    return queueIndex - 1;
+    return item;
 }
 
-int16_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
-    if(!renderQueueAvailable) return -1;
-
-    renderQueue[queueIndex].type = 'r';
-    renderQueue[queueIndex].x = x1;
-    renderQueue[queueIndex].y = y1;
-    renderQueue[queueIndex].w = x2;
-    renderQueue[queueIndex].h = y2;
-    renderQueue[queueIndex].color = color;
-    queueIndex++;
-
-    return queueIndex - 1;
+RenderQueueItem * drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
+    return NULL;
 }
 
-int16_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
-    return;
+RenderQueueItem * drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
+    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(item == NULL) return NULL;
+
+    item->type = 'o';
+    item->x1 = x;
+    item->y1 = y;
+    item->x2 = radius;
+    item->color = color;
+    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    
+    lastItem->next = item; //Link the last item to this one
+    lastItem = item; //Reset lastItem
+
+    return item;
 }
 
-int16_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
-    if(!renderQueueAvailable) return -1;
-
-    renderQueue[queueIndex].type = 'o';
-    renderQueue[queueIndex].x = x;
-    renderQueue[queueIndex].y = y;
-    renderQueue[queueIndex].w = radius;
-    renderQueue[queueIndex].color = color;
-    queueIndex++;
-
-    return queueIndex - 1;
+RenderQueueItem * drawNPoints(uint16_t points[][2], uint8_t len, uint8_t color) { //draws a path between all points in the list
+    return NULL;
 }
 
-int16_t drawNPoints(uint16_t points[][2], uint8_t len, uint8_t color) { //draws a path between all points in the list
-    return;
+RenderQueueItem * fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
+    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(item == NULL) return NULL;
+
+    item->type = 'R';
+    item->x1 = x1 < x2 ? x1 : x2; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
+    item->y1 = y1 < y2 ? y1 : y2;
+    item->x2 = x1 > x2 ? x1 : x2;
+    item->y2 = y1 > y2 ? y1 : y2;
+    item->color = color;
+    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    
+    lastItem->next = item; //Link the last item to this one
+    lastItem = item; //Reset lastItem
+
+    return item;
 }
 
-int16_t fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
-    if(!renderQueueAvailable) return -1;
-
-    renderQueue[queueIndex].type = 'R';
-    renderQueue[queueIndex].x = x1;
-    renderQueue[queueIndex].y = y1;
-    renderQueue[queueIndex].w = x2;
-    renderQueue[queueIndex].h = y2;
-    renderQueue[queueIndex].color = color;
-    queueIndex++;
-
-    return queueIndex - 1;
+RenderQueueItem * fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
+    return NULL;
 }
 
-int16_t fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
-    return;
+RenderQueueItem * fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
+    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(item == NULL) return NULL;
+
+    item->type = 'O';
+    item->x1 = x;
+    item->y1 = y;
+    item->x2 = radius;
+    item->color = color;
+    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    
+    lastItem->next = item; //Link the last item to this one
+    lastItem = item; //Reset lastItem
+
+    return item;
 }
 
-int16_t fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
-    if(!renderQueueAvailable) return -1;
+RenderQueueItem * fillScreen(uint8_t color, bool clearRenderQueue) {
+    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(item == NULL) return NULL;
 
-    renderQueue[queueIndex].type = 'O';
-    renderQueue[queueIndex].x = x;
-    renderQueue[queueIndex].y = y;
-    renderQueue[queueIndex].w = radius;
-    renderQueue[queueIndex].color = color;
-    queueIndex++;
+    item->type = 'f';
+    item->color = color;
+    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    
+    lastItem->next = item; //Link the last item to this one
+    lastItem = item; //Reset lastItem
 
-    return queueIndex - 1;
+    return item;
 }
 
-int16_t fillScreen(uint8_t color, bool clearRenderQueue) {
-    if(!renderQueueAvailable) return -1;
-
-    if(clearRenderQueue) {
-        for(int i = 0; i < queueIndex; i++) {
-            renderQueue[i].type = 'n';
-        }
-    }
-
-    renderQueue[queueIndex].type = 'f';
-    renderQueue[queueIndex].color = color;
-    queueIndex++;
-}
-
+//Removes everything from the linked list, free()'s all memory, resets background to black
 void clearScreen() {
-    for(int i = 0; i < RENDER_QUEUE_LEN; i++) {
-        renderQueue[i].type = 'n';
+    background.type = 'f';
+    background.color = 0;
+
+    RenderQueueItem *item = background.next; //DO NOT REMOVE the first element of the linked list! (background)
+    while(item != NULL) {
+        item->type = 'n';
+        item = item->next;
     }
 }
 
@@ -374,14 +413,21 @@ void clearScreen() {
 */
 static uint8_t *font = &cp437[0][0]; //The current font in use by the system
 
-int16_t drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale) {
-    if(!renderQueueAvailable) return -1;
+RenderQueueItem * drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale) {
+    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(item == NULL) return NULL;
 
-    int i = 0;
-    while(str[i] != '\0') {
-        printf("%c", str[i]);
-        i++;
-    }
+    item->type = 'c';
+    item->x1 = x; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
+    item->y1 = y;
+    item->color = color;
+    item->obj = str;
+    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    
+    lastItem->next = item; //Link the last item to this one
+    lastItem = item; //Reset lastItem
+
+    return item;
 }
 
 void changeFont(uint8_t *newFont) {
@@ -393,19 +439,23 @@ void changeFont(uint8_t *newFont) {
         Sprite Drawing Functions
 ========================================
 */
-int16_t drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale) {
-    if(!renderQueueAvailable) return -1;
+RenderQueueItem * drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale) {
+    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(item == NULL) return NULL;
 
-    renderQueue[queueIndex].type = 's';
-    renderQueue[queueIndex].obj = sprite;
-    renderQueue[queueIndex].x = x;
-    renderQueue[queueIndex].y = y;
-    renderQueue[queueIndex].w = dimX;
-    renderQueue[queueIndex].h = dimY;
-    renderQueue[queueIndex].color = colorOverride;
-    queueIndex++;
+    item->type = 's';
+    item->x1 = x; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
+    item->y1 = y;
+    item->x2 = dimX;
+    item->y2 = dimY;
+    item->color = colorOverride != 0 ? colorOverride : 0; //color = 0: use colors from sprite, else use override
+    item->obj = sprite;
+    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    
+    lastItem->next = item; //Link the last item to this one
+    lastItem = item; //Reset lastItem
 
-    return queueIndex - 1;
+    return item;
 }
 
 
@@ -414,3 +464,5 @@ int16_t drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint1
 =========================
 */
 
+void render() {
+}

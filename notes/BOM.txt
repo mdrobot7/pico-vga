@@ -25,7 +25,7 @@ Resistors:
 2x 33   0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3EKF33R0V/1746383
 1x 390  0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ391V/135774
 1x 47   0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3EKF47R0V/1746425
-6x 1k   0603 Resistor -- https://www.digikey.com/en/products/detail/nte-electronics-inc/SR1-0603-210/11648254
+6x 1k   0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ102V/68472
 2x 220  0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ221V/135719
 2x 1.8k 0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3EKF1801V/1746325
 2x 100  0603 Resistor -- https://www.digikey.com/en/products/detail/panasonic-electronic-components/ERJ-3GEYJ101V/135659

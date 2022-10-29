@@ -3,8 +3,10 @@
 
 /*
 TODO:
-- Update cleanRenderQueue() (garbage collector) to use DMA instead of regular accesses
 - Finish draw functions
+- Add insertion/deletion support
+- colorHandler.pio only handles the end of the frame vertically (below 600 lines), NOT
+  the edges of the frame. find a fix for this, so DMA isn't giving color data while the viewer can't see it
 */
 
 /*
@@ -12,16 +14,22 @@ Ideas:
 - GIMP can output C header, raw binary, etc files, make that the sprite format
 - Linked list for render queue -- each item contains a pointer to the next item, allows for insertions/deletions
 - malloc() to deal with allocating space for linked list stuff
-- dealloc() for garbage collection
+- free() for garbage collection
 */
 
 /*
         Initializers and Prototypes
 ===========================================
 */
+static uint8_t line[2][FRAME_WIDTH]; //The pixel arrays for rendering (even lines = line[0], odd lines = line[1])
+static uint16_t currentLine = 0; //The current line that the renderer is on
+static bool dmaStart = true; //Whether the color PIO machine is running
+
 RenderQueueItem background = { //First element of the linked list, can be reset to any background
     .type = 'f',
-    .color = 0
+    .color = 0,
+    .obj = NULL,
+    .next = NULL
 };
 static RenderQueueItem *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
 
@@ -38,7 +46,9 @@ static void restartColor();
 static bool updateControllerStruct(struct repeating_timer *t);
 static void initController();
 
-void initPIO() {
+static void render();
+
+static void initPIO() {
     //Clock configuration
     clocks_init();
     set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
@@ -104,6 +114,11 @@ void initSDK(Controller *c) {
     add_repeating_timer_ms(1, updateControllerStruct, NULL, &controllerTimer);
     sio_hw->gpio_oe_set = (1u << CONTROLLER_SEL_A_PIN) | (1u << CONTROLLER_SEL_B_PIN); //Enable outputs on pins 22 and 26
     initController();
+
+    initPIO();
+    
+    multicore_launch_core1(render);
+    while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
 }
 
 
@@ -112,16 +127,6 @@ void initSDK(Controller *c) {
 =====================================
 */
 static void updateDMA() {
-    static bool currentLineDoubled = false;
-    static uint16_t currentLine = 0;
-    bool dmaStart = true;
-
-    if(currentLineDoubled) { //handle line doubling
-        currentLine++; 
-        currentLineDoubled = false;
-    }
-    else currentLineDoubled = true;
-
     if(currentLine == FRAME_HEIGHT) { //if it reaches the end of the frame, reload DMA, but DON'T start yet
         dmaStart = false;
         currentLine = 0;
@@ -130,7 +135,7 @@ static void updateDMA() {
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << pioDMAChan;
     // Give the channel a new frame address to read from, and re-trigger it
-    dma_channel_set_read_addr(pioDMAChan, frame[currentLine], dmaStart);
+    dma_channel_set_read_addr(pioDMAChan, line[currentLine % 2], dmaStart);
 }
 
 static void restartColor() {
@@ -238,32 +243,21 @@ static void initController() {
     cPtr->C4.r = 0;
 }
 
-//GARBAGE COLLECTOR
-void cleanRenderQueue() {
-    //Remove indexes that contain removed elements, collapse render queue
-    RenderQueueItem *previousItem = &background;
-    RenderQueueItem *currentItem = background.next; //start with the index after background, DON'T DELETE THE FIRST ELEMENT
-    while(currentItem != NULL) {
-        if(currentItem->type == 'n') {
-            previousItem->next = currentItem->next; //tell the previous item to link to the next one (delete the current one)
-            free(currentItem);
-            currentItem = previousItem->next; //increment the linked list
-        }
-        else {
-            previousItem = currentItem; //increment the linked list
-            currentItem = currentItem->next;
-        }
-    }
-
-    //Implement this LATER, it might actually make things worse.
-    //check every index, see if one is "useless" -- all of its pixels are overwritten later
-}
-
 
 /*
         Drawing Functions
 =================================
 */
+void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
+    if(obj == NULL) { //set background to solid color
+        background.obj = NULL;
+        background.color = color;
+    }
+    else { //set the background to a picture/sprite/something not a solid color
+        background.obj = (uint8_t *)obj;
+    }
+}
+
 RenderQueueItem * drawPixel(uint16_t x, uint16_t y, uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
@@ -380,12 +374,18 @@ RenderQueueItem * fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t co
     return item;
 }
 
-RenderQueueItem * fillScreen(uint8_t color, bool clearRenderQueue) {
+RenderQueueItem * fillScreen(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color, bool clearRenderQueue) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
     item->type = 'f';
-    item->color = color;
+    if(obj == NULL) {
+        item->obj = NULL;
+        item->color = color;
+    }
+    else {
+        item->obj = (uint8_t *)obj;
+    }
     item->next = NULL; //Set *next to NULL, means it is the last item in linked list
     
     lastItem->next = item; //Link the last item to this one
@@ -411,14 +411,16 @@ void clearScreen() {
         Text Functions
 ==============================
 */
-static uint8_t *font = &cp437[0][0]; //The current font in use by the system
+static uint8_t (*font)[256][8] = cp437; //The current font in use by the system
+#define CHAR_WIDTH 5
+#define CHAR_HEIGHT 8
 
 RenderQueueItem * drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
     item->type = 'c';
-    item->x1 = x; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
+    item->x1 = x;
     item->y1 = y;
     item->color = color;
     item->obj = str;
@@ -430,7 +432,7 @@ RenderQueueItem * drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uin
     return item;
 }
 
-void changeFont(uint8_t *newFont) {
+void changeFont(uint8_t (*newFont)[256][8]) {
     font = newFont;
 }
 
@@ -446,8 +448,8 @@ RenderQueueItem * drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t d
     item->type = 's';
     item->x1 = x; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
     item->y1 = y;
-    item->x2 = dimX;
-    item->y2 = dimY;
+    item->x2 = x + dimX;
+    item->y2 = y + dimY;
     item->color = colorOverride != 0 ? colorOverride : 0; //color = 0: use colors from sprite, else use override
     item->obj = sprite;
     item->next = NULL; //Set *next to NULL, means it is the last item in linked list
@@ -463,6 +465,121 @@ RenderQueueItem * drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t d
         Renderer!
 =========================
 */
+static void render() {
+    multicore_fifo_push_blocking(13); //tell core 0 that everything is ok/it's running
 
-void render() {
+    uint8_t l; //which index of line[][] I'm writing to (line[0] or line[1])
+    uint16_t x; //scratch variable
+    RenderQueueItem *item;
+    RenderQueueItem *previousItem;
+
+    while(1) {
+        uint8_t l = (currentLine + 1) % 2; //update which line is being written to
+
+        item = &background;
+        previousItem = NULL;
+        while(item != NULL) {
+            //If the item is hidden or does not cross the current line being rendered, ignore it
+            if(item->type == 'h' || item->y1 > currentLine || item->y2 < currentLine) {
+                previousItem = item;
+                item = item->next;
+                continue;
+            }
+
+            switch(item->type) {
+                case 'p': //Pixel
+                    line[l][item->x1] = item->color;
+                    break;
+                case 'l': //Line
+                     //Point slope form solved for x -- SHOULD y (currentLine) BE NEGATIVE?
+                    x = ((currentLine - item->y1)/((item->y2 - item->y1)/(item->x2 - item->x1))) + item->x1;
+                    line[l][x] = item->color;
+                    break;
+                case 'r': //Rectangle
+                    if(item->y1 == currentLine || item->y2 == currentLine) {
+                        for(uint16_t i = item->x1; i <= item->x2; i++) {
+                            line[l][i] = item->color;
+                        }
+                    }
+                    else {
+                        line[l][item->x1] = item->color; //the two sides of the rectangle
+                        line[l][item->x2] = item->color;
+                    }
+                    break;
+                case 't': //Triangle
+                    break;
+                case 'o': //Circle
+                    //Standard form of circle solved for x-h (left here because of +/- from sqrt)
+                    x = sqrt(pow(item->x2, 2.0) - pow(currentLine - item->y1, 2.0));
+                    line[l][x + item->x1] = item->color; //handle the +/- from the sqrt (the 2 sides of the circle)
+                    line[l][x - item->x1] = item->color;
+                    break;
+                case 'R': //Filled Rectangle
+                    for(uint16_t i = item->x1; i <= item->x2; i++) {
+                        line[l][i] = item->color;
+                    }
+                    break;
+                case 'T': //Filled Triangle
+                    break;
+                case 'O': //Filled Circle
+                    //Standard form of circle solved for x-h (left here because of +/- from sqrt)
+                    x = sqrt(pow(item->x2, 2.0) - pow(currentLine - item->y1, 2.0));
+                    for(uint16_t i = x - item->x1; i < x + item->x1; i++) {
+                        line[l][i] = item->color;
+                    }
+                    break;
+                case 'c': //Character/String
+                    for(uint16_t i = 0; item->obj[i] != '\0'; i++) {
+                        x = item->x1 + (i*CHAR_WIDTH);
+                        for(uint8_t j; j < CHAR_WIDTH; j++) {
+                            //font[][] is a bit array, so check if a particular bit is true, if so, set the pixel array
+                            if(((*font)[item->obj[i]][currentLine - item->y1]) & ((1 << (CHAR_WIDTH - 1)) >> j)) {
+                                line[l][x + j] = item->color;
+                            }
+                        }
+                    }
+                    break;
+                case 's': //Sprites
+                    for(uint16_t i = item->x1; i < item->x2; i++) {
+                        //Skip changing the pixel if it's set to the COLOR_NULL value
+                        if(*(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i) == COLOR_NULL) continue;
+
+                        if(item->color == 0) {
+                            //*(original mem location + (currentRowInArray * nColumns) + currentColumnInArray)
+                            line[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
+                        }
+                        else {
+                            line[l][i] = item->color;
+                        }
+                    }
+                    break;
+                case 'f': //Fill the screen
+                    if(item->obj == NULL) {
+                        for(uint16_t i = 0; i < FRAME_WIDTH; i++) {
+                            line[l][i] = item->color;
+                        }
+                    }
+                    else {
+                        for(uint16_t i = 0; i < FRAME_WIDTH; i++) {
+                            //Skip changing the pixel if it's set to the COLOR_NULL value
+                            if(*(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i) == COLOR_NULL) continue;
+
+                            //*(original mem location + (currentRowInArray * nColumns) + currentColumnInArray)
+                            line[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
+                        }
+                    }
+                    break;
+                case 'n': //Deleted item (garbage collector)
+                    previousItem->next = item->next;
+                    free(item);
+                    item = previousItem; //prevent the code from skipping items
+            }
+
+            previousItem = item;
+            item = item->next; //increment linked list
+        }
+
+        //busy wait for currentline to change, then start rendering next line
+        while(l == ((currentLine + 1) % 2));
+    }
 }

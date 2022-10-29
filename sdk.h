@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
@@ -112,6 +113,11 @@ typedef struct {
 #define FRAME_WIDTH 400
 #define FRAME_HEIGHT 300
 
+#define COLOR_NULL  0b00000000
+#define COLOR_BLACK 0b00100000 //Black is defined as slightly red, since the sprite code needs a NULL char (above)
+                               //to signify "Don't change this pixel" rather than "set it to black"
+                               //ALT: have the sprite array, and then have a bit array to say whether or not to display stuff
+
 #define COLOR_RED   0b11100000
 #define COLOR_GREEN 0b00011100
 #define COLOR_BLUE  0b00000011
@@ -122,7 +128,6 @@ typedef struct {
         Functions
 =========================
 */
-void initPIO();
 void initSDK(Controller *c);
 
 extern Controller controller;
@@ -133,6 +138,8 @@ extern RenderQueueItem background;
 //xN and yN are coordinates, in pixels, color is the color of the element.
 //draw functions just draw the element, fill elements draw and fill it in.
 //All functions return the index in the render queue that the element takes up.
+
+void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color);
 
 RenderQueueItem * drawPixel(uint16_t x, uint16_t y, uint8_t color);
 RenderQueueItem * drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
@@ -145,7 +152,7 @@ RenderQueueItem * fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t 
 RenderQueueItem * fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
 RenderQueueItem * fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
 
-RenderQueueItem * fillScreen(uint8_t color, bool clearRenderQueue);
+RenderQueueItem * fillScreen(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color, bool clearRenderQueue);
 void clearScreen();
 
 

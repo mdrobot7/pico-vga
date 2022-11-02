@@ -14,6 +14,11 @@
 #include "pico/multicore.h"
 #include "pico/malloc.h"
 
+#include "color.pio.h"
+#include "vsync.pio.h"
+#include "hsync.pio.h"
+#include "colorHandler.pio.h"
+
 #include "pinout.h"
 
 //This file includes all function headers and dependencies for the pico-vga SDK.
@@ -110,8 +115,9 @@ typedef struct {
         Constants
 =========================
 */
-#define FRAME_WIDTH 400
-#define FRAME_HEIGHT 300
+#define FRAME_HEIGHT 600
+#define FRAME_WIDTH 800
+#define FRAME_FULL_WIDTH 1056 //The full width of the frame (MUST BE DIVISIBLE BY 32!)
 
 #define COLOR_NULL  0b00000000
 #define COLOR_BLACK 0b00100000 //Black is defined as slightly red, since the sprite code needs a NULL char (above)

@@ -49,7 +49,7 @@ static void initController();
 static void render();
 
 static void initPIO() {
-    //Clock configuration
+    //Clock configuration -- 120MHz system clock frequency
     clocks_init();
     set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
@@ -88,10 +88,10 @@ static void initPIO() {
     dma_channel_configure(
         pioDMAChan,
         &dmaConf,
-        &pio0_hw->txf[0], // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
-        frame,             // Initial read address
-        FRAME_WIDTH/4,     // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
-        false             // Don't start yet
+        &pio0_hw->txf[0],   // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
+        line,               // Initial read address
+        FRAME_FULL_WIDTH/4, // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
+        false               // Don't start yet
     );
 
     // Tell the DMA to raise IRQ line 0 when the channel finishes a block
@@ -127,22 +127,23 @@ void initSDK(Controller *c) {
 =====================================
 */
 static void updateDMA() {
-    if(currentLine == FRAME_HEIGHT) { //if it reaches the end of the frame, reload DMA, but DON'T start yet
-        dmaStart = false;
-        currentLine = 0;
-    }
-
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << pioDMAChan;
     // Give the channel a new frame address to read from, and re-trigger it
     dma_channel_set_read_addr(pioDMAChan, line[currentLine % 2], dmaStart);
+
+    currentLine++;
+    if(currentLine == FRAME_HEIGHT) { //if it reaches the end of the frame, reload DMA, but DON'T start yet
+        dmaStart = false;
+        currentLine = 0;
+    }
 }
 
 static void restartColor() {
     pio0_hw->irq = 0b1; //clear interrupt 0 (set bit 0)
-    dma_channel_start(pioDMAChan); //restart DMA -- the color PIO will stop if it runs out of data, this is how
-                                   //I'm stopping it during sync periods
-    printf("x");
+    dmaStart = true;
+
+    updateDMA();
 }
 
 

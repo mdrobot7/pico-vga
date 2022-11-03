@@ -4,23 +4,20 @@
 /*
 TODO:
 - Finish draw functions
-- Add insertion/deletion support
-- colorHandler.pio only handles the end of the frame vertically (below 600 lines), NOT
-  the edges of the frame. find a fix for this, so DMA isn't giving color data while the viewer can't see it
+- text scaling
 */
 
 /*
 Ideas:
 - GIMP can output C header, raw binary, etc files, make that the sprite format
-- Linked list for render queue -- each item contains a pointer to the next item, allows for insertions/deletions
-- malloc() to deal with allocating space for linked list stuff
-- free() for garbage collection
 */
 
 /*
         Initializers and Prototypes
 ===========================================
 */
+static uint8_t renderState = 0; //Turn the renderer on or off
+
 static uint8_t line[2][FRAME_WIDTH]; //The pixel arrays for rendering (even lines = line[0], odd lines = line[1])
 static uint16_t currentLine = 0; //The current line that the renderer is on
 static bool dmaStart = true; //Whether the color PIO machine is running
@@ -119,6 +116,11 @@ void initSDK(Controller *c) {
     
     multicore_launch_core1(render);
     while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
+}
+
+//Turn the renderer on or off
+void setRendererState(uint8_t state) {
+    renderState = state;
 }
 
 
@@ -246,9 +248,30 @@ static void initController() {
 
 
 /*
+        Color Functions
+===============================
+*/
+uint8_t rgbToByte(uint8_t r, uint8_t g, uint8_t b) {
+    return 0;
+}
+
+uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value) {
+    return 0;
+}
+
+
+/*
         Drawing Functions
 =================================
 */
+//Checks (and corrects for) overflow on the coordinates (i.e. drawing something at invalid location)
+static void checkOvf(uint16_t *x, uint16_t *y) {
+    if(*x < 0) *x = 0;
+    else if(*x >= FRAME_WIDTH) *x = FRAME_WIDTH - 1;
+    if(*y < 0) *y = 0;
+    if(*y >= FRAME_HEIGHT) *y = FRAME_HEIGHT - 1;
+}
+
 void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
     if(obj == NULL) { //set background to solid color
         background.obj = NULL;
@@ -259,23 +282,32 @@ void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
     }
 }
 
-RenderQueueItem * drawPixel(uint16_t x, uint16_t y, uint8_t color) {
+RenderQueueItem * drawPixel(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
+
+    checkOvf(&x, &y);
 
     item->type = 'p';
     item->x1 = x;
     item->y1 = y;
     item->color = color;
-    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
 
-    lastItem->next = item; //Link the last item to this one
-    lastItem = item; //Reset lastItem
+    if(prev == NULL) {
+        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+        lastItem->next = item; //Link the last item to this one
+        lastItem = item; //Reset lastItem
+    }
+    else {
+        item->next = prev->next; //insert item into the linked list
+        prev->next = item;
+    }
 
     return item;
 }
 
-RenderQueueItem * drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
+RenderQueueItem * drawLine(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -285,15 +317,22 @@ RenderQueueItem * drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, u
     item->x2 = x1 > x2 ? x1 : x2;
     item->y2 = y1 > y2 ? y1 : y2;
     item->color = color;
-    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-    
-    lastItem->next = item; //Link the last item to this one
-    lastItem = item; //Reset lastItem
+
+    if(prev == NULL) {
+        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+        lastItem->next = item; //Link the last item to this one
+        lastItem = item; //Reset lastItem
+    }
+    else {
+        item->next = prev->next; //insert item into the linked list
+        prev->next = item;
+    }
 
     return item;
 }
 
-RenderQueueItem * drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
+RenderQueueItem * drawRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -303,19 +342,26 @@ RenderQueueItem * drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t 
     item->x2 = x1 > x2 ? x1 : x2;
     item->y2 = y1 > y2 ? y1 : y2;
     item->color = color;
-    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-    
-    lastItem->next = item; //Link the last item to this one
-    lastItem = item; //Reset lastItem
+
+    if(prev == NULL) {
+        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+        lastItem->next = item; //Link the last item to this one
+        lastItem = item; //Reset lastItem
+    }
+    else {
+        item->next = prev->next; //insert item into the linked list
+        prev->next = item;
+    }
 
     return item;
 }
 
-RenderQueueItem * drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
+RenderQueueItem * drawTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
     return NULL;
 }
 
-RenderQueueItem * drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
+RenderQueueItem * drawCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -324,19 +370,26 @@ RenderQueueItem * drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t co
     item->y1 = y;
     item->x2 = radius;
     item->color = color;
-    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-    
-    lastItem->next = item; //Link the last item to this one
-    lastItem = item; //Reset lastItem
+
+    if(prev == NULL) {
+        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+        lastItem->next = item; //Link the last item to this one
+        lastItem = item; //Reset lastItem
+    }
+    else {
+        item->next = prev->next; //insert item into the linked list
+        prev->next = item;
+    }
 
     return item;
 }
 
-RenderQueueItem * drawNPoints(uint16_t points[][2], uint8_t len, uint8_t color) { //draws a path between all points in the list
+RenderQueueItem * drawNPoints(RenderQueueItem* prev, uint16_t points[][2], uint8_t len, uint8_t color) { //draws a path between all points in the list
     return NULL;
 }
 
-RenderQueueItem * fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
+RenderQueueItem * fillRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -346,19 +399,26 @@ RenderQueueItem * fillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t 
     item->x2 = x1 > x2 ? x1 : x2;
     item->y2 = y1 > y2 ? y1 : y2;
     item->color = color;
-    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-    
-    lastItem->next = item; //Link the last item to this one
-    lastItem = item; //Reset lastItem
+
+    if(prev == NULL) {
+        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+        lastItem->next = item; //Link the last item to this one
+        lastItem = item; //Reset lastItem
+    }
+    else {
+        item->next = prev->next; //insert item into the linked list
+        prev->next = item;
+    }
 
     return item;
 }
 
-RenderQueueItem * fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
+RenderQueueItem * fillTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
     return NULL;
 }
 
-RenderQueueItem * fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
+RenderQueueItem * fillCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -367,15 +427,22 @@ RenderQueueItem * fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t co
     item->y1 = y;
     item->x2 = radius;
     item->color = color;
-    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-    
-    lastItem->next = item; //Link the last item to this one
-    lastItem = item; //Reset lastItem
+
+    if(prev == NULL) {
+        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+        lastItem->next = item; //Link the last item to this one
+        lastItem = item; //Reset lastItem
+    }
+    else {
+        item->next = prev->next; //insert item into the linked list
+        prev->next = item;
+    }
 
     return item;
 }
 
-RenderQueueItem * fillScreen(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color, bool clearRenderQueue) {
+RenderQueueItem * fillScreen(RenderQueueItem* prev, uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color, bool clearRenderQueue) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -387,10 +454,17 @@ RenderQueueItem * fillScreen(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t col
     else {
         item->obj = (uint8_t *)obj;
     }
-    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-    
-    lastItem->next = item; //Link the last item to this one
-    lastItem = item; //Reset lastItem
+
+    if(prev == NULL) {
+        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+        lastItem->next = item; //Link the last item to this one
+        lastItem = item; //Reset lastItem
+    }
+    else {
+        item->next = prev->next; //insert item into the linked list
+        prev->next = item;
+    }
 
     return item;
 }
@@ -416,7 +490,7 @@ static uint8_t (*font)[256][8] = cp437; //The current font in use by the system
 #define CHAR_WIDTH 5
 #define CHAR_HEIGHT 8
 
-RenderQueueItem * drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale) {
+RenderQueueItem * drawText(RenderQueueItem* prev, uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -425,10 +499,17 @@ RenderQueueItem * drawText(uint16_t x, uint16_t y, char *str, uint8_t color, uin
     item->y1 = y;
     item->color = color;
     item->obj = str;
-    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-    
-    lastItem->next = item; //Link the last item to this one
-    lastItem = item; //Reset lastItem
+
+    if(prev == NULL) {
+        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+        lastItem->next = item; //Link the last item to this one
+        lastItem = item; //Reset lastItem
+    }
+    else {
+        item->next = prev->next; //insert item into the linked list
+        prev->next = item;
+    }
 
     return item;
 }
@@ -442,7 +523,7 @@ void changeFont(uint8_t (*newFont)[256][8]) {
         Sprite Drawing Functions
 ========================================
 */
-RenderQueueItem * drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale) {
+RenderQueueItem * drawSprite(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -451,12 +532,19 @@ RenderQueueItem * drawSprite(uint16_t x, uint16_t y, uint8_t *sprite, uint16_t d
     item->y1 = y;
     item->x2 = x + dimX;
     item->y2 = y + dimY;
-    item->color = colorOverride != 0 ? colorOverride : 0; //color = 0: use colors from sprite, else use override
+    item->color = colorOverride != COLOR_NULL ? colorOverride : 0; //color = 0: use colors from sprite, else use override
     item->obj = sprite;
-    item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-    
-    lastItem->next = item; //Link the last item to this one
-    lastItem = item; //Reset lastItem
+
+    if(prev == NULL) {
+        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+
+        lastItem->next = item; //Link the last item to this one
+        lastItem = item; //Reset lastItem
+    }
+    else {
+        item->next = prev->next; //insert item into the linked list
+        prev->next = item;
+    }
 
     return item;
 }
@@ -475,7 +563,8 @@ static void render() {
     RenderQueueItem *previousItem;
 
     while(1) {
-        uint8_t l = (currentLine + 1) % 2; //update which line is being written to
+        if(!renderState) continue;
+        l = (currentLine + 1) % 2; //update which line is being written to
 
         item = &background;
         previousItem = NULL;

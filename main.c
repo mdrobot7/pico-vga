@@ -30,37 +30,15 @@ GPIO9 - VSync
 */
 
 
-uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
+uint8_t frame[FRAME_HEIGHT][FRAME_FULL_WIDTH];
+uint8_t line[2][FRAME_FULL_WIDTH*2];
 
 int dmaChan;
+bool dmaStart = true;
+uint16_t currentLine = 0;
 
 static void updateDMA() {
-    static bool currentLineDoubled = false;
-    static uint16_t currentLine = 0;
-    bool dmaStart = true;
-
-    if(currentLineDoubled) { //handle line doubling
-        currentLine++; 
-        currentLineDoubled = false;
-    }
-    else currentLineDoubled = true;
-
-    if(currentLine == FRAME_HEIGHT) { //if it reaches the end of the frame, reload DMA, but DON'T start yet
-        dmaStart = false;
-        currentLine = 0;
-    }
-
-    // Clear the interrupt request.
-    dma_hw->ints0 = 1u << dmaChan;
-    // Give the channel a new frame address to read from, and re-trigger it
-    dma_channel_set_read_addr(dmaChan, frame[currentLine], dmaStart);
-}
-
-static void restartColor() {
-    pio0_hw->irq = 0b1; //clear interrupt 0 (set bit 0)
-    dma_channel_start(dmaChan); //restart DMA -- the color PIO will stop if it runs out of data, this is how
-                                //I'm stopping it during sync periods
-    printf("x");
+    return;
 }
 
 int main() {
@@ -74,13 +52,23 @@ int main() {
         printf("%d\n", clock_get_hz(clk_sys));
         //sleep_ms(250);
     }
-    
-    for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
-        for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
-            if(j % 2 == 0) frame[i][j] = 255; //fill the frame array
-            else frame[i][j] = 0;
-        }
+    printf("\n");
+
+    for(uint16_t j = 0; j < FRAME_WIDTH*2; j++) {
+        if(j % 40 < 20) line[0][j] = 255;
+        else line[0][j] = 0;
     }
+    line[0][FRAME_WIDTH*2 - 1] = 1;
+    for(uint16_t j = FRAME_WIDTH*2; j < FRAME_FULL_WIDTH*2; j++) {
+        line[0][j] = 0;
+    }
+
+    for(uint16_t i = 0; i < FRAME_FULL_WIDTH*2; i++) {
+        line[1][i] = 0;
+    }
+    line[1][0] = 255;
+    line[1][FRAME_WIDTH*2 - 1] = 255;
+    
 
     //PIO Configuration
 
@@ -97,49 +85,70 @@ int main() {
     offset = pio_add_program(pio0, &vsync_program);
     vsync_program_init(pio0, 2, offset, 9);
 
-    offset = pio_add_program(pio0, &colorHandler_program);
-    colorHandler_program_init(pio0, 3, offset);
-    pio_set_irq0_source_enabled(pio0, pis_interrupt0, true); //pipe pio0 interrupt 0 to the system
-    irq_set_exclusive_handler(PIO0_IRQ_0, restartColor); //tie pio0 irq channel 0 to restartColor()
-    irq_set_enabled(PIO0_IRQ_0, true); //enable irq
-
 
     //DMA Configuration
 
-    // Configure a channel to write the same word (32 bits) repeatedly to PIO0
-    // SM0's TX FIFO, paced by the data request signal from that peripheral.
-    dmaChan = dma_claim_unused_channel(true);
-    dma_channel_config dmaConf = dma_channel_get_default_config(dmaChan);
-    channel_config_set_transfer_data_size(&dmaConf, DMA_SIZE_32); //the amount to shift the read position by (4 bytes)
-    channel_config_set_read_increment(&dmaConf, true); //shift the "read position" every read
-    channel_config_set_dreq(&dmaConf, DREQ_PIO0_TX0); //set where the data request will come from
+    dma_channel_config dma0Conf = dma_channel_get_default_config(0);
+    channel_config_set_transfer_data_size(&dma0Conf, DMA_SIZE_32); //the amount to shift the read position by (4 bytes)
+    channel_config_set_dreq(&dma0Conf, 0x3f); //set where the data request will come from
+    channel_config_set_read_increment(&dma0Conf, false);
+    //channel_config_set_high_priority(&dma0Conf, true);
+
+    static uint32_t linePtr = (uint32_t)line;
 
     dma_channel_configure(
-        dmaChan,
-        &dmaConf,
-        &pio0_hw->txf[0], // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
-        frame,             // Initial read address
-        FRAME_WIDTH/4,     // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
+        0,
+        &dma0Conf,
+        &dma_hw->ch[1].al3_read_addr_trig, // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
+        &linePtr,             // Initial read address
+        1,     // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
         false             // Don't start yet
     );
 
-    // Tell the DMA to raise IRQ line 0 when the channel finishes a block
-    dma_channel_set_irq0_enabled(dmaChan, true);
+    dma_channel_config dma1Conf = dma_channel_get_default_config(1);
+    channel_config_set_transfer_data_size(&dma1Conf, DMA_SIZE_32); //the amount to shift the read position by (4 bytes)
+    channel_config_set_read_increment(&dma1Conf, true); //shift the "read position" every read
+    channel_config_set_dreq(&dma1Conf, DREQ_PIO0_TX0); //set where the data request will come from
+    //channel_config_set_high_priority(&dma1Conf, true);
+    channel_config_set_chain_to(&dma1Conf, 0);
+    channel_config_set_irq_quiet(&dma1Conf, true);
 
-    // Configure the processor to run updateDMA() when DMA IRQ 0 is asserted
-    irq_set_exclusive_handler(DMA_IRQ_0, updateDMA);
-    irq_set_enabled(DMA_IRQ_0, true);
+    dma_channel_configure(
+        1,
+        &dma1Conf,
+        &pio0_hw->txf[0], // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
+        NULL,             // Initial read address
+        ((FRAME_FULL_WIDTH*2)/4)*2,     // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
+        false             // Don't start yet
+    );
+
+
+    printf("%p, %x, %p, %x\n", line, linePtr, &linePtr, dma_hw->ch[0].read_addr);
+    printf("%x, %p\n", dma_hw->ch[0].write_addr, &dma_hw->ch[1].al3_read_addr_trig);
+    printf("%d, %d\n\n", dma_debug_hw->ch[0].tcr, dma_debug_hw->ch[1].tcr);
+
+    dma_start_channel_mask(1u << 0);
+
+    printf("%d, %d, %d, %d, %x\n", dma_hw->ch[0].al1_ctrl & (1u << 24), dma_hw->ch[1].al1_ctrl & (1u << 24), dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count, dma_hw->ch[1].al3_read_addr_trig);
+    printf("%d, %d, %d, %d, %x\n", dma_hw->ch[0].al1_ctrl & (1u << 24), dma_hw->ch[1].al1_ctrl & (1u << 24), dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count, dma_hw->ch[1].al3_read_addr_trig);
+    printf("%d, %d, %d, %d, %x\n\n", dma_hw->ch[0].al1_ctrl & (1u << 24), dma_hw->ch[1].al1_ctrl & (1u << 24), dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count, dma_hw->ch[1].al3_read_addr_trig);
 
     //start all 4 state machines at once, sync clocks
-    pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b1111);
+    pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111);
 
-    updateDMA(); //trigger the DMA manually
+    for(int i = 0; i < 100; i++) {
+    printf("%d, %d, %d, %d, %x\n", dma_hw->ch[0].al1_ctrl & (1u << 24), dma_hw->ch[1].al1_ctrl & (1u << 24), dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count, dma_hw->ch[1].al3_read_addr_trig);
+    }
+
+    printf("%x\n", dma_hw->ch[1].al3_read_addr_trig);
+    printf("%d, %d\n", dma_debug_hw->ch[0].tcr, dma_debug_hw->ch[1].tcr);
+    printf("%d, %d\n", dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count);
 
     gpio_init(25);
     gpio_set_dir(25, true);
     while(true)
     {
-        printf("asdf\n");
+        printf("asdf %d %d %d %d\n", dma_channel_is_busy(0), dma_channel_is_busy(1), dma_channel_is_busy(2), dma_channel_is_busy(3));
         gpio_put(25, true);
         sleep_ms(250);
         gpio_put(25, false);

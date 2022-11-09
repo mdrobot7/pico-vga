@@ -18,6 +18,7 @@ FILE(GLOB gameSources ./game/*.c)
 
 add_executable(${PROJECT_NAME} 
     main.c
+    sdk.c
     ${gameSources} # NOTE! This line is dangerous. It tells CMake to build every .c file in /game/. If build
                    #       happen, it's likely this line.
 )
@@ -44,7 +45,8 @@ target_link_libraries(${PROJECT_NAME}
     hardware_dma
     hardware_irq
     hardware_gpio
-    hardware_pwm
+    pico_multicore
+    pico_malloc
 )
 
 # Enable usb output, disable uart output

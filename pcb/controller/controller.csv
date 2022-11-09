@@ -1,0 +1,32 @@
+"Source:","C:\Users\Michael\DATA\Projects\pico-vga\pcb\controller\controller.kicad_sch"
+"Date:","10/15/2022 6:32:18 PM"
+"Tool:","Eeschema (6.0.8)"
+"Generator:","C:\Program Files\KiCad\6.0\bin\scripting\plugins/bom_csv_grouped_by_value.py"
+"Component Count:","12"
+
+"Individual Components:"
+
+"Item","Qty","Reference(s)","Value","LibPart","Footprint","Datasheet"
+"","","D1","LED","Device:LED","LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+"","","J1","USB_C_Receptacle","Connector:USB_C_Receptacle","controller:USB_C_Receptacle_Molex_2171830001","https://www.usb.org/sites/default/files/documents/usb_type-c.zip"
+"","","R1","1K","Device:R","Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder","~"
+"","","R2","1M","Device:R","Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder","~"
+"","","SW1","SW_Push","Switch:SW_Push","controller:SW_Push_1P1T_12MM_SMD_AND_THT","~"
+"","","SW2","SW_Push","Switch:SW_Push","controller:SW_Push_1P1T_12MM_SMD_AND_THT","~"
+"","","SW3","SW_Push","Switch:SW_Push","controller:SW_Push_1P1T_12MM_SMD_AND_THT","~"
+"","","SW4","SW_Push","Switch:SW_Push","controller:SW_Push_1P1T_12MM_SMD_AND_THT","~"
+"","","SW5","SW_Push","Switch:SW_Push","controller:SW_Push_1P1T_12MM_SMD_AND_THT","~"
+"","","SW6","SW_Push","Switch:SW_Push","controller:SW_Push_1P1T_12MM_SMD_AND_THT","~"
+"","","SW7","SW_Push","Switch:SW_Push","controller:SW_Push_1P1T_12MM_SMD_AND_THT","~"
+"","","SW8","SW_Push","Switch:SW_Push","controller:SW_Push_1P1T_12MM_SMD_AND_THT","~"
+
+
+
+"Collated Components:"
+
+"Item","Qty","Reference(s)","Value","LibPart","Footprint","Datasheet"
+"1","1","D1","LED","Device:LED","LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+"2","1","J1","USB_C_Receptacle","Connector:USB_C_Receptacle","controller:USB_C_Receptacle_Molex_2171830001","https://www.usb.org/sites/default/files/documents/usb_type-c.zip"
+"3","1","R1","1K","Device:R","Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder","~"
+"4","1","R2","1M","Device:R","Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder","~"
+"5","8","SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8","SW_Push","Switch:SW_Push","controller:SW_Push_1P1T_12MM_SMD_AND_THT","~"

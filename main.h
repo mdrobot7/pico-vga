@@ -22,4 +22,5 @@
 #define FRAME_FULL_HEIGHT 314
 
 //extern uint8_t frame[FRAME_HEIGHT][FRAME_FULL_WIDTH - 5]; //1 frame, 300 rows by 400 columns. 120kB array.
+
 #endif

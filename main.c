@@ -1,20 +1,6 @@
+#include "sdk.h"
 #include "main.h"
 #include "game/game.h"
-
-/*
-        PINOUT
-GPIO0 - Color MSB (RED)
-GPIO 1-6 - Color
-GPIO7 - Color LSB (BLUE)
-GPIO8 - HSync
-GPIO9 - VSync
-*/
-
-
-//NEXT:
-// - Timing for state machines, clock divider?
-// - TEST! cut up a vga cable, tie it to a monitor, actually display an image
-
 
 /* Timing guide:
 - HSync and VSync are started, and then left alone. They just do their own thing.
@@ -30,6 +16,7 @@ GPIO9 - VSync
 */
 
 
+
 uint8_t frame[FRAME_HEIGHT][FRAME_FULL_WIDTH];
 uint8_t line[2][FRAME_FULL_WIDTH*2];
 
@@ -42,10 +29,6 @@ static void updateDMA() {
 }
 
 int main() {
-    //Clock configuration
-    clocks_init();
-    set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
-
     stdio_init_all();
     for(uint8_t i = 0; i < 32; i++) { //8 seconds to open serial communication
         printf("Waiting for user to open serial...");
@@ -53,7 +36,8 @@ int main() {
         //sleep_ms(250);
     }
     printf("\n");
-
+    
+    //Fill line array (TESTING)
     for(uint16_t j = 0; j < FRAME_WIDTH*2; j++) {
         if(j % 40 < 20) line[0][j] = 255;
         else line[0][j] = 0;
@@ -70,6 +54,7 @@ int main() {
     line[1][FRAME_WIDTH*2 - 1] = 255;
     
 
+    //(TESTING)
     //PIO Configuration
 
     // Add PIO program to PIO instruction memory. SDK will find location and
@@ -143,6 +128,9 @@ int main() {
     printf("%x\n", dma_hw->ch[1].al3_read_addr_trig);
     printf("%d, %d\n", dma_debug_hw->ch[0].tcr, dma_debug_hw->ch[1].tcr);
     printf("%d, %d\n", dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count);
+    
+    
+    initSDK(&controller);
 
     gpio_init(25);
     gpio_set_dir(25, true);

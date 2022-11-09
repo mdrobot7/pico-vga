@@ -4,7 +4,7 @@
 .program vsync
 
 .wrap_target
-    set x 18 [23]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
+    set x 17 [23]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
 waitloop:
     nop [30]         ; 32 cycle loop -- nop + 30 + jmp = 32
     jmp x-- waitloop

@@ -3,6 +3,14 @@
 
 .program color
 
+; Sync color state machine
+set x 29 [0]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
+
+waitloop:
+    nop [30]         ; 32 cycle loop -- nop + 30 + jmp = 32
+    jmp x-- waitloop
+
+
 .wrap_target
     out pins 8 ; Shift 8 bits of data from the OSR to the pins.
 .wrap
@@ -38,10 +46,10 @@ static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPi
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
     
     //Setup state machine clock divider
-    sm_config_set_clkdiv(&c, 6.0); //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock, /2 again for line doubling
+    sm_config_set_clkdiv(&c, 3.0); //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock, /2 again for line doubling
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
-    sm_config_set_out_shift(&c, false, true, 32);
+    sm_config_set_out_shift(&c, true, true, 32);
 
     //Start state machine with this configuration
     pio_sm_init(pio, sm, offset, &c);

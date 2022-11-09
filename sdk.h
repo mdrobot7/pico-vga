@@ -17,7 +17,6 @@
 #include "color.pio.h"
 #include "vsync.pio.h"
 #include "hsync.pio.h"
-#include "colorHandler.pio.h"
 
 #include "pinout.h"
 

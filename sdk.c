@@ -19,13 +19,28 @@ Ideas:
 static uint8_t renderState = 0; //Turn the renderer on or off
 
 static uint8_t line[2][FRAME_FULL_WIDTH]; //The pixel arrays for rendering (even lines = line[0], odd lines = line[1])
-static uint16_t currentLine = 0; //The current line that the renderer is on
+static volatile uint16_t currentLine = 0; //The current line that the renderer is on
 
 //Constants for the DMA channels
 #define line0CtrlDMA 0
 #define line0DataDMA 1
 #define line1CtrlDMA 2
 #define line1DataDMA 3
+
+//LSBs for DMA CTRL register bits (pico's SDK constants weren't great)
+#define SDK_DMA_CTRL_EN 0
+#define SDK_DMA_CTRL_HIGH_PRIORITY 1
+#define SDK_DMA_CTRL_DATA_SIZE 2
+#define SDK_DMA_CTRL_INCR_READ 4
+#define SDK_DMA_CTRL_INCR_WRITE 5
+#define SDK_DMA_CTRL_RING_SIZE 6
+#define SDK_DMA_CTRL_RING_SEL 10
+#define SDK_DMA_CTRL_CHAIN_TO 11
+#define SDK_DMA_CTRL_TREQ_SEL 15
+#define SDK_DMA_CTRL_IRQ_QUIET 21
+#define SDK_DMA_CTRL_BSWAP 22
+#define SDK_DMA_CTRL_SNIFF_EN 23
+#define SDK_DMA_CTRL_BUSY 24
 
 RenderQueueItem background = { //First element of the linked list, can be reset to any background
     .type = 'f',
@@ -48,24 +63,24 @@ static void initController();
 static void render();
 
 static void initPIO() {
-    //Clock configuration -- 120MHz system clock frequency
-    clocks_init();
-    set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
-
     for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
-        if(j % 40 < 20) line[0][j] = 255;
-        else line[0][j] = 0;
+        line[0][j] = 0b11100011;
     }
-    line[0][FRAME_WIDTH - 1] = 1;
     for(uint16_t j = FRAME_WIDTH; j < FRAME_FULL_WIDTH; j++) {
         line[0][j] = 0;
     }
+    line[0][0] = 1;
+    line[0][FRAME_WIDTH - 1] = 1;
 
-    for(uint16_t i = 0; i < FRAME_FULL_WIDTH; i++) {
-        line[1][i] = 0;
+    for(uint16_t i = 0; i < FRAME_WIDTH; i++) {
+        line[1][i] = 0b00011100;
     }
-    line[1][0] = 255;
-    line[1][FRAME_WIDTH - 1] = 255;
+    for(uint16_t j = FRAME_WIDTH; j < FRAME_FULL_WIDTH; j++) {
+        line[1][j] = 0;
+    }
+    line[1][0] = 1;
+    line[1][FRAME_WIDTH - 1] = 1;
+
 
     //PIO Configuration
 
@@ -84,109 +99,56 @@ static void initPIO() {
 
 
     //DMA Configuration
-    dma_channel_config dma0Conf = dma_channel_get_default_config(0);
-    channel_config_set_transfer_data_size(&dma0Conf, DMA_SIZE_32); //the amount to shift the read position by (4 bytes)
-    channel_config_set_dreq(&dma0Conf, 0x3f); //set where the data request will come from
-    channel_config_set_read_increment(&dma0Conf, false);
-    //channel_config_set_high_priority(&dma0Conf, true);
 
-    static uint32_t linePtr = (uint32_t)line;
-
-    dma_channel_configure(
-        0,
-        &dma0Conf,
-        &dma_hw->ch[1].al3_read_addr_trig, // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
-        &linePtr,             // Initial read address
-        1,     // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
-        false             // Don't start yet
-    );
-
-    dma_channel_config dma1Conf = dma_channel_get_default_config(1);
-    channel_config_set_transfer_data_size(&dma1Conf, DMA_SIZE_32); //the amount to shift the read position by (4 bytes)
-    channel_config_set_read_increment(&dma1Conf, true); //shift the "read position" every read
-    channel_config_set_dreq(&dma1Conf, DREQ_PIO0_TX0); //set where the data request will come from
-    //channel_config_set_high_priority(&dma1Conf, true);
-    channel_config_set_chain_to(&dma1Conf, 2);
-    channel_config_set_irq_quiet(&dma1Conf, false);
-    
-    dma_channel_set_irq0_enabled(1, true);
-
-    dma_channel_configure(
-        1,
-        &dma1Conf,
-        &pio0_hw->txf[0], // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
-        NULL,             // Initial read address
-        (FRAME_FULL_WIDTH/4),     // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
-        false             // Don't start yet
-    );
-
-    dma_channel_config dma2Conf = dma_channel_get_default_config(2);
-    channel_config_set_transfer_data_size(&dma2Conf, DMA_SIZE_32); //the amount to shift the read position by (4 bytes)
-    channel_config_set_dreq(&dma2Conf, 0x3f); //set where the data request will come from
-    channel_config_set_read_increment(&dma2Conf, false);
-    //channel_config_set_high_priority(&dma0Conf, true);
-
+    dma_claim_mask((1 << line0CtrlDMA) | (1 << line0DataDMA) | (1 << line1CtrlDMA) | (1 << line1DataDMA)); //mark channels as used in the SDK
+    static uint32_t line0Ptr = (uint32_t)line[0];
     static uint32_t line1Ptr = (uint32_t)line[1];
 
-    dma_channel_configure(
-        2,
-        &dma2Conf,
-        &dma_hw->ch[3].al3_read_addr_trig, // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
-        &line1Ptr,             // Initial read address
-        1,     // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
-        false             // Don't start yet
-    );
+    dma_hw->ch[line0CtrlDMA].read_addr = &line0Ptr;
+    dma_hw->ch[line0CtrlDMA].write_addr = &dma_hw->ch[line0DataDMA].al3_read_addr_trig;
+    dma_hw->ch[line0CtrlDMA].transfer_count = 1;
+    dma_hw->ch[line0CtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
+                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (line0CtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | 
+                                        (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL)   | (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
-    dma_channel_config dma3Conf = dma_channel_get_default_config(3);
-    channel_config_set_transfer_data_size(&dma3Conf, DMA_SIZE_32); //the amount to shift the read position by (4 bytes)
-    channel_config_set_read_increment(&dma3Conf, true); //shift the "read position" every read
-    channel_config_set_dreq(&dma3Conf, DREQ_PIO0_TX0); //set where the data request will come from
-    //channel_config_set_high_priority(&dma1Conf, true);
-    channel_config_set_chain_to(&dma3Conf, 0);
-    channel_config_set_irq_quiet(&dma3Conf, false); //explicitly false
+    dma_hw->ch[line0DataDMA].read_addr = NULL;
+    dma_hw->ch[line0DataDMA].write_addr = &pio0_hw->txf[0];
+    dma_hw->ch[line0DataDMA].transfer_count = FRAME_FULL_WIDTH/4;
+    dma_hw->ch[line0DataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
+                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
+                                        (line1CtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL);
     
-    dma_channel_set_irq0_enabled(3, true);
+    dma_hw->ch[line1CtrlDMA].read_addr = &line1Ptr;
+    dma_hw->ch[line1CtrlDMA].write_addr = &dma_hw->ch[line1DataDMA].al3_read_addr_trig;
+    dma_hw->ch[line1CtrlDMA].transfer_count = 1;
+    dma_hw->ch[line1CtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
+                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (line1CtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
+                                        (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL)   | (1 << SDK_DMA_CTRL_IRQ_QUIET);
+    
+    dma_hw->ch[line1DataDMA].read_addr = NULL;
+    dma_hw->ch[line1DataDMA].write_addr = &pio0_hw->txf[0];
+    dma_hw->ch[line1DataDMA].transfer_count = FRAME_FULL_WIDTH/4;
+    dma_hw->ch[line1DataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
+                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
+                                        (line0CtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL);
 
-    dma_channel_configure(
-        3,
-        &dma3Conf,
-        &pio0_hw->txf[0], // Write address (only need to set this once) -- TX FIFO of PIO 0, state machine 0 (color state machine)
-        NULL,             // Initial read address
-        (FRAME_FULL_WIDTH/4),     // Transfer a line, 4 bytes (32 bits) at a time, then halt and interrupt
-        false             // Don't start yet
-    );
+    dma_hw->inte0 = (1 << line0DataDMA) | (1 << line1DataDMA);
 
-    // Configure the processor to run updateDMA() when DMA IRQ 0 is asserted
+    // Configure the processor to update the line count when DMA IRQ 0 is asserted
     irq_set_exclusive_handler(DMA_IRQ_0, updateLineCount);
     irq_set_enabled(DMA_IRQ_0, true);
 
-
-    //printf("%p, %x, %p, %x\n", line, linePtr, &linePtr, dma_hw->ch[0].read_addr);
-    //printf("%x, %p\n", dma_hw->ch[0].write_addr, &dma_hw->ch[1].al3_read_addr_trig);
-    //printf("%d, %d\n\n", dma_debug_hw->ch[0].tcr, dma_debug_hw->ch[1].tcr);
-
-    dma_start_channel_mask(1u << 0);
-
-    //printf("%d, %d, %d, %d, %x\n", dma_hw->ch[0].al1_ctrl & (1u << 24), dma_hw->ch[1].al1_ctrl & (1u << 24), dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count, dma_hw->ch[1].al3_read_addr_trig);
-    //printf("%d, %d, %d, %d, %x\n", dma_hw->ch[0].al1_ctrl & (1u << 24), dma_hw->ch[1].al1_ctrl & (1u << 24), dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count, dma_hw->ch[1].al3_read_addr_trig);
-    //printf("%d, %d, %d, %d, %x\n\n", dma_hw->ch[0].al1_ctrl & (1u << 24), dma_hw->ch[1].al1_ctrl & (1u << 24), dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count, dma_hw->ch[1].al3_read_addr_trig);
+    dma_hw->multi_channel_trigger = (1 << line0CtrlDMA); //Start!
 
     //start all 4 state machines at once, sync clocks
     pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111);
-
-    //for(int i = 0; i < 100; i++) {
-    //printf("%d, %d, %d, %d, %x\n", dma_hw->ch[0].al1_ctrl & (1u << 24), dma_hw->ch[1].al1_ctrl & (1u << 24), dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count, dma_hw->ch[1].al3_read_addr_trig);
-    //}
-
-    //printf("%x\n", dma_hw->ch[1].al3_read_addr_trig);
-    //printf("%d, %d\n", dma_debug_hw->ch[0].tcr, dma_debug_hw->ch[1].tcr);
-    //printf("%d, %d\n\n\n", dma_hw->ch[0].transfer_count, dma_hw->ch[1].transfer_count);
-
-    //start all 4 state machines at once, sync clocks
-    //pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b1111);
 }
 
 void initSDK(Controller *c) {
+    //Clock configuration -- 120MHz system clock frequency
+    clocks_init();
+    set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
+
     cPtr = c;
 
     struct repeating_timer controllerTimer;

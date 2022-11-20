@@ -135,8 +135,8 @@ typedef struct {
 */
 void initSDK(Controller *c);
 
-extern Controller controller;
-extern RenderQueueItem background;
+extern volatile Controller controller;
+extern volatile RenderQueueItem background;
 
 void setRendererState(uint8_t state);
 

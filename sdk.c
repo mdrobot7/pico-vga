@@ -16,9 +16,9 @@ Ideas:
         Initializers and Prototypes
 ===========================================
 */
-static uint8_t renderState = 0; //Turn the renderer on or off
+static volatile uint8_t renderState = 0; //Turn the renderer on or off
 
-static uint8_t line[2][FRAME_FULL_WIDTH]; //The pixel arrays for rendering (even lines = line[0], odd lines = line[1])
+static volatile uint8_t line[2][FRAME_FULL_WIDTH]; //The pixel arrays for rendering (even lines = line[0], odd lines = line[1])
 static volatile uint16_t currentLine = 0; //The current line that the renderer is on
 
 //Constants for the DMA channels
@@ -26,6 +26,7 @@ static volatile uint16_t currentLine = 0; //The current line that the renderer i
 #define line0DataDMA 1
 #define line1CtrlDMA 2
 #define line1DataDMA 3
+#define lineClrDMA 4
 
 //LSBs for DMA CTRL register bits (pico's SDK constants weren't great)
 #define SDK_DMA_CTRL_EN 0
@@ -42,15 +43,15 @@ static volatile uint16_t currentLine = 0; //The current line that the renderer i
 #define SDK_DMA_CTRL_SNIFF_EN 23
 #define SDK_DMA_CTRL_BUSY 24
 
-RenderQueueItem background = { //First element of the linked list, can be reset to any background
+volatile RenderQueueItem background = { //First element of the linked list, can be reset to any background
     .type = 'f',
     .color = 0,
     .obj = NULL,
     .next = NULL
 };
-static RenderQueueItem *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
+static volatile RenderQueueItem *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
 
-Controller controller;
+volatile Controller controller;
 
 static Controller *cPtr = &controller;
 
@@ -63,23 +64,15 @@ static void initController();
 static void render();
 
 static void initPIO() {
-    for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
-        line[0][j] = 0b11100011;
+    for(uint8_t i = 0; i < 2; i++) {
+        for(uint16_t j = 0; j < FRAME_FULL_WIDTH; j++) {
+            line[i][j] = 0;
+        }
     }
-    for(uint16_t j = FRAME_WIDTH; j < FRAME_FULL_WIDTH; j++) {
-        line[0][j] = 0;
-    }
-    line[0][0] = 1;
-    line[0][FRAME_WIDTH - 1] = 1;
-
-    for(uint16_t i = 0; i < FRAME_WIDTH; i++) {
-        line[1][i] = 0b00011100;
-    }
-    for(uint16_t j = FRAME_WIDTH; j < FRAME_FULL_WIDTH; j++) {
-        line[1][j] = 0;
-    }
-    line[1][0] = 1;
-    line[1][FRAME_WIDTH - 1] = 1;
+    line[0][0] = COLOR_BLACK;
+    line[0][FRAME_WIDTH - 1] = COLOR_BLACK;
+    line[1][0] = COLOR_BLACK;
+    line[1][FRAME_WIDTH - 1] = COLOR_BLACK;
 
 
     //PIO Configuration
@@ -157,9 +150,15 @@ void initSDK(Controller *c) {
     initController();
 
     initPIO();
+
+    printf("%p\n", drawRectangle(NULL, 100, 100, 500, 500, 255));
+    setRendererState(1);
+    render();
     
+    //printf("Launching second core...\n");
     //multicore_launch_core1(render);
     //while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
+    //printf("Second core started.\n");
 }
 
 //Turn the renderer on or off
@@ -594,12 +593,29 @@ static void render() {
 
     uint8_t l; //which index of line[][] I'm writing to (line[0] or line[1])
     uint16_t x; //scratch variable
+    static uint32_t ZERO = 0; //used for clearing lines
+    static uint32_t linePtr;
     RenderQueueItem *item;
     RenderQueueItem *previousItem;
 
     while(1) {
         if(!renderState) continue;
         l = (currentLine + 1) % 2; //update which line is being written to
+
+        linePtr = (uint32_t)line[l];
+        dma_channel_claim(lineClrDMA);
+        dma_hw->ch[lineClrDMA].read_addr = &ZERO;
+        dma_hw->ch[lineClrDMA].write_addr = &linePtr;
+        dma_hw->ch[lineClrDMA].transfer_count = FRAME_FULL_WIDTH/4;
+        dma_hw->ch[lineClrDMA].ctrl_trig = (1 << SDK_DMA_CTRL_EN) | (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) |
+                                           (1 << SDK_DMA_CTRL_INCR_WRITE) | (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
+        while(dma_hw->ch[lineClrDMA].al1_ctrl & (1 << SDK_DMA_CTRL_BUSY)) {
+            tight_loop_contents();
+        }
+        line[l][0] = COLOR_BLACK;
+        line[l][FRAME_WIDTH - 1] = COLOR_BLACK;
+
+
 
         item = &background;
         previousItem = NULL;

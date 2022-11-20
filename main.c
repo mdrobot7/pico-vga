@@ -17,18 +17,13 @@
 
 int main() {
     stdio_init_all();
-    for(uint8_t i = 0; i < 32; i++) { //8 seconds to open serial communication
-        printf("Waiting for user to open serial...");
-        printf("%d\n", clock_get_hz(clk_sys));
+    for(uint8_t i = 0; i < 20; i++) { //5 seconds to open serial communication
+        printf("Waiting for user to open serial...\n");
         sleep_ms(250);
     }
     printf("\n");
     
     initSDK(&controller);
-
-    while(true)
-    {
-        tight_loop_contents();
-    } //lock the processor into inf loop
+    
     game();
 }

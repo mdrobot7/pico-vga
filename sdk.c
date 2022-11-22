@@ -18,15 +18,15 @@ Ideas:
 */
 static volatile uint8_t renderState = 0; //Turn the renderer on or off
 
-static volatile uint8_t line[2][FRAME_FULL_WIDTH]; //The pixel arrays for rendering (even lines = line[0], odd lines = line[1])
-static volatile uint16_t currentLine = 0; //The current line that the renderer is on
+static volatile uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
+
+static volatile uint16_t currentLine = 0; //The current line being rendered
+static volatile uint32_t framePtr = (uint32_t)frame[0];
 
 //Constants for the DMA channels
-#define line0CtrlDMA 0
-#define line0DataDMA 1
-#define line1CtrlDMA 2
-#define line1DataDMA 3
-#define lineClrDMA 4
+#define frameCtrlDMA 0
+#define frameDataDMA 1
+#define blankDataDMA 2
 
 //LSBs for DMA CTRL register bits (pico's SDK constants weren't great)
 #define SDK_DMA_CTRL_EN 0
@@ -56,7 +56,7 @@ volatile Controller controller;
 static Controller *cPtr = &controller;
 
 //Prototypes, for functions not defined in sdk.h (NOT for use by the user)
-static void updateLineCount();
+static void updateFramePtr();
 
 static bool updateControllerStruct(struct repeating_timer *t);
 static void initController();
@@ -64,15 +64,12 @@ static void initController();
 static void render();
 
 static void initPIO() {
-    for(uint8_t i = 0; i < 2; i++) {
-        for(uint16_t j = 0; j < FRAME_FULL_WIDTH; j++) {
-            line[i][j] = 0;
+    //Clear out frame
+    for(uint8_t i = 0; i < FRAME_HEIGHT; i++) {
+        for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
+            frame[i][j] = 0;
         }
     }
-    line[0][0] = COLOR_BLACK;
-    line[0][FRAME_WIDTH - 1] = COLOR_BLACK;
-    line[1][0] = COLOR_BLACK;
-    line[1][FRAME_WIDTH - 1] = COLOR_BLACK;
 
 
     //PIO Configuration
@@ -82,7 +79,7 @@ static void initPIO() {
     uint offset = pio_add_program(pio0, &color_program);
 
     // Initialize color pio program, but DON'T enable PIO state machine
-    color_program_init(pio0, 0, offset, 0);
+    color_program_init(pio0, 0, offset, 0, FRAME_SCALER);
 
     offset = pio_add_program(pio0, &hsync_program);
     hsync_program_init(pio0, 1, offset, HSYNC_PIN);
@@ -93,45 +90,38 @@ static void initPIO() {
 
     //DMA Configuration
 
-    dma_claim_mask((1 << line0CtrlDMA) | (1 << line0DataDMA) | (1 << line1CtrlDMA) | (1 << line1DataDMA)); //mark channels as used in the SDK
-    static uint32_t line0Ptr = (uint32_t)line[0];
-    static uint32_t line1Ptr = (uint32_t)line[1];
+    dma_claim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA)); //mark channels as used in the SDK
 
-    dma_hw->ch[line0CtrlDMA].read_addr = &line0Ptr;
-    dma_hw->ch[line0CtrlDMA].write_addr = &dma_hw->ch[line0DataDMA].al3_read_addr_trig;
-    dma_hw->ch[line0CtrlDMA].transfer_count = 1;
-    dma_hw->ch[line0CtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (line0CtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | 
+    static uint32_t ZERO = 0;
+
+    dma_hw->ch[frameCtrlDMA].read_addr = &framePtr;
+    dma_hw->ch[frameCtrlDMA].write_addr = &dma_hw->ch[frameDataDMA].al3_read_addr_trig;
+    dma_hw->ch[frameCtrlDMA].transfer_count = 1;
+    dma_hw->ch[frameCtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
+                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
                                         (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL)   | (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
-    dma_hw->ch[line0DataDMA].read_addr = NULL;
-    dma_hw->ch[line0DataDMA].write_addr = &pio0_hw->txf[0];
-    dma_hw->ch[line0DataDMA].transfer_count = FRAME_FULL_WIDTH/4;
-    dma_hw->ch[line0DataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
+    dma_hw->ch[frameDataDMA].read_addr = NULL;
+    dma_hw->ch[frameDataDMA].write_addr = &pio0_hw->txf[0];
+    dma_hw->ch[frameDataDMA].transfer_count = FRAME_WIDTH/4;
+    dma_hw->ch[frameDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
                                         (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
-                                        (line1CtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL);
+                                        (blankDataDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL);
     
-    dma_hw->ch[line1CtrlDMA].read_addr = &line1Ptr;
-    dma_hw->ch[line1CtrlDMA].write_addr = &dma_hw->ch[line1DataDMA].al3_read_addr_trig;
-    dma_hw->ch[line1CtrlDMA].transfer_count = 1;
-    dma_hw->ch[line1CtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (line1CtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
-                                        (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL)   | (1 << SDK_DMA_CTRL_IRQ_QUIET);
-    
-    dma_hw->ch[line1DataDMA].read_addr = NULL;
-    dma_hw->ch[line1DataDMA].write_addr = &pio0_hw->txf[0];
-    dma_hw->ch[line1DataDMA].transfer_count = FRAME_FULL_WIDTH/4;
-    dma_hw->ch[line1DataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
-                                        (line0CtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL);
+    dma_hw->ch[blankDataDMA].read_addr = &ZERO;
+    dma_hw->ch[blankDataDMA].write_addr = &pio0_hw->txf[0];
+    dma_hw->ch[blankDataDMA].transfer_count = (FRAME_FULL_WIDTH - FRAME_WIDTH)/4;
+    dma_hw->ch[blankDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
+                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
+                                        (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL)   | (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
-    dma_hw->inte0 = (1 << line0DataDMA) | (1 << line1DataDMA);
+    dma_hw->inte0 = (1 << frameDataDMA);
 
     // Configure the processor to update the line count when DMA IRQ 0 is asserted
-    irq_set_exclusive_handler(DMA_IRQ_0, updateLineCount);
+    irq_set_exclusive_handler(DMA_IRQ_0, updateFramePtr);
     irq_set_enabled(DMA_IRQ_0, true);
 
-    dma_hw->multi_channel_trigger = (1 << line0CtrlDMA); //Start!
+    dma_hw->multi_channel_trigger = (1 << frameCtrlDMA); //Start!
 
     //start all 4 state machines at once, sync clocks
     pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111);
@@ -151,7 +141,7 @@ void initSDK(Controller *c) {
 
     initPIO();
 
-    printf("%p\n", drawRectangle(NULL, 100, 100, 500, 500, 255));
+    printf("%p\n", drawRectangle(NULL, 100, 100, 200, 200, 255));
     setRendererState(1);
     render();
     
@@ -171,15 +161,21 @@ void setRendererState(uint8_t state) {
         Backend PIO Functions
 =====================================
 */
-static void updateLineCount() {
+static void updateFramePtr() {
     // Clear the interrupt request.
-    dma_hw->ints0 = 1u << line0DataDMA;
-    dma_hw->ints0 = 1u << line1DataDMA;
+    dma_hw->ints0 = 1u << frameDataDMA;
+    
+    static uint8_t lineDoubled = 0;
 
-    currentLine++;
-    if(currentLine == FRAME_HEIGHT) {
-        currentLine = 0;
+    lineDoubled++;
+    if(lineDoubled % FRAME_SCALER == 0) {
+        lineDoubled = 0;
+
+        currentLine++;
+        if(currentLine == FRAME_HEIGHT) currentLine = 0;
     }
+
+    framePtr = frame[currentLine]; //reset the pointer for DMA
 }
 
 
@@ -589,33 +585,16 @@ RenderQueueItem * drawSprite(RenderQueueItem* prev, uint16_t x, uint16_t y, uint
 =========================
 */
 static void render() {
-    multicore_fifo_push_blocking(13); //tell core 0 that everything is ok/it's running
+    //multicore_fifo_push_blocking(13); //tell core 0 that everything is ok/it's running
 
-    uint8_t l; //which index of line[][] I'm writing to (line[0] or line[1])
+    uint8_t l; //which line the code is writing to
     uint16_t x; //scratch variable
-    static uint32_t ZERO = 0; //used for clearing lines
-    static uint32_t linePtr;
     RenderQueueItem *item;
     RenderQueueItem *previousItem;
 
     while(1) {
         if(!renderState) continue;
-        l = (currentLine + 1) % 2; //update which line is being written to
-
-        linePtr = (uint32_t)line[l];
-        dma_channel_claim(lineClrDMA);
-        dma_hw->ch[lineClrDMA].read_addr = &ZERO;
-        dma_hw->ch[lineClrDMA].write_addr = &linePtr;
-        dma_hw->ch[lineClrDMA].transfer_count = FRAME_FULL_WIDTH/4;
-        dma_hw->ch[lineClrDMA].ctrl_trig = (1 << SDK_DMA_CTRL_EN) | (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) |
-                                           (1 << SDK_DMA_CTRL_INCR_WRITE) | (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
-        while(dma_hw->ch[lineClrDMA].al1_ctrl & (1 << SDK_DMA_CTRL_BUSY)) {
-            tight_loop_contents();
-        }
-        line[l][0] = COLOR_BLACK;
-        line[l][FRAME_WIDTH - 1] = COLOR_BLACK;
-
-
+        l = (l + 1) % FRAME_HEIGHT; //update which line is being written to
 
         item = &background;
         previousItem = NULL;
@@ -629,22 +608,22 @@ static void render() {
 
             switch(item->type) {
                 case 'p': //Pixel
-                    line[l][item->x1] = item->color;
+                    frame[l][item->x1] = item->color;
                     break;
                 case 'l': //Line
                      //Point slope form solved for x -- SHOULD y (currentLine) BE NEGATIVE?
                     x = ((currentLine - item->y1)/((item->y2 - item->y1)/(item->x2 - item->x1))) + item->x1;
-                    line[l][x] = item->color;
+                    frame[l][x] = item->color;
                     break;
                 case 'r': //Rectangle
                     if(item->y1 == currentLine || item->y2 == currentLine) {
                         for(uint16_t i = item->x1; i <= item->x2; i++) {
-                            line[l][i] = item->color;
+                            frame[l][i] = item->color;
                         }
                     }
                     else {
-                        line[l][item->x1] = item->color; //the two sides of the rectangle
-                        line[l][item->x2] = item->color;
+                        frame[l][item->x1] = item->color; //the two sides of the rectangle
+                        frame[l][item->x2] = item->color;
                     }
                     break;
                 case 't': //Triangle
@@ -652,12 +631,12 @@ static void render() {
                 case 'o': //Circle
                     //Standard form of circle solved for x-h (left here because of +/- from sqrt)
                     x = sqrt(pow(item->x2, 2.0) - pow(currentLine - item->y1, 2.0));
-                    line[l][x + item->x1] = item->color; //handle the +/- from the sqrt (the 2 sides of the circle)
-                    line[l][x - item->x1] = item->color;
+                    frame[l][x + item->x1] = item->color; //handle the +/- from the sqrt (the 2 sides of the circle)
+                    frame[l][x - item->x1] = item->color;
                     break;
                 case 'R': //Filled Rectangle
                     for(uint16_t i = item->x1; i <= item->x2; i++) {
-                        line[l][i] = item->color;
+                        frame[l][i] = item->color;
                     }
                     break;
                 case 'T': //Filled Triangle
@@ -666,7 +645,7 @@ static void render() {
                     //Standard form of circle solved for x-h (left here because of +/- from sqrt)
                     x = sqrt(pow(item->x2, 2.0) - pow(currentLine - item->y1, 2.0));
                     for(uint16_t i = x - item->x1; i < x + item->x1; i++) {
-                        line[l][i] = item->color;
+                        frame[l][i] = item->color;
                     }
                     break;
                 case 'c': //Character/String
@@ -675,7 +654,7 @@ static void render() {
                         for(uint8_t j; j < CHAR_WIDTH; j++) {
                             //font[][] is a bit array, so check if a particular bit is true, if so, set the pixel array
                             if(((*font)[item->obj[i]][currentLine - item->y1]) & ((1 << (CHAR_WIDTH - 1)) >> j)) {
-                                line[l][x + j] = item->color;
+                                frame[l][x + j] = item->color;
                             }
                         }
                     }
@@ -687,17 +666,17 @@ static void render() {
 
                         if(item->color == 0) {
                             //*(original mem location + (currentRowInArray * nColumns) + currentColumnInArray)
-                            line[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
+                            frame[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
                         }
                         else {
-                            line[l][i] = item->color;
+                            frame[l][i] = item->color;
                         }
                     }
                     break;
                 case 'f': //Fill the screen
                     if(item->obj == NULL) {
                         for(uint16_t i = 0; i < FRAME_WIDTH; i++) {
-                            line[l][i] = item->color;
+                            frame[l][i] = item->color;
                         }
                     }
                     else {
@@ -706,7 +685,7 @@ static void render() {
                             if(*(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i) == COLOR_NULL) continue;
 
                             //*(original mem location + (currentRowInArray * nColumns) + currentColumnInArray)
-                            line[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
+                            frame[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
                         }
                     }
                     break;
@@ -714,13 +693,11 @@ static void render() {
                     previousItem->next = item->next;
                     free(item);
                     item = previousItem; //prevent the code from skipping items
+                    break;
             }
 
             previousItem = item;
             item = item->next; //increment linked list
         }
-
-        //busy wait for currentline to change, then start rendering next line
-        while(l == ((currentLine + 1) % 2));
     }
 }

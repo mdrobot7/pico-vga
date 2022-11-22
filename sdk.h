@@ -114,9 +114,12 @@ typedef struct {
         Constants
 =========================
 */
-#define FRAME_HEIGHT 600
-#define FRAME_WIDTH 800
-#define FRAME_FULL_WIDTH 1056 //The full width of the frame (MUST BE DIVISIBLE BY 32!)
+#define FRAME_SCALER 2 //divider for frame width/height, divides resolution by this value for better perf
+
+#define FRAME_HEIGHT (600/FRAME_SCALER)
+#define FRAME_WIDTH (800/FRAME_SCALER)
+#define FRAME_FULL_HEIGHT (628/FRAME_SCALER) //The full height/width of the frame, including porches, sync, etc
+#define FRAME_FULL_WIDTH (1056/FRAME_SCALER)
 
 #define COLOR_NULL  0b00000000
 #define COLOR_BLACK 0b00100000 //Black is defined as slightly red, since the sprite code needs a NULL char (above)

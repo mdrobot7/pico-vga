@@ -23,6 +23,8 @@ static volatile uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
 static volatile uint16_t currentLine = 0; //The current line being rendered
 static volatile uint32_t framePtr = (uint32_t)frame[0];
 
+static volatile uint32_t ZERO = 0;
+
 //Constants for the DMA channels
 #define frameCtrlDMA 0
 #define frameDataDMA 1
@@ -65,11 +67,20 @@ static void render();
 
 static void initPIO() {
     //Clear out frame
-    for(uint8_t i = 0; i < FRAME_HEIGHT; i++) {
-        for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
-            frame[i][j] = 0;
+    for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
+        if(i % 20 == 0) {
+            for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
+                frame[i][j] = 0b00000011;
+            }
         }
+        /*else {
+            for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
+                if(j % 10 == 0) frame[i][j] = 0b00000011;
+                else frame[i][j] = 0;
+            }
+        }*/
     }
+    printf("2 : %d, %d\n", FRAME_HEIGHT, FRAME_WIDTH);
 
 
     //PIO Configuration
@@ -87,12 +98,10 @@ static void initPIO() {
     offset = pio_add_program(pio0, &vsync_program);
     vsync_program_init(pio0, 2, offset, VSYNC_PIN);
 
-
+    printf("3\n");
     //DMA Configuration
 
     dma_claim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA)); //mark channels as used in the SDK
-
-    static uint32_t ZERO = 0;
 
     dma_hw->ch[frameCtrlDMA].read_addr = &framePtr;
     dma_hw->ch[frameCtrlDMA].write_addr = &dma_hw->ch[frameDataDMA].al3_read_addr_trig;
@@ -113,7 +122,7 @@ static void initPIO() {
     dma_hw->ch[blankDataDMA].transfer_count = (FRAME_FULL_WIDTH - FRAME_WIDTH)/4;
     dma_hw->ch[blankDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
                                         (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
-                                        (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL)   | (1 << SDK_DMA_CTRL_IRQ_QUIET);
+                                        (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL)| (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
     dma_hw->inte0 = (1 << frameDataDMA);
 
@@ -125,6 +134,8 @@ static void initPIO() {
 
     //start all 4 state machines at once, sync clocks
     pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111);
+
+    printf("config done\n");
 }
 
 void initSDK(Controller *c) {
@@ -133,13 +144,18 @@ void initSDK(Controller *c) {
     set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
     cPtr = c;
+    printf("1\n");
 
     struct repeating_timer controllerTimer;
     add_repeating_timer_ms(1, updateControllerStruct, NULL, &controllerTimer);
     sio_hw->gpio_oe_set = (1u << CONTROLLER_SEL_A_PIN) | (1u << CONTROLLER_SEL_B_PIN); //Enable outputs on pins 22 and 26
     initController();
 
+    printf("1.5\n");
+
     initPIO();
+
+    while(1); //inf loop
 
     printf("%p\n", drawRectangle(NULL, 100, 100, 200, 200, 255));
     setRendererState(1);
@@ -161,21 +177,24 @@ void setRendererState(uint8_t state) {
         Backend PIO Functions
 =====================================
 */
+static volatile uint8_t lineDoubled = 0;
+
 static void updateFramePtr() {
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << frameDataDMA;
-    
-    static uint8_t lineDoubled = 0;
 
     lineDoubled++;
     if(lineDoubled % FRAME_SCALER == 0) {
         lineDoubled = 0;
 
         currentLine++;
-        if(currentLine == FRAME_HEIGHT) currentLine = 0;
+        if(currentLine == FRAME_FULL_HEIGHT) currentLine = 0;
     }
 
-    framePtr = frame[currentLine]; //reset the pointer for DMA
+    if(currentLine >= FRAME_HEIGHT) framePtr = (uint32_t)frame[currentLine]; //reset the pointer for DMA
+    else {
+
+    }
 }
 
 

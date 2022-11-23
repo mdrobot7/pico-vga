@@ -4,12 +4,15 @@
 .program color
 
 ; Sync color state machine
-set x 29 [0]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
+; USE FOR DORM MONITOR --> set x 29 [0]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
+
+set x 31 [31]
+
+nop [1]
 
 waitloop:
     nop [30]         ; 32 cycle loop -- nop + 30 + jmp = 32
     jmp x-- waitloop
-
 
 .wrap_target
     out pins 8 ; Shift 8 bits of data from the OSR to the pins.

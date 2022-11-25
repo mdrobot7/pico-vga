@@ -70,15 +70,15 @@ static void initPIO() {
     for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
         if(i % 20 == 0) {
             for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
-                frame[i][j] = 0b00000011;
+                frame[i][j] = 255;
             }
         }
-        /*else {
+        else {
             for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
-                if(j % 10 == 0) frame[i][j] = 0b00000011;
+                if(j % 10 == 0) frame[i][j] = 255;
                 else frame[i][j] = 0;
             }
-        }*/
+        }
     }
     printf("2 : %d, %d\n", FRAME_HEIGHT, FRAME_WIDTH);
 
@@ -108,15 +108,16 @@ static void initPIO() {
     dma_hw->ch[frameCtrlDMA].transfer_count = 1;
     dma_hw->ch[frameCtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
                                         (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
-                                        (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL)   | (1 << SDK_DMA_CTRL_IRQ_QUIET);
+                                        (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
 
     dma_hw->ch[frameDataDMA].read_addr = NULL;
     dma_hw->ch[frameDataDMA].write_addr = &pio0_hw->txf[0];
     dma_hw->ch[frameDataDMA].transfer_count = FRAME_WIDTH/4;
     dma_hw->ch[frameDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
                                         (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
-                                        (blankDataDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL);
-    
+                                        (blankDataDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL) |
+                                        (1 << SDK_DMA_CTRL_IRQ_QUIET);
+
     dma_hw->ch[blankDataDMA].read_addr = &ZERO;
     dma_hw->ch[blankDataDMA].write_addr = &pio0_hw->txf[0];
     dma_hw->ch[blankDataDMA].transfer_count = (FRAME_FULL_WIDTH - FRAME_WIDTH)/4;
@@ -124,7 +125,7 @@ static void initPIO() {
                                         (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
                                         (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL)| (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
-    dma_hw->inte0 = (1 << frameDataDMA);
+    dma_hw->inte0 = (1 << frameCtrlDMA);
 
     // Configure the processor to update the line count when DMA IRQ 0 is asserted
     irq_set_exclusive_handler(DMA_IRQ_0, updateFramePtr);
@@ -181,19 +182,23 @@ static volatile uint8_t lineDoubled = 0;
 
 static void updateFramePtr() {
     // Clear the interrupt request.
-    dma_hw->ints0 = 1u << frameDataDMA;
+    dma_hw->ints0 = 1u << frameCtrlDMA;
 
     lineDoubled++;
     if(lineDoubled % FRAME_SCALER == 0) {
         lineDoubled = 0;
 
         currentLine++;
-        if(currentLine == FRAME_FULL_HEIGHT) currentLine = 0;
-    }
+        //if(currentLine >= FRAME_HEIGHT) {
+        //    dma_hw->ch[frameDataDMA].al1_ctrl &= ~(1 << SDK_DMA_CTRL_INCR_READ); //turn off read increment on data ch.
+        //}
+        if(currentLine == FRAME_FULL_HEIGHT) {
+        //    dma_hw->ch[frameDataDMA].al1_ctrl |= (1 << SDK_DMA_CTRL_INCR_READ); //turn on read increment
+            currentLine = 0;
+        }
 
-    if(currentLine >= FRAME_HEIGHT) framePtr = (uint32_t)frame[currentLine]; //reset the pointer for DMA
-    else {
-
+        if(currentLine <= FRAME_HEIGHT) framePtr = (uint32_t)frame[currentLine]; //reset the pointer for DMA
+        else framePtr = (uint32_t)&ZERO;
     }
 }
 

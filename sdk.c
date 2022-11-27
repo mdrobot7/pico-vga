@@ -21,9 +21,9 @@ static volatile uint8_t renderState = 0; //Turn the renderer on or off
 static volatile uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
 
 static volatile uint16_t currentLine = 0; //The current line being rendered
-static volatile uint32_t framePtr = (uint32_t)frame[0];
+static volatile uint8_t * frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER];
 
-static volatile uint32_t ZERO = 0;
+static volatile uint8_t BLANK[FRAME_WIDTH];
 
 //Constants for the DMA channels
 #define frameCtrlDMA 0
@@ -80,7 +80,16 @@ static void initPIO() {
             }
         }
     }
-    printf("2 : %d, %d\n", FRAME_HEIGHT, FRAME_WIDTH);
+    //printf("2 : %d, %d\n", FRAME_HEIGHT, FRAME_WIDTH);
+
+    for(uint16_t i = 0; i < FRAME_FULL_HEIGHT*FRAME_SCALER; i++) {
+        if(i >= FRAME_HEIGHT*FRAME_SCALER) frameReadAddr[i] = BLANK;
+        else frameReadAddr[i] = frame[i/FRAME_SCALER];
+    }
+
+    gpio_init(25);
+    gpio_set_dir(25, true);
+    gpio_put(25, false);
 
 
     //PIO Configuration
@@ -98,17 +107,17 @@ static void initPIO() {
     offset = pio_add_program(pio0, &vsync_program);
     vsync_program_init(pio0, 2, offset, VSYNC_PIN);
 
-    printf("3\n");
+    //printf("3\n");
     //DMA Configuration
 
     dma_claim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA)); //mark channels as used in the SDK
 
-    dma_hw->ch[frameCtrlDMA].read_addr = &framePtr;
+    dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
     dma_hw->ch[frameCtrlDMA].write_addr = &dma_hw->ch[frameDataDMA].al3_read_addr_trig;
     dma_hw->ch[frameCtrlDMA].transfer_count = 1;
     dma_hw->ch[frameCtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
-                                        (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
+                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
+                                        (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
 
     dma_hw->ch[frameDataDMA].read_addr = NULL;
     dma_hw->ch[frameDataDMA].write_addr = &pio0_hw->txf[0];
@@ -118,7 +127,7 @@ static void initPIO() {
                                         (blankDataDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL) |
                                         (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
-    dma_hw->ch[blankDataDMA].read_addr = &ZERO;
+    dma_hw->ch[blankDataDMA].read_addr = BLANK;
     dma_hw->ch[blankDataDMA].write_addr = &pio0_hw->txf[0];
     dma_hw->ch[blankDataDMA].transfer_count = (FRAME_FULL_WIDTH - FRAME_WIDTH)/4;
     dma_hw->ch[blankDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
@@ -136,7 +145,7 @@ static void initPIO() {
     //start all 4 state machines at once, sync clocks
     pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111);
 
-    printf("config done\n");
+    //printf("config done\n");
 }
 
 void initSDK(Controller *c) {
@@ -145,14 +154,14 @@ void initSDK(Controller *c) {
     set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
     cPtr = c;
-    printf("1\n");
+    //printf("1\n");
 
     struct repeating_timer controllerTimer;
     add_repeating_timer_ms(1, updateControllerStruct, NULL, &controllerTimer);
     sio_hw->gpio_oe_set = (1u << CONTROLLER_SEL_A_PIN) | (1u << CONTROLLER_SEL_B_PIN); //Enable outputs on pins 22 and 26
     initController();
 
-    printf("1.5\n");
+    //printf("1.5\n");
 
     initPIO();
 
@@ -184,7 +193,14 @@ static void updateFramePtr() {
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << frameCtrlDMA;
 
-    lineDoubled++;
+    currentLine++;
+    if(currentLine >= FRAME_FULL_HEIGHT*FRAME_SCALER) {
+        currentLine = 0;
+        dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
+        sio_hw->gpio_set = (1 << 25);
+    }
+
+    /*lineDoubled++;
     if(lineDoubled % FRAME_SCALER == 0) {
         lineDoubled = 0;
 
@@ -199,7 +215,7 @@ static void updateFramePtr() {
 
         if(currentLine <= FRAME_HEIGHT) framePtr = (uint32_t)frame[currentLine]; //reset the pointer for DMA
         else framePtr = (uint32_t)&ZERO;
-    }
+    }*/
 }
 
 

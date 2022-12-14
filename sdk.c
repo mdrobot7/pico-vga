@@ -67,7 +67,7 @@ static void render();
 
 static void initPIO() {
     //Clear out frame
-    for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
+    /*for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
         if(i % 20 == 0) {
             for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
                 frame[i][j] = 255;
@@ -79,21 +79,20 @@ static void initPIO() {
                 else frame[i][j] = 0;
             }
         }
+    }*/
+
+    for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
+        for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
+            frame[i][j] = 255;
+        }
     }
-    //printf("2 : %d, %d\n", FRAME_HEIGHT, FRAME_WIDTH);
 
     for(uint16_t i = 0; i < FRAME_FULL_HEIGHT*FRAME_SCALER; i++) {
         if(i >= FRAME_HEIGHT*FRAME_SCALER) frameReadAddr[i] = BLANK;
         else frameReadAddr[i] = frame[i/FRAME_SCALER];
     }
 
-    gpio_init(25);
-    gpio_set_dir(25, true);
-    gpio_put(25, false);
-
-
     //PIO Configuration
-
     // Add PIO program to PIO instruction memory. SDK will find location and
     // return with the memory offset of the program.
     uint offset = pio_add_program(pio0, &color_program);
@@ -107,9 +106,8 @@ static void initPIO() {
     offset = pio_add_program(pio0, &vsync_program);
     vsync_program_init(pio0, 2, offset, VSYNC_PIN);
 
-    //printf("3\n");
-    //DMA Configuration
 
+    //DMA Configuration
     dma_claim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA)); //mark channels as used in the SDK
 
     dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
@@ -144,8 +142,6 @@ static void initPIO() {
 
     //start all 4 state machines at once, sync clocks
     pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111);
-
-    //printf("config done\n");
 }
 
 void initSDK(Controller *c) {
@@ -154,14 +150,11 @@ void initSDK(Controller *c) {
     set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
     cPtr = c;
-    //printf("1\n");
 
     struct repeating_timer controllerTimer;
     add_repeating_timer_ms(1, updateControllerStruct, NULL, &controllerTimer);
     sio_hw->gpio_oe_set = (1u << CONTROLLER_SEL_A_PIN) | (1u << CONTROLLER_SEL_B_PIN); //Enable outputs on pins 22 and 26
     initController();
-
-    //printf("1.5\n");
 
     initPIO();
 
@@ -197,7 +190,6 @@ static void updateFramePtr() {
     if(currentLine >= FRAME_FULL_HEIGHT*FRAME_SCALER) {
         currentLine = 0;
         dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
-        sio_hw->gpio_set = (1 << 25);
     }
 
     /*lineDoubled++;

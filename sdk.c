@@ -66,9 +66,20 @@ static void initController();
 static void render();
 
 static void initPIO() {
-    //Clear out frame
+    for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
+        uint8_t r = (uint8_t) 4*cos(((2*M_PI)/400)*j) + 4;
+        uint8_t g = (uint8_t) 4*cos(((2*M_PI)/400)*j + ((4*M_PI)/3)) + 4;
+        uint8_t b = (uint8_t) 2*cos(((2*M_PI)/400)*j + ((2*M_PI)/3)) + 2;
+
+        uint8_t color = (r << 5) | (g << 2) | b;
+
+        for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
+            frame[i][j] = color;
+        }
+    }
+    
     /*for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
-        if(i % 20 == 0) {
+        if(i % 10 == 0) {
             for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
                 frame[i][j] = 255;
             }
@@ -76,16 +87,15 @@ static void initPIO() {
         else {
             for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
                 if(j % 10 == 0) frame[i][j] = 255;
-                else frame[i][j] = 0;
             }
         }
     }*/
 
-    for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
+    /*for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
         for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
             frame[i][j] = 255;
         }
-    }
+    }*/
 
     for(uint16_t i = 0; i < FRAME_FULL_HEIGHT*FRAME_SCALER; i++) {
         if(i >= FRAME_HEIGHT*FRAME_SCALER) frameReadAddr[i] = BLANK;
@@ -151,23 +161,23 @@ void initSDK(Controller *c) {
 
     cPtr = c;
 
-    struct repeating_timer controllerTimer;
+    static struct repeating_timer controllerTimer;
     add_repeating_timer_ms(1, updateControllerStruct, NULL, &controllerTimer);
     sio_hw->gpio_oe_set = (1u << CONTROLLER_SEL_A_PIN) | (1u << CONTROLLER_SEL_B_PIN); //Enable outputs on pins 22 and 26
     initController();
 
     initPIO();
 
-    while(1); //inf loop
+    while(1) { //inf loop
+        tight_loop_contents();
+    }
 
-    printf("%p\n", drawRectangle(NULL, 100, 100, 200, 200, 255));
+    drawRectangle(NULL, 100, 100, 200, 200, 255);
     setRendererState(1);
     render();
     
-    //printf("Launching second core...\n");
     //multicore_launch_core1(render);
     //while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
-    //printf("Second core started.\n");
 }
 
 //Turn the renderer on or off
@@ -186,27 +196,14 @@ static void updateFramePtr() {
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << frameCtrlDMA;
 
-    currentLine++;
-    if(currentLine >= FRAME_FULL_HEIGHT*FRAME_SCALER) {
-        currentLine = 0;
+    if(dma_hw->ch[frameCtrlDMA].read_addr >= &frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER]) {
         dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
     }
 
-    /*lineDoubled++;
-    if(lineDoubled % FRAME_SCALER == 0) {
-        lineDoubled = 0;
-
-        currentLine++;
-        //if(currentLine >= FRAME_HEIGHT) {
-        //    dma_hw->ch[frameDataDMA].al1_ctrl &= ~(1 << SDK_DMA_CTRL_INCR_READ); //turn off read increment on data ch.
-        //}
-        if(currentLine == FRAME_FULL_HEIGHT) {
-        //    dma_hw->ch[frameDataDMA].al1_ctrl |= (1 << SDK_DMA_CTRL_INCR_READ); //turn on read increment
-            currentLine = 0;
-        }
-
-        if(currentLine <= FRAME_HEIGHT) framePtr = (uint32_t)frame[currentLine]; //reset the pointer for DMA
-        else framePtr = (uint32_t)&ZERO;
+    /*currentLine++;
+    if(currentLine >= FRAME_FULL_HEIGHT*FRAME_SCALER) {
+        currentLine = 0;
+        dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
     }*/
 }
 

@@ -55,58 +55,29 @@ Special values:
 struct RenderQueueItem {
     struct RenderQueueItem *next;
     char type;
+    uint8_t update; //true if this item should be updated on the next render pass, false otherwise
+    
     uint16_t x1; //rectangular bounding box for the item
     uint16_t y1;
     uint16_t x2;
     uint16_t y2;
+
     uint8_t color;
     uint8_t *obj;
 };
 
 typedef struct RenderQueueItem RenderQueueItem;
 
-//The controller button struct -- read this to get controller button values
+//Struct for one controller
 typedef struct {
-    struct Controller1 {
-        uint8_t a;
-        uint8_t b;
-        uint8_t x;
-        uint8_t y;
-        uint8_t u;
-        uint8_t d;
-        uint8_t l;
-        uint8_t r;
-    } C1;
-    struct Controller2 {
-        uint8_t a;
-        uint8_t b;
-        uint8_t x;
-        uint8_t y;
-        uint8_t u;
-        uint8_t d;
-        uint8_t l;
-        uint8_t r;
-    } C2;
-    struct Controller3 {
-        uint8_t a;
-        uint8_t b;
-        uint8_t x;
-        uint8_t y;
-        uint8_t u;
-        uint8_t d;
-        uint8_t l;
-        uint8_t r;
-    } C3;
-    struct Controller4 {
-        uint8_t a;
-        uint8_t b;
-        uint8_t x;
-        uint8_t y;
-        uint8_t u;
-        uint8_t d;
-        uint8_t l;
-        uint8_t r;
-    } C4;
+    uint8_t a;
+    uint8_t b;
+    uint8_t x;
+    uint8_t y;
+    uint8_t u;
+    uint8_t d;
+    uint8_t l;
+    uint8_t r;
 } Controller;
 
 
@@ -114,18 +85,14 @@ typedef struct {
         Constants
 =========================
 */
-#define FRAME_SCALER 2 //divider for frame width/height, divides resolution by this value for better perf
+extern uint8_t frameScaler;
 
-#define FRAME_HEIGHT (600/FRAME_SCALER)
-#define FRAME_WIDTH (800/FRAME_SCALER)
-#define FRAME_FULL_HEIGHT (628/FRAME_SCALER) //The full height/width of the frame, including porches, sync, etc
-#define FRAME_FULL_WIDTH (1056/FRAME_SCALER)
+#define FRAME_HEIGHT (600/frameScaler)
+#define FRAME_WIDTH (800/frameScaler)
+#define FRAME_FULL_HEIGHT (628/frameScaler) //The full height/width of the frame, including porches, sync, etc
+#define FRAME_FULL_WIDTH (1056/frameScaler)
 
-#define COLOR_NULL  0b00000000
-#define COLOR_BLACK 0b00100000 //Black is defined as slightly red, since the sprite code needs a NULL char (above)
-                               //to signify "Don't change this pixel" rather than "set it to black"
-                               //ALT: have the sprite array, and then have a bit array to say whether or not to display stuff
-
+#define COLOR_BLACK 0b00000000 
 #define COLOR_RED   0b11100000
 #define COLOR_GREEN 0b00011100
 #define COLOR_BLUE  0b00000011
@@ -139,7 +106,6 @@ typedef struct {
 void initSDK(Controller *c);
 void updateDisplay();
 
-extern volatile Controller controller;
 extern volatile RenderQueueItem background;
 
 //Basic Drawing
@@ -160,19 +126,16 @@ RenderQueueItem * fillRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1,
 RenderQueueItem * fillTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
 RenderQueueItem * fillCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
 
-RenderQueueItem * fillScreen(RenderQueueItem* prev, uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color, bool clearRenderQueue);
+RenderQueueItem * fillScreen(RenderQueueItem* prev, uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color);
 void clearScreen();
 
-
-//Advanced drawing
+RenderQueueItem * drawSprite(RenderQueueItem* prev, uint8_t *sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, uint8_t scale);
 
 //Draws the chars from the default character library. Dimensions are 5x8 pixels each.
 RenderQueueItem * drawText(RenderQueueItem* prev, uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale);
 
 //Text helper functions:
 void setTextFont(uint8_t *newFont);
-
-RenderQueueItem * drawSprite(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale);
 
 //Utilities:
 uint8_t rgbToByte(uint8_t r, uint8_t g, uint8_t b);

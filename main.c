@@ -22,8 +22,13 @@ int main() {
         //sleep_ms(250);
     }
     //printf("\n");
+
+    Controller P1;
+    Controller P2;
+    Controller P3;
+    Controller P4;
     
-    initSDK(&controller);
+    initDisplay(&P1, &P2, &P3, &P4, 2, false);
     
     game();
 }

@@ -137,11 +137,10 @@ typedef struct {
 =========================
 */
 void initSDK(Controller *c);
+void updateDisplay();
 
 extern volatile Controller controller;
 extern volatile RenderQueueItem background;
-
-void setRendererState(uint8_t state);
 
 //Basic Drawing
 //xN and yN are coordinates, in pixels, color is the color of the element.
@@ -174,6 +173,10 @@ RenderQueueItem * drawText(RenderQueueItem* prev, uint16_t x, uint16_t y, char *
 void setTextFont(uint8_t *newFont);
 
 RenderQueueItem * drawSprite(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale);
+
+//Utilities:
+uint8_t rgbToByte(uint8_t r, uint8_t g, uint8_t b);
+uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value);
 
 /*
 Draw text algorithm:

@@ -46,7 +46,6 @@
 's' : sprite
 
 Special values:
-'h' : hidden (keep it in the render queue, but don't display it)
 'n' : removed (this slot in the render queue is now open)
 
 */
@@ -55,58 +54,43 @@ Special values:
 struct RenderQueueItem {
     struct RenderQueueItem *next;
     char type;
+
+    uint8_t flags; //Bit register for parameters
+    /*
+    Bit |   Purpose
+    0   | Update -- set to 1 to update this item when in autoRender mode
+    1   | Hidden -- set to 1 to hide this item
+    2   | 
+    3   | 
+    4   | 
+    5   | 
+    6   | 
+    7   | 
+    */
+    
     uint16_t x1; //rectangular bounding box for the item
     uint16_t y1;
     uint16_t x2;
     uint16_t y2;
+
+    uint8_t thickness;
+
     uint8_t color;
     uint8_t *obj;
 };
 
 typedef struct RenderQueueItem RenderQueueItem;
 
-//The controller button struct -- read this to get controller button values
+//Struct for one controller
 typedef struct {
-    struct Controller1 {
-        uint8_t a;
-        uint8_t b;
-        uint8_t x;
-        uint8_t y;
-        uint8_t u;
-        uint8_t d;
-        uint8_t l;
-        uint8_t r;
-    } C1;
-    struct Controller2 {
-        uint8_t a;
-        uint8_t b;
-        uint8_t x;
-        uint8_t y;
-        uint8_t u;
-        uint8_t d;
-        uint8_t l;
-        uint8_t r;
-    } C2;
-    struct Controller3 {
-        uint8_t a;
-        uint8_t b;
-        uint8_t x;
-        uint8_t y;
-        uint8_t u;
-        uint8_t d;
-        uint8_t l;
-        uint8_t r;
-    } C3;
-    struct Controller4 {
-        uint8_t a;
-        uint8_t b;
-        uint8_t x;
-        uint8_t y;
-        uint8_t u;
-        uint8_t d;
-        uint8_t l;
-        uint8_t r;
-    } C4;
+    uint8_t a;
+    uint8_t b;
+    uint8_t x;
+    uint8_t y;
+    uint8_t u;
+    uint8_t d;
+    uint8_t l;
+    uint8_t r;
 } Controller;
 
 
@@ -114,63 +98,77 @@ typedef struct {
         Constants
 =========================
 */
-#define FRAME_HEIGHT 600
-#define FRAME_WIDTH 800
-#define FRAME_FULL_WIDTH 1056 //The full width of the frame (MUST BE DIVISIBLE BY 32!)
+#define FRAME_SCALER 2 //Resolution Scaler
 
-#define COLOR_NULL  0b00000000
-#define COLOR_BLACK 0b00100000 //Black is defined as slightly red, since the sprite code needs a NULL char (above)
-                               //to signify "Don't change this pixel" rather than "set it to black"
-                               //ALT: have the sprite array, and then have a bit array to say whether or not to display stuff
+#define FRAME_HEIGHT (600/FRAME_SCALER)
+#define FRAME_WIDTH (800/FRAME_SCALER)
+#define FRAME_FULL_HEIGHT (628/FRAME_SCALER) //The full height/width of the frame, including porches, sync, etc
+#define FRAME_FULL_WIDTH (1056/FRAME_SCALER)
 
-#define COLOR_RED   0b11100000
-#define COLOR_GREEN 0b00011100
-#define COLOR_BLUE  0b00000011
-//Fill in rest of basic colors here
+#define COLOR_WHITE   0b11111111
+#define COLOR_SILVER  0b10110110
+#define COLOR_GRAY    0b10010010
+#define COLOR_BLACK   0b00000000
+
+#define COLOR_RED     0b11100000
+#define COLOR_MAROON  0b10000000
+#define COLOR_YELLOW  0b11111100
+#define COLOR_OLIVE   0b10010000
+#define COLOR_LIME    0b00011100
+#define COLOR_GREEN   0b00010000
+#define COLOR_TEAL    0b00010010
+#define COLOR_CYAN    0b00011111
+#define COLOR_BLUE    0b00000011
+#define COLOR_NAVY    0b00000010
+#define COLOR_MAGENTA 0b11100011
+#define COLOR_PURPLE  0b10000010
 
 
 /*
         Functions
 =========================
 */
-void initSDK(Controller *c);
+int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, uint8_t autoRenderEn);
+void updateDisplay();
 
-extern volatile Controller controller;
 extern volatile RenderQueueItem background;
-
-void setRendererState(uint8_t state);
 
 //Basic Drawing
 //xN and yN are coordinates, in pixels, color is the color of the element.
 //draw functions just draw the element, fill elements draw and fill it in.
 //All functions return the index in the render queue that the element takes up.
 
-void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color);
-
 RenderQueueItem * drawPixel(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8_t color);
-RenderQueueItem * drawLine(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
+RenderQueueItem * drawLine(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness);
 RenderQueueItem * drawRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
 RenderQueueItem * drawTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
 RenderQueueItem * drawCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
 RenderQueueItem * drawNPoints(RenderQueueItem* prev, uint16_t points[][2], uint8_t len, uint8_t color); //draws a path between all points in the list
 
-RenderQueueItem * fillRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
-RenderQueueItem * fillTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
-RenderQueueItem * fillCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
+RenderQueueItem * drawFilledRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
+RenderQueueItem * drawFilledTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
+RenderQueueItem * drawFilledCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
 
-RenderQueueItem * fillScreen(RenderQueueItem* prev, uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color, bool clearRenderQueue);
+RenderQueueItem * fillScreen(RenderQueueItem* prev, uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color);
 void clearScreen();
 
-
-//Advanced drawing
+RenderQueueItem * drawSprite(RenderQueueItem* prev, uint8_t *sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, uint8_t scale);
 
 //Draws the chars from the default character library. Dimensions are 5x8 pixels each.
 RenderQueueItem * drawText(RenderQueueItem* prev, uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale);
-
-//Text helper functions:
 void setTextFont(uint8_t *newFont);
 
-RenderQueueItem * drawSprite(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8_t *sprite, uint16_t dimX, uint16_t dimY, uint8_t colorOverride, uint8_t scale);
+//Modifiers:
+void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color);
+void setHidden(RenderQueueItem *item, uint8_t hidden);
+void setColor(RenderQueueItem *item, uint8_t color);
+void setCoordinates(RenderQueueItem *item, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
+void removeItem(RenderQueueItem *item);
+
+//Utilities:
+uint8_t HTMLTo8Bit(uint32_t color);
+uint8_t rgbTo8Bit(uint8_t r, uint8_t g, uint8_t b);
+uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value);
 
 /*
 Draw text algorithm:

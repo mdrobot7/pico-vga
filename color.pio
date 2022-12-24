@@ -4,12 +4,15 @@
 .program color
 
 ; Sync color state machine
-set x 29 [0]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
+; USE FOR DORM MONITOR --> set x 29 [0]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
+
+set x 31 [31]
+
+nop [1]
 
 waitloop:
     nop [30]         ; 32 cycle loop -- nop + 30 + jmp = 32
     jmp x-- waitloop
-
 
 .wrap_target
     out pins 8 ; Shift 8 bits of data from the OSR to the pins.
@@ -19,7 +22,7 @@ waitloop:
 
 // Helper function (for use in C program) to initialize this PIO program
 
-static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPin) {
+static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPin, uint divider) {
     //Initialize 8 data pins for 8 bit color (R1, R2, R3, G1, G2, G3, B1, B2), RRRGGGBB
     pio_gpio_init(pio, dataPin);
     pio_gpio_init(pio, dataPin + 1);
@@ -46,7 +49,7 @@ static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPi
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
     
     //Setup state machine clock divider
-    sm_config_set_clkdiv(&c, 3.0); //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock, /2 again for line doubling
+    sm_config_set_clkdiv(&c, 3.0*divider); //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);

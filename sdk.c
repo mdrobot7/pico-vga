@@ -11,6 +11,7 @@ TODO:
 - change line, circle rendering to use all integer math instead of floats (algs: https://en.wikipedia.org/wiki/Rasterisation#2D_Images)
 - add a .rotation parameter to RenderQueueItem, so you can rotate anything
 - make a demo program, similar to the adafruit gfx demo
+- split this sdk into multiple files
 */
 
 /*
@@ -65,6 +66,7 @@ static Controller *C3;
 static Controller *C4;
 
 //Prototypes, for functions not defined in sdk.h (NOT for use by the user)
+static void initSecondCore();
 static void initDMA();
 static void initPIO();
 
@@ -94,11 +96,7 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
 
     autoRender = autoRenderEn;
 
-    initPIO();
-    initDMA();
-    pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111); //start all 4 state machines
-
-    multicore_launch_core1(render);
+    multicore_launch_core1(initSecondCore);
     while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
     
     for(uint64_t wait = 0; wait < 10000000; wait++) asm("nop"); //busy wait to make sure everything is stable (not using sleep_ms(), it causes issues)
@@ -109,28 +107,28 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
 static void initDMA() {
     for(uint16_t i = 0; i < FRAME_FULL_HEIGHT*FRAME_SCALER; i++) {
         if(i >= FRAME_HEIGHT*FRAME_SCALER) frameReadAddr[i] = BLANK;
-        else frameReadAddr[i] = frame[i/FRAME_SCALER];
+        else frameReadAddr[i] = (uint8_t *) frame[i/FRAME_SCALER];
     }
 
     dma_claim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA)); //mark channels as used in the SDK
 
-    dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
-    dma_hw->ch[frameCtrlDMA].write_addr = &dma_hw->ch[frameDataDMA].al3_read_addr_trig;
+    dma_hw->ch[frameCtrlDMA].read_addr = (io_rw_32) frameReadAddr;
+    dma_hw->ch[frameCtrlDMA].write_addr = (io_rw_32) &dma_hw->ch[frameDataDMA].al3_read_addr_trig;
     dma_hw->ch[frameCtrlDMA].transfer_count = 1;
     dma_hw->ch[frameCtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
                                         (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
                                         (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
 
-    dma_hw->ch[frameDataDMA].read_addr = NULL;
-    dma_hw->ch[frameDataDMA].write_addr = &pio0_hw->txf[0];
+    dma_hw->ch[frameDataDMA].read_addr = (io_rw_32) NULL;
+    dma_hw->ch[frameDataDMA].write_addr = (io_rw_32) &pio0_hw->txf[0];
     dma_hw->ch[frameDataDMA].transfer_count = FRAME_WIDTH/4;
     dma_hw->ch[frameDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
                                         (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
                                         (blankDataDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL) |
                                         (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
-    dma_hw->ch[blankDataDMA].read_addr = BLANK;
-    dma_hw->ch[blankDataDMA].write_addr = &pio0_hw->txf[0];
+    dma_hw->ch[blankDataDMA].read_addr = (io_rw_32) BLANK;
+    dma_hw->ch[blankDataDMA].write_addr = (io_rw_32) &pio0_hw->txf[0];
     dma_hw->ch[blankDataDMA].transfer_count = (FRAME_FULL_WIDTH - FRAME_WIDTH)/4;
     dma_hw->ch[blankDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
                                         (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
@@ -160,6 +158,14 @@ static void initPIO() {
     vsync_program_init(pio0, 2, offset, VSYNC_PIN);
 }
 
+static void initSecondCore() {
+    initPIO();
+    initDMA();
+    pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111); //start all 4 state machines
+
+    render();
+}
+
 
 /*
         DMA Functions
@@ -169,8 +175,8 @@ static void updateFramePtr() {
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << frameCtrlDMA;
 
-    if(dma_hw->ch[frameCtrlDMA].read_addr >= &frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER]) {
-        dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
+    if(dma_hw->ch[frameCtrlDMA].read_addr >= (io_rw_32) &frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER]) {
+        dma_hw->ch[frameCtrlDMA].read_addr = (io_rw_32) frameReadAddr;
     }
 }
 
@@ -276,18 +282,7 @@ uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value) {
         Drawing Functions
 =================================
 */
-void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
-    if(obj == NULL) { //set background to solid color
-        background.obj = NULL;
-        background.color = color;
-    }
-    else { //set the background to a picture/sprite/something not a solid color
-        background.obj = (uint8_t *)obj;
-    }
-    background.update = true;
-}
-
-RenderQueueItem * drawPixel(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8_t color) {
+RenderQueueItem * drawPixel(RenderQueueItem *prev, uint16_t x, uint16_t y, uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -312,7 +307,7 @@ RenderQueueItem * drawPixel(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8
     return item;
 }
 
-RenderQueueItem * drawLine(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
+RenderQueueItem * drawLine(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -339,7 +334,7 @@ RenderQueueItem * drawLine(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint
     return item;
 }
 
-RenderQueueItem * drawRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
+RenderQueueItem * drawRectangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -366,11 +361,11 @@ RenderQueueItem * drawRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1,
     return item;
 }
 
-RenderQueueItem * drawTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
+RenderQueueItem * drawTriangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
     return NULL;
 }
 
-RenderQueueItem * drawCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
+RenderQueueItem * drawCircle(RenderQueueItem *prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -396,11 +391,11 @@ RenderQueueItem * drawCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint
     return item;
 }
 
-RenderQueueItem * drawNPoints(RenderQueueItem* prev, uint16_t points[][2], uint8_t len, uint8_t color) { //draws a path between all points in the list
+RenderQueueItem * drawNPoints(RenderQueueItem *prev, uint16_t points[][2], uint8_t len, uint8_t color) { //draws a path between all points in the list
     return NULL;
 }
 
-RenderQueueItem * drawFilledRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
+RenderQueueItem * drawFilledRectangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -427,11 +422,11 @@ RenderQueueItem * drawFilledRectangle(RenderQueueItem* prev, uint16_t x1, uint16
     return item;
 }
 
-RenderQueueItem * drawFilledTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
+RenderQueueItem * drawFilledTriangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
     return NULL;
 }
 
-RenderQueueItem * drawFilledCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
+RenderQueueItem * drawFilledCircle(RenderQueueItem *prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -457,7 +452,7 @@ RenderQueueItem * drawFilledCircle(RenderQueueItem* prev, uint16_t x, uint16_t y
     return item;
 }
 
-RenderQueueItem * fillScreen(RenderQueueItem* prev, uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
+RenderQueueItem * fillScreen(RenderQueueItem *prev, uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -510,7 +505,7 @@ static uint8_t *font = (uint8_t *)cp437; //The current font in use by the system
 #define CHAR_WIDTH 5
 #define CHAR_HEIGHT 8
 
-RenderQueueItem * drawText(RenderQueueItem* prev, uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale) {
+RenderQueueItem * drawText(RenderQueueItem *prev, uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -545,7 +540,7 @@ void setTextFont(uint8_t *newFont) {
         Sprite Drawing Functions
 ========================================
 */
-RenderQueueItem * drawSprite(RenderQueueItem* prev, uint8_t *sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, uint8_t scale) {
+RenderQueueItem * drawSprite(RenderQueueItem *prev, uint8_t *sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, uint8_t scale) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -575,6 +570,21 @@ RenderQueueItem * drawSprite(RenderQueueItem* prev, uint8_t *sprite, uint16_t x,
 
 
 /*
+        Render Queue Modifiers
+======================================
+*/
+void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
+    if(obj == NULL) { //set background to solid color
+        background.obj = NULL;
+        background.color = color;
+    }
+    else { //set the background to a picture/sprite/something not a solid color
+        background.obj = (uint8_t *)obj;
+    }
+    background.update = true;
+}
+
+/*
         Renderer!
 =========================
 */
@@ -601,18 +611,18 @@ static void render() {
 
     while(1) {
         if(autoRender) {
-            item = &background;
+            item = (RenderQueueItem *) &background;
             //look for the first item that needs an update, render that item and everything after it
             while(!item->update) {
                 previousItem = item;
                 item = item->next;
-                if(item == NULL) item = &background;
+                if(item == NULL) item = (RenderQueueItem *) &background;
             }
-            if(item->type == 'h') item = &background; //if the update is to hide an item, rerender the whole thing
+            if(item->type == 'h') item = (RenderQueueItem *) &background; //if the update is to hide an item, rerender the whole thing
         }
         else { //manual rendering
             while(!update); //wait until it's told to update the display
-            item = &background;
+            item = (RenderQueueItem *) &background;
         }
 
         while(item != NULL) {

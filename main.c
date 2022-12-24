@@ -28,7 +28,31 @@ int main() {
     Controller P3;
     Controller P4;
     
-    initDisplay(&P1, &P2, &P3, &P4, 2, false);
+    initDisplay(&P1, &P2, &P3, &P4, true);
+
+    RenderQueueItem *temp = drawRectangle(NULL, 150, 150, 350, 250, 0b00011100);
+    //updateDisplay();
+
+    for(uint8_t x = 0; x < 4; x++) {
+        for(uint8_t y = 0; y < 3; y++) {
+            drawFilledRectangle(NULL, 25 + x*100, 25 + y*100, 75 + x*100, 75 + y*100, 0b11100011, 0);
+            drawPixel(NULL, 25 + x*100, 25 + y*100, 0b00011100);
+            drawFilledCircle(NULL, 50 + x*100, 50 + y*100, 25, 0b11100000, 0);
+        }
+    //    updateDisplay();
+    }
+    //updateDisplay();
+    temp = drawLine(NULL, 0, 0, FRAME_WIDTH - 1, FRAME_HEIGHT - 1, 0b00000011);
+    for(uint64_t w = 0; w < 10000000; w++) asm("nop");
+
+    temp->type = 'h';
+    temp->update = true;
+
+    //for(uint64_t w = 0; w < 10000000; w++) asm("nop");
+
+    //updateDisplay();
+    
+    while(1);
     
     game();
 }

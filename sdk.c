@@ -7,6 +7,10 @@ TODO:
 - text scaling
 - handle out of bounds coordinates for rendering
 - make the DMA reconfig interrupt the NMI
+- renderQueueItem modifier functions (that flip the .update flag at the end)
+- change line, circle rendering to use all integer math instead of floats (algs: https://en.wikipedia.org/wiki/Rasterisation#2D_Images)
+- add a .rotation parameter to RenderQueueItem, so you can rotate anything
+- make a demo program, similar to the adafruit gfx demo
 */
 
 /*
@@ -38,21 +42,20 @@ Ideas:
 #define SDK_DMA_CTRL_SNIFF_EN 23
 #define SDK_DMA_CTRL_BUSY 24
 
-//Dynamically allocated in initDisplay()
-static volatile uint8_t *frame;
-static uint8_t ** frameReadAddr;
-static uint8_t * BLANK;
+static volatile uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
+static uint8_t * frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER];
+static uint8_t BLANK[FRAME_WIDTH];
 
 volatile RenderQueueItem background = { //First element of the linked list, can be reset to any background
     .type = 'f',
     .color = 0,
     .obj = NULL,
-    .next = NULL
+    .next = NULL,
+    .update = true
 };
 static volatile RenderQueueItem *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
 
 //Configuration Options
-uint8_t frameScaler = 1;
 static uint8_t autoRender = 0;
 
 //Controllers
@@ -75,7 +78,7 @@ static void render();
         Initializers/Deinitializers
 ===========================================
 */
-int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, uint8_t scaler, uint8_t autoRenderEn) {
+int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, uint8_t autoRenderEn) {
     //Clock configuration -- 120MHz system clock frequency
     clocks_init();
     set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
@@ -89,66 +92,25 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
     static struct repeating_timer controllerTimer;
     add_repeating_timer_ms(1, updateAllControllers, NULL, &controllerTimer);
 
-    frameScaler = scaler;
     autoRender = autoRenderEn;
 
-    frame = (uint8_t *) calloc(FRAME_WIDTH*FRAME_HEIGHT, sizeof(uint8_t));
-    frameReadAddr = (uint8_t **) calloc(FRAME_FULL_HEIGHT*frameScaler, sizeof(uint8_t *));
-    BLANK = (uint8_t *) calloc(FRAME_WIDTH, sizeof(uint8_t));
-    if(frame == NULL || frameReadAddr == NULL || BLANK == NULL) return 1;
-
-    //initPIO();
+    initPIO();
     initDMA();
     pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111); //start all 4 state machines
-
-    while(1);
 
     multicore_launch_core1(render);
     while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
     
-    for(uint16_t wait = 0; wait < 10000000; wait++) asm("nop"); //busy wait to make sure everything is stable (not using sleep_ms(), it causes issues)
+    for(uint64_t wait = 0; wait < 10000000; wait++) asm("nop"); //busy wait to make sure everything is stable (not using sleep_ms(), it causes issues)
 
-    while(1);
     return 0;
 }
 
 static void initDMA() {
-    /*for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
-        if(i % 10 == 0) {
-            for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
-                *(frame + (i*FRAME_WIDTH) + j) = 255;
-            }
-        }
-        else {
-            for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
-                if(j % 10 == 0) *(frame + (i*FRAME_WIDTH) + j) = 255;
-            }
-        }
-    }*/
-
-    for(uint16_t i = 0; i < FRAME_HEIGHT; i++) {
-        for(uint16_t j = 0; j < FRAME_WIDTH; j++) {
-            *(frame + (i*FRAME_WIDTH) + j) = 255;
-        }
+    for(uint16_t i = 0; i < FRAME_FULL_HEIGHT*FRAME_SCALER; i++) {
+        if(i >= FRAME_HEIGHT*FRAME_SCALER) frameReadAddr[i] = BLANK;
+        else frameReadAddr[i] = frame[i/FRAME_SCALER];
     }
-    
-    for(uint16_t i = 0; i < FRAME_FULL_HEIGHT*frameScaler; i++) {
-        if(i >= FRAME_HEIGHT*frameScaler) frameReadAddr[i] = BLANK;
-        else frameReadAddr[i] = (frame + (i*FRAME_WIDTH)/frameScaler);
-    }
-
-    // Add PIO program to PIO instruction memory. SDK will find location and
-    // return with the memory offset of the program.
-    uint offset = pio_add_program(pio0, &color_program);
-
-    // Initialize color pio program, but DON'T enable PIO state machine
-    color_program_init(pio0, 0, offset, 0, frameScaler);
-
-    offset = pio_add_program(pio0, &hsync_program);
-    hsync_program_init(pio0, 1, offset, HSYNC_PIN);
-
-    offset = pio_add_program(pio0, &vsync_program);
-    vsync_program_init(pio0, 2, offset, VSYNC_PIN);
 
     dma_claim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA)); //mark channels as used in the SDK
 
@@ -184,13 +146,18 @@ static void initDMA() {
 }
 
 static void initPIO() {
-  return;
-}
+    // Add PIO program to PIO instruction memory. SDK will find location and
+    // return with the memory offset of the program.
+    uint offset = pio_add_program(pio0, &color_program);
 
-void deInitDisplay() {
-    //turn off DMA (turn EN bit to 0)
-    //turn off PIO
-    //free() the frame arrays
+    // Initialize color pio program, but DON'T enable PIO state machine
+    color_program_init(pio0, 0, offset, 0, FRAME_SCALER);
+
+    offset = pio_add_program(pio0, &hsync_program);
+    hsync_program_init(pio0, 1, offset, HSYNC_PIN);
+
+    offset = pio_add_program(pio0, &vsync_program);
+    vsync_program_init(pio0, 2, offset, VSYNC_PIN);
 }
 
 
@@ -202,9 +169,8 @@ static void updateFramePtr() {
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << frameCtrlDMA;
 
-    if(dma_hw->ch[frameCtrlDMA].read_addr >= &frameReadAddr[FRAME_FULL_HEIGHT*frameScaler]) {
+    if(dma_hw->ch[frameCtrlDMA].read_addr >= &frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER]) {
         dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
-        asm("nop");
     }
 }
 
@@ -254,7 +220,11 @@ static bool updateAllControllers(struct repeating_timer *t) {
         Color Functions
 ===============================
 */
-uint8_t rgbToByte(uint8_t r, uint8_t g, uint8_t b) {
+uint8_t inline HTMLTo8Bit(uint32_t color) {
+    return rgbTo8Bit((uint8_t)((color >> 16) & 255), (uint8_t)((color >> 8) & 255), (uint8_t)((color & 255)));
+}
+
+uint8_t inline rgbTo8Bit(uint8_t r, uint8_t g, uint8_t b) {
     return ((r/32) << 5) | ((g/32) << 2) | (b/64);
 }
 
@@ -298,7 +268,7 @@ uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value) {
     }
     else return 0;
 
-    return ((r/32) << 5) | ((g/32) << 2) | (b/64);
+    return rgbTo8Bit(r, g, b);
 }
 
 
@@ -314,6 +284,7 @@ void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
     else { //set the background to a picture/sprite/something not a solid color
         background.obj = (uint8_t *)obj;
     }
+    background.update = true;
 }
 
 RenderQueueItem * drawPixel(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8_t color) {
@@ -335,6 +306,8 @@ RenderQueueItem * drawPixel(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8
         item->next = prev->next; //insert item into the linked list
         prev->next = item;
     }
+
+    item->update = true;
 
     return item;
 }
@@ -361,6 +334,8 @@ RenderQueueItem * drawLine(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint
         prev->next = item;
     }
 
+    item->update = true;
+
     return item;
 }
 
@@ -385,6 +360,8 @@ RenderQueueItem * drawRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1,
         item->next = prev->next; //insert item into the linked list
         prev->next = item;
     }
+
+    item->update = true;
 
     return item;
 }
@@ -414,6 +391,8 @@ RenderQueueItem * drawCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint
         prev->next = item;
     }
 
+    item->update = true;
+
     return item;
 }
 
@@ -421,7 +400,7 @@ RenderQueueItem * drawNPoints(RenderQueueItem* prev, uint16_t points[][2], uint8
     return NULL;
 }
 
-RenderQueueItem * fillRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
+RenderQueueItem * drawFilledRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -443,14 +422,16 @@ RenderQueueItem * fillRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1,
         prev->next = item;
     }
 
+    item->update = true;
+
     return item;
 }
 
-RenderQueueItem * fillTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
+RenderQueueItem * drawFilledTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
     return NULL;
 }
 
-RenderQueueItem * fillCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
+RenderQueueItem * drawFilledCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
@@ -470,6 +451,8 @@ RenderQueueItem * fillCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint
         item->next = prev->next; //insert item into the linked list
         prev->next = item;
     }
+
+    item->update = true;
 
     return item;
 }
@@ -499,6 +482,8 @@ RenderQueueItem * fillScreen(RenderQueueItem* prev, uint8_t obj[FRAME_HEIGHT][FR
         prev->next = item;
     }
 
+    item->update = true;
+
     return item;
 }
 
@@ -512,6 +497,8 @@ void clearScreen() {
         item->type = 'n';
         item = item->next;
     }
+
+    background.update = true;
 }
 
 
@@ -543,6 +530,8 @@ RenderQueueItem * drawText(RenderQueueItem* prev, uint16_t x, uint16_t y, char *
         item->next = prev->next; //insert item into the linked list
         prev->next = item;
     }
+
+    item->update = true;
 
     return item;
 }
@@ -579,6 +568,8 @@ RenderQueueItem * drawSprite(RenderQueueItem* prev, uint8_t *sprite, uint16_t x,
         prev->next = item;
     }
 
+    item->update = true;
+
     return item;
 }
 
@@ -591,6 +582,7 @@ static volatile uint8_t update = 0;
 
 void updateDisplay() {
     update = 1;
+    if(autoRender) background.update = true; //force-update in autoRender mode
 }
 
 //Checks (and corrects for) overflow on the coordinates (i.e. drawing something at invalid location)
@@ -601,11 +593,6 @@ static void checkOvf(uint16_t *x, uint16_t *y) {
     if(*y >= FRAME_HEIGHT) *y = FRAME_HEIGHT - 1;
 }
 
-//Converts frame[i][j] to pointer using pointer math, required now that the frame is dynamically allocated
-static inline uint8_t * frameToPtr(uint16_t y, uint16_t x) {
-    return (uint8_t *)(frame + y*FRAME_WIDTH + x);
-}
-
 static void render() {
     multicore_fifo_push_blocking(13); //tell core 0 that everything is ok/it's running
 
@@ -614,12 +601,14 @@ static void render() {
 
     while(1) {
         if(autoRender) {
-            //look for the first item that needs an update, render that and everything after it
+            item = &background;
+            //look for the first item that needs an update, render that item and everything after it
             while(!item->update) {
                 previousItem = item;
                 item = item->next;
                 if(item == NULL) item = &background;
             }
+            if(item->type == 'h') item = &background; //if the update is to hide an item, rerender the whole thing
         }
         else { //manual rendering
             while(!update); //wait until it's told to update the display
@@ -629,24 +618,24 @@ static void render() {
         while(item != NULL) {
             switch(item->type) {
                 case 'p': //Pixel
-                    *frameToPtr(item->y1, item->x1) = item->color;
+                    frame[item->y1][item->x1] = item->color;
                     break;
                 case 'l': //Line
                     if(item->x1 == item->x2) {
-                        for(uint16_t y = item->y1; y <= item->y2; y++) *frameToPtr(y, item->x1) = item->color;
+                        for(uint16_t y = item->y1; y <= item->y2; y++) frame[y][item->x1] = item->color;
                     }
                     else {
-                        uint16_t m = (uint16_t)((item->y2 - item->y1)/(item->x2 - item->x1));
+                        float m = ((float)(item->y2 - item->y1))/((float)(item->x2 - item->x1));
                         for(uint16_t x = item->x1; x <= item->x2; x++) {
-                            *frameToPtr((m*(x - item->x1)) + item->y1, x) = item->color;
+                            frame[(uint16_t)((m*(x - item->x1)) + item->y1)][x] = item->color;
                         }
                     }
                     break;
                 case 'r': //Rectangle
-                    for(uint16_t x = item->x1; x <= item->x2; x++) *frameToPtr(item->y1, x) = item->color; //top
-                    for(uint16_t x = item->x1; x <= item->x2; x++) *frameToPtr(item->y2, x) = item->color; //bottom
-                    for(uint16_t y = item->y1; y <= item->y2; y++) *frameToPtr(y, item->x1) = item->color; //left
-                    for(uint16_t y = item->y1; y <= item->y2; y++) *frameToPtr(y, item->x2) = item->color; //right
+                    for(uint16_t x = item->x1; x <= item->x2; x++) frame[item->y1][x] = item->color; //top
+                    for(uint16_t x = item->x1; x <= item->x2; x++) frame[item->y2][x] = item->color; //bottom
+                    for(uint16_t y = item->y1; y <= item->y2; y++) frame[y][item->x1] = item->color; //left
+                    for(uint16_t y = item->y1; y <= item->y2; y++) frame[y][item->x2] = item->color; //right
                     break;
                 case 't': //Triangle
                     break;
@@ -654,14 +643,14 @@ static void render() {
                     //x1, y1 = center, x2 = radius
                     for(uint16_t y = item->y1 - item->x2; y <= item->y1 + item->x2; y++) {
                         uint16_t x = sqrt(pow(item->x2, 2.0) - pow(y - item->y1, 2.0));
-                        *frameToPtr(y, x + item->x1) = item->color; //handle the +/- from the sqrt (the 2 sides of the circle)
-                        *frameToPtr(y, x - item->x1) = item->color;
+                        frame[y][item->x1 + x] = item->color; //handle the +/- from the sqrt (the 2 sides of the circle)
+                        frame[y][item->x1 - x] = item->color;
                     }
                     break;
                 case 'R': //Filled Rectangle
                     for(uint16_t y = item->y1; y <= item->y2; y++) {
                         for(uint16_t x = item->x1; x <= item->x2; x++) {
-                            *frameToPtr(y, x) = item->color;
+                            frame[y][x] = item->color;
                         }
                     }
                     break;
@@ -671,8 +660,8 @@ static void render() {
                     //x1, y1 = center, x2 = radius
                     for(uint16_t y = item->y1 - item->x2; y <= item->y1 + item->x2; y++) {
                         uint16_t x = sqrt(pow(item->x2, 2.0) - pow(y - item->y1, 2.0));
-                        for(uint16_t i = x - item->x1; i <= x + item->x1; i++) {
-                            *frameToPtr(y, i) = item->color;
+                        for(uint16_t i = item->x1 - x; i <= item->x1 + x; i++) {
+                            frame[y][i] = item->color;
                         }
                     }
                     break;
@@ -691,7 +680,6 @@ static void render() {
                     /*for(uint16_t i = item->x1; i < item->x2; i++) {
                         //Skip changing the pixel if it's set to the COLOR_NULL value
                         if(*(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i) == COLOR_NULL) continue;
-
                         if(item->color == 0) {
                             //*(original mem location + (currentRowInArray * nColumns) + currentColumnInArray)
                             frame[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
@@ -704,7 +692,7 @@ static void render() {
                 case 'f': //Fill the screen
                     for(uint16_t y = 0; y < FRAME_HEIGHT; y++) {
                         for(uint16_t x = 0; x < FRAME_WIDTH; x++) {
-                            *frameToPtr(y, x) = item->color;
+                            frame[y][x] = item->color;
                         }
                     }
                     /*if(item->obj == NULL) {
@@ -716,7 +704,6 @@ static void render() {
                         for(uint16_t i = 0; i < FRAME_WIDTH; i++) {
                             //Skip changing the pixel if it's set to the COLOR_NULL value
                             if(*(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i) == COLOR_NULL) continue;
-
                             //*(original mem location + (currentRowInArray * nColumns) + currentColumnInArray)
                             frame[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
                         }
@@ -729,6 +716,7 @@ static void render() {
                     break;
             }
             
+            item->update = false;
             previousItem = item;
             item = item->next;
         }

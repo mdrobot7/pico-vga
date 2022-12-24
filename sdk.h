@@ -85,25 +85,37 @@ typedef struct {
         Constants
 =========================
 */
-extern uint8_t frameScaler;
+#define FRAME_SCALER 2 //Resolution Scaler
 
-#define FRAME_HEIGHT (600/frameScaler)
-#define FRAME_WIDTH (800/frameScaler)
-#define FRAME_FULL_HEIGHT (628/frameScaler) //The full height/width of the frame, including porches, sync, etc
-#define FRAME_FULL_WIDTH (1056/frameScaler)
+#define FRAME_HEIGHT (600/FRAME_SCALER)
+#define FRAME_WIDTH (800/FRAME_SCALER)
+#define FRAME_FULL_HEIGHT (628/FRAME_SCALER) //The full height/width of the frame, including porches, sync, etc
+#define FRAME_FULL_WIDTH (1056/FRAME_SCALER)
 
-#define COLOR_BLACK 0b00000000 
-#define COLOR_RED   0b11100000
-#define COLOR_GREEN 0b00011100
-#define COLOR_BLUE  0b00000011
-//Fill in rest of basic colors here
+#define COLOR_WHITE   0b11111111
+#define COLOR_SILVER  0b10110110
+#define COLOR_GRAY    0b10010010
+#define COLOR_BLACK   0b00000000
+
+#define COLOR_RED     0b11100000
+#define COLOR_MAROON  0b10000000
+#define COLOR_YELLOW  0b11111100
+#define COLOR_OLIVE   0b10010000
+#define COLOR_LIME    0b00011100
+#define COLOR_GREEN   0b00010000
+#define COLOR_TEAL    0b00010010
+#define COLOR_CYAN    0b00011111
+#define COLOR_BLUE    0b00000011
+#define COLOR_NAVY    0b00000010
+#define COLOR_MAGENTA 0b11100011
+#define COLOR_PURPLE  0b10000010
 
 
 /*
         Functions
 =========================
 */
-void initSDK(Controller *c);
+int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, uint8_t autoRenderEn);
 void updateDisplay();
 
 extern volatile RenderQueueItem background;
@@ -122,9 +134,9 @@ RenderQueueItem * drawTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, 
 RenderQueueItem * drawCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
 RenderQueueItem * drawNPoints(RenderQueueItem* prev, uint16_t points[][2], uint8_t len, uint8_t color); //draws a path between all points in the list
 
-RenderQueueItem * fillRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
-RenderQueueItem * fillTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
-RenderQueueItem * fillCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
+RenderQueueItem * drawFilledRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
+RenderQueueItem * drawFilledTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
+RenderQueueItem * drawFilledCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
 
 RenderQueueItem * fillScreen(RenderQueueItem* prev, uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color);
 void clearScreen();
@@ -138,7 +150,8 @@ RenderQueueItem * drawText(RenderQueueItem* prev, uint16_t x, uint16_t y, char *
 void setTextFont(uint8_t *newFont);
 
 //Utilities:
-uint8_t rgbToByte(uint8_t r, uint8_t g, uint8_t b);
+uint8_t HTMLTo8Bit(uint32_t color);
+uint8_t rgbTo8Bit(uint8_t r, uint8_t g, uint8_t b);
 uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value);
 
 /*

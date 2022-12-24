@@ -46,7 +46,6 @@
 's' : sprite
 
 Special values:
-'h' : hidden (keep it in the render queue, but don't display it)
 'n' : removed (this slot in the render queue is now open)
 
 */
@@ -55,12 +54,26 @@ Special values:
 struct RenderQueueItem {
     struct RenderQueueItem *next;
     char type;
-    uint8_t update; //true if this item should be updated on the next render pass, false otherwise
+
+    uint8_t flags; //Bit register for parameters
+    /*
+    Bit |   Purpose
+    0   | Update -- set to 1 to update this item when in autoRender mode
+    1   | Hidden -- set to 1 to hide this item
+    2   | 
+    3   | 
+    4   | 
+    5   | 
+    6   | 
+    7   | 
+    */
     
     uint16_t x1; //rectangular bounding box for the item
     uint16_t y1;
     uint16_t x2;
     uint16_t y2;
+
+    uint8_t thickness;
 
     uint8_t color;
     uint8_t *obj;
@@ -125,10 +138,8 @@ extern volatile RenderQueueItem background;
 //draw functions just draw the element, fill elements draw and fill it in.
 //All functions return the index in the render queue that the element takes up.
 
-void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color);
-
 RenderQueueItem * drawPixel(RenderQueueItem* prev, uint16_t x, uint16_t y, uint8_t color);
-RenderQueueItem * drawLine(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
+RenderQueueItem * drawLine(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness);
 RenderQueueItem * drawRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
 RenderQueueItem * drawTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
 RenderQueueItem * drawCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
@@ -145,9 +156,14 @@ RenderQueueItem * drawSprite(RenderQueueItem* prev, uint8_t *sprite, uint16_t x,
 
 //Draws the chars from the default character library. Dimensions are 5x8 pixels each.
 RenderQueueItem * drawText(RenderQueueItem* prev, uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale);
-
-//Text helper functions:
 void setTextFont(uint8_t *newFont);
+
+//Modifiers:
+void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color);
+void setHidden(RenderQueueItem *item, uint8_t hidden);
+void setColor(RenderQueueItem *item, uint8_t color);
+void setCoordinates(RenderQueueItem *item, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
+void removeItem(RenderQueueItem *item);
 
 //Utilities:
 uint8_t HTMLTo8Bit(uint32_t color);

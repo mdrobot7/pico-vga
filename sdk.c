@@ -5,13 +5,12 @@
 TODO:
 - Finish draw functions
 - text scaling
-- handle out of bounds coordinates for rendering
 - make the DMA reconfig interrupt the NMI
-- renderQueueItem modifier functions (that flip the .update flag at the end)
 - change line, circle rendering to use all integer math instead of floats (algs: https://en.wikipedia.org/wiki/Rasterisation#2D_Images)
 - add a .rotation parameter to RenderQueueItem, so you can rotate anything
 - make a demo program, similar to the adafruit gfx demo
 - split this sdk into multiple files
+- add thickness parameter to lines, rectangles, circles.... and make it intuitive
 */
 
 /*
@@ -52,7 +51,7 @@ volatile RenderQueueItem background = { //First element of the linked list, can 
     .color = 0,
     .obj = NULL,
     .next = NULL,
-    .update = true
+    .flags = 1
 };
 static volatile RenderQueueItem *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
 
@@ -302,21 +301,22 @@ RenderQueueItem * drawPixel(RenderQueueItem *prev, uint16_t x, uint16_t y, uint8
         prev->next = item;
     }
 
-    item->update = true;
+    item->flags = 1; //Clear bit field, set the update bit
 
     return item;
 }
 
-RenderQueueItem * drawLine(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
+RenderQueueItem * drawLine(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
     item->type = 'l';
-    item->x1 = x1 < x2 ? x1 : x2; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
-    item->y1 = y1 < y2 ? y1 : y2;
-    item->x2 = x1 > x2 ? x1 : x2;
-    item->y2 = y1 > y2 ? y1 : y2;
+    item->x1 = x1 <= x2 ? x1 : x2; //Makes sure the point closer to x = 0 is set to (x1, y1) not (x2, y2)
+    item->y1 = x1 <= x2 ? y1 : y2;
+    item->x2 = x1 >  x2 ? x1 : x2;
+    item->y2 = x1 >  x2 ? y1 : y2;
     item->color = color;
+    item->thickness = thickness - 1;
 
     if(prev == NULL) {
         item->next = NULL; //Set *next to NULL, means it is the last item in linked list
@@ -329,7 +329,7 @@ RenderQueueItem * drawLine(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint
         prev->next = item;
     }
 
-    item->update = true;
+    item->flags = 1; //Clear bit field, set the update bit
 
     return item;
 }
@@ -339,10 +339,10 @@ RenderQueueItem * drawRectangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1,
     if(item == NULL) return NULL;
 
     item->type = 'r';
-    item->x1 = x1 < x2 ? x1 : x2; //Makes sure the point closer to (0,0) is assigned to (x1,y1) and not (x2, y2)
-    item->y1 = y1 < y2 ? y1 : y2;
-    item->x2 = x1 > x2 ? x1 : x2;
-    item->y2 = y1 > y2 ? y1 : y2;
+    item->x1 = x1 <= x2 ? x1 : x2; //Makes sure the point closer to x = 0 is set to (x1, y1) not (x2, y2)
+    item->y1 = x1 <= x2 ? y1 : y2;
+    item->x2 = x1 >  x2 ? x1 : x2;
+    item->y2 = x1 >  x2 ? y1 : y2;
     item->color = color;
 
     if(prev == NULL) {
@@ -356,12 +356,24 @@ RenderQueueItem * drawRectangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1,
         prev->next = item;
     }
 
-    item->update = true;
+    item->flags = 1; //Clear bit field, set the update bit
 
     return item;
 }
 
 RenderQueueItem * drawTriangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
+    RenderQueueItem *side1 = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    RenderQueueItem *side2 = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    RenderQueueItem *side3 = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    if(side1 == NULL || side2 == NULL || side3 == NULL) return NULL;
+
+    side1->type = 't';
+    side2->type = 't';
+    side3->type = 't';
+
+    //sort points by x value
+    //assign
+
     return NULL;
 }
 
@@ -386,7 +398,7 @@ RenderQueueItem * drawCircle(RenderQueueItem *prev, uint16_t x, uint16_t y, uint
         prev->next = item;
     }
 
-    item->update = true;
+    item->flags = 1; //Clear bit field, set the update bit
 
     return item;
 }
@@ -400,10 +412,10 @@ RenderQueueItem * drawFilledRectangle(RenderQueueItem *prev, uint16_t x1, uint16
     if(item == NULL) return NULL;
 
     item->type = 'R';
-    item->x1 = x1 < x2 ? x1 : x2; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
-    item->y1 = y1 < y2 ? y1 : y2;
-    item->x2 = x1 > x2 ? x1 : x2;
-    item->y2 = y1 > y2 ? y1 : y2;
+    item->x1 = x1 <= x2 ? x1 : x2; //Makes sure the point closer to x = 0 is set to (x1, y1) not (x2, y2)
+    item->y1 = x1 <= x2 ? y1 : y2;
+    item->x2 = x1 >  x2 ? x1 : x2;
+    item->y2 = x1 >  x2 ? y1 : y2;
     item->color = color;
 
     if(prev == NULL) {
@@ -417,7 +429,7 @@ RenderQueueItem * drawFilledRectangle(RenderQueueItem *prev, uint16_t x1, uint16
         prev->next = item;
     }
 
-    item->update = true;
+    item->flags = 1; //Clear bit field, set the update bit
 
     return item;
 }
@@ -447,7 +459,7 @@ RenderQueueItem * drawFilledCircle(RenderQueueItem *prev, uint16_t x, uint16_t y
         prev->next = item;
     }
 
-    item->update = true;
+    item->flags = 1; //Clear bit field, set the update bit
 
     return item;
 }
@@ -477,7 +489,7 @@ RenderQueueItem * fillScreen(RenderQueueItem *prev, uint8_t obj[FRAME_HEIGHT][FR
         prev->next = item;
     }
 
-    item->update = true;
+    item->flags = 1; //Clear bit field, set the update bit
 
     return item;
 }
@@ -493,7 +505,7 @@ void clearScreen() {
         item = item->next;
     }
 
-    background.update = true;
+    background.flags = 1;
 }
 
 
@@ -526,7 +538,7 @@ RenderQueueItem * drawText(RenderQueueItem *prev, uint16_t x, uint16_t y, char *
         prev->next = item;
     }
 
-    item->update = true;
+    item->flags = 1; //Clear bit field, set the update bit
 
     return item;
 }
@@ -563,7 +575,7 @@ RenderQueueItem * drawSprite(RenderQueueItem *prev, uint8_t *sprite, uint16_t x,
         prev->next = item;
     }
 
-    item->update = true;
+    item->flags = 1; //Clear bit field, set the update bit
 
     return item;
 }
@@ -573,6 +585,7 @@ RenderQueueItem * drawSprite(RenderQueueItem *prev, uint8_t *sprite, uint16_t x,
         Render Queue Modifiers
 ======================================
 */
+//Set the parameters for the background.
 void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
     if(obj == NULL) { //set background to solid color
         background.obj = NULL;
@@ -581,8 +594,37 @@ void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
     else { //set the background to a picture/sprite/something not a solid color
         background.obj = (uint8_t *)obj;
     }
-    background.update = true;
+    background.flags |= 1u;
 }
+
+//Set item to be hidden (true = hidden, false = showing)
+void setHidden(RenderQueueItem *item, uint8_t hidden) {
+    if(hidden) item->flags |= (1u << 1);
+    else item->flags &= ~(1u << 1);
+    item->flags |= 1u; //Set the update bit
+}
+
+//Set the color for item.
+void setColor(RenderQueueItem *item, uint8_t color) {
+    item->color = color;
+    item->flags |= 1u; //Set the update bit
+}
+
+//Set the coordinates for item. Set parameter to -1 to leave it unchanged.
+void setCoordinates(RenderQueueItem *item, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
+    if(x1 >= 0) item->x1 = x1;
+    if(y1 >= 0) item->y1 = y1;
+    if(x2 >= 0) item->x2 = x2;
+    if(y2 >= 0) item->y2 = y2;
+    item->flags |= 1u; //Set the update bit
+}
+
+//Permanently remove item from the render queue.
+void removeItem(RenderQueueItem *item) {
+    item->type = 'n';
+    item->flags |= 1u; //Set the update bit
+}
+
 
 /*
         Renderer!
@@ -592,15 +634,13 @@ static volatile uint8_t update = 0;
 
 void updateDisplay() {
     update = 1;
-    if(autoRender) background.update = true; //force-update in autoRender mode
+    if(autoRender) background.flags |= 1u; //force-update in autoRender mode
 }
 
-//Checks (and corrects for) overflow on the coordinates (i.e. drawing something at invalid location)
-static void checkOvf(uint16_t *x, uint16_t *y) {
-    if(*x < 0) *x = 0;
-    if(*x >= FRAME_WIDTH) *x = FRAME_WIDTH - 1;
-    if(*y < 0) *y = 0;
-    if(*y >= FRAME_HEIGHT) *y = FRAME_HEIGHT - 1;
+//Checks for out-of-bounds coordinates and writes to the frame
+static inline void writePixel(uint16_t y, uint16_t x, uint8_t color) {
+    if(x >= FRAME_WIDTH || y >= FRAME_HEIGHT) return;
+    else frame[y][x] = color;
 }
 
 static void render() {
@@ -613,12 +653,12 @@ static void render() {
         if(autoRender) {
             item = (RenderQueueItem *) &background;
             //look for the first item that needs an update, render that item and everything after it
-            while(!item->update) {
+            while(!(item->flags & 1u)) {
                 previousItem = item;
                 item = item->next;
                 if(item == NULL) item = (RenderQueueItem *) &background;
             }
-            if(item->type == 'h') item = (RenderQueueItem *) &background; //if the update is to hide an item, rerender the whole thing
+            if(((item->flags >> 1) & 1u) || item->type == 'n') item = (RenderQueueItem *) &background; //if the update is to hide an item, rerender the whole thing
         }
         else { //manual rendering
             while(!update); //wait until it's told to update the display
@@ -626,26 +666,27 @@ static void render() {
         }
 
         while(item != NULL) {
+            if(!((item->flags >> 1) & 1u)) {
             switch(item->type) {
                 case 'p': //Pixel
-                    frame[item->y1][item->x1] = item->color;
+                    writePixel(item->y1, item->x1, item->color);
                     break;
                 case 'l': //Line
                     if(item->x1 == item->x2) {
-                        for(uint16_t y = item->y1; y <= item->y2; y++) frame[y][item->x1] = item->color;
+                        for(uint16_t y = item->y1; y <= item->y2; y++) writePixel(y, item->x1, item->color);
                     }
                     else {
                         float m = ((float)(item->y2 - item->y1))/((float)(item->x2 - item->x1));
                         for(uint16_t x = item->x1; x <= item->x2; x++) {
-                            frame[(uint16_t)((m*(x - item->x1)) + item->y1)][x] = item->color;
+                            writePixel((uint16_t)((m*(x - item->x1)) + item->y1), x, item->color);
                         }
                     }
                     break;
                 case 'r': //Rectangle
-                    for(uint16_t x = item->x1; x <= item->x2; x++) frame[item->y1][x] = item->color; //top
-                    for(uint16_t x = item->x1; x <= item->x2; x++) frame[item->y2][x] = item->color; //bottom
-                    for(uint16_t y = item->y1; y <= item->y2; y++) frame[y][item->x1] = item->color; //left
-                    for(uint16_t y = item->y1; y <= item->y2; y++) frame[y][item->x2] = item->color; //right
+                    for(uint16_t x = item->x1; x <= item->x2; x++) writePixel(item->y1, x, item->color); //top
+                    for(uint16_t x = item->x1; x <= item->x2; x++) writePixel(item->y2, x, item->color); //bottom
+                    for(uint16_t y = item->y1; y <= item->y2; y++) writePixel(y, item->x1, item->color); //left
+                    for(uint16_t y = item->y1; y <= item->y2; y++) writePixel(y, item->x2, item->color); //right
                     break;
                 case 't': //Triangle
                     break;
@@ -653,14 +694,14 @@ static void render() {
                     //x1, y1 = center, x2 = radius
                     for(uint16_t y = item->y1 - item->x2; y <= item->y1 + item->x2; y++) {
                         uint16_t x = sqrt(pow(item->x2, 2.0) - pow(y - item->y1, 2.0));
-                        frame[y][item->x1 + x] = item->color; //handle the +/- from the sqrt (the 2 sides of the circle)
-                        frame[y][item->x1 - x] = item->color;
+                        writePixel(y, item->x1 + x, item->color); //handle the +/- from the sqrt (the 2 sides of the circle)
+                        writePixel(y, item->x1 - x, item->color);
                     }
                     break;
                 case 'R': //Filled Rectangle
                     for(uint16_t y = item->y1; y <= item->y2; y++) {
                         for(uint16_t x = item->x1; x <= item->x2; x++) {
-                            frame[y][x] = item->color;
+                            writePixel(y, x, item->color);
                         }
                     }
                     break;
@@ -671,7 +712,7 @@ static void render() {
                     for(uint16_t y = item->y1 - item->x2; y <= item->y1 + item->x2; y++) {
                         uint16_t x = sqrt(pow(item->x2, 2.0) - pow(y - item->y1, 2.0));
                         for(uint16_t i = item->x1 - x; i <= item->x1 + x; i++) {
-                            frame[y][i] = item->color;
+                            writePixel(y, i, item->color);
                         }
                     }
                     break;
@@ -702,7 +743,7 @@ static void render() {
                 case 'f': //Fill the screen
                     for(uint16_t y = 0; y < FRAME_HEIGHT; y++) {
                         for(uint16_t x = 0; x < FRAME_WIDTH; x++) {
-                            frame[y][x] = item->color;
+                            writePixel(y, x, item->color);
                         }
                     }
                     /*if(item->obj == NULL) {
@@ -725,8 +766,9 @@ static void render() {
                     item = previousItem; //prevent the code from skipping items
                     break;
             }
+            }
             
-            item->update = false;
+            item->flags &= ~(1u); //Clear the update bit
             previousItem = item;
             item = item->next;
         }

@@ -1,4 +1,4 @@
-All ICs are SOIC package, if possible
+All ICs are SOIC package
 
 pico-vga
 -----------------------
@@ -44,7 +44,9 @@ Diodes:
 
 Misc:
 1x Pushbutton (6mm square) -- https://www.digikey.com/en/products/detail/apem-inc/MJTP1230/1798037
-2x 1x20 female header pins
+2x 1x20 female header pins (optional)
+2x 1x20 male header pins
+1x 1x6 male right-angle header pins
 
 
 
@@ -62,3 +64,6 @@ One of the LEDs from the main board, your choice of color
 
 Buttons:
 25 pack of 12mm buttons (5 each, red, yellow, green, blue, white) https://www.amazon.com/ACEIRMC-12x12x7-3mm-Momentary-Tactile-Arduino/dp/B091HL5YBD/ref=sr_1_16?crid=3UJJ6PJ4PZ4P1&keywords=arduino+buttons&qid=1665885175&qu=eyJxc2MiOiI0LjcxIiwicXNhIjoiNC4yNyIsInFzcCI6IjQuMDEifQ%3D%3D&sprefix=arduino+buttons%2Caps%2C109&sr=8-16
+
+Cable:
+1x USB-C male-male cable (must be fully wired with all 24 conductors)

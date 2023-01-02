@@ -1,8 +1,6 @@
 #ifndef SDK_CHARS_H
 #define SDK_CHARS_H
 
-#include "main.h"
-
 /*
 - This file contains constant bit arrays representing the layout of the IBM CP437 character list.
 

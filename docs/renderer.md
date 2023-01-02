@@ -31,7 +31,13 @@ System/Memory <-- RX FIFO <-- Input Shift Register <-- Pins
 The color state machine is very simple: All it does is take data from the TX FIFO, pull it to the Output Shift Register automatically (see: Autopull in Pico docs) and, every clock cycle, OUT 8 bits of data from the Output Shift Register to 8 GPIO pins.
 
 ## DMA -- Feeding the Color State Machine
-By far, the hardest of this system is feeding the Color state machine. It may seem simple: just tell DMA to constantly copy data from a buffer in memory to the TX FIFO of the Color state machine. There are a few problems with this, but the biggest one is that there is blank time on the right and bottom of the screen during the front and back porches and sync pulses (see [hardware.md](./hardware.md)). This means any color data outputted during this time can, at best, not show up, be wasted, and mess up the next line. At worst, the display doesn't understand what the board is doing and make the full frame out of sync.
+By far, the hardest of this system is feeding the Color state machine. It may seem simple: just tell DMA to constantly copy data from a buffer in memory to the TX FIFO of the Color state machine.
+
+There are a few problems with this, but the biggest one is that there is blank time on the right and bottom of the screen during the front and back porches and sync pulses (see [hardware.md](./hardware.md)). This means any color data outputted during this time can, at best, not show up, be wasted, and mess up the next line. At worst, the display doesn't understand what the board is doing and make the full frame out of sync. There are a few ways to stop the color data from being sent:
+- Put in placeholder data (zeros or garbage)
+- Stop the PIO state machine by disabling it, either through the enable flag or an IRQ command in the PIO assembly code itself
+- Stop the DMA by disabling it (stall the PIO state machine while it waits for data)
+
 
 The second major problem is that the DMA doesn't understand that it needs to loop back to the beginning of the memory buffer when it reaches the end. It will keep going until it happens to stop or reaches an invalid memory address.
 

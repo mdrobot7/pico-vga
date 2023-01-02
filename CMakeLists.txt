@@ -13,37 +13,18 @@ set(CMAKE_CXX_STANDARD 17)
 # Creates a pico-sdk subdirectory in our project for the libraries
 pico_sdk_init()
 
-# Tell CMake where to find the executable source files
-FILE(GLOB gameSources ./game/*.c)
-
 add_executable(${PROJECT_NAME} 
     main.c
-    sdk.c
-    ${gameSources} # NOTE! This line is dangerous. It tells CMake to build every .c file in /game/. If build
-                   #       happen, it's likely this line.
 )
 
-# Create C header file with the name <pio program>.pio.h
-# All 3 calls are REQUIRED, otherwise it doesn't build for some reason.
-pico_generate_pio_header(${PROJECT_NAME}  
-        ${CMAKE_CURRENT_LIST_DIR}/color.pio
-)
-pico_generate_pio_header(${PROJECT_NAME}  
-        ${CMAKE_CURRENT_LIST_DIR}/hsync.pio
-)
-pico_generate_pio_header(${PROJECT_NAME}  
-        ${CMAKE_CURRENT_LIST_DIR}/vsync.pio
-)
+add_subdirectory(sdk)
+add_subdirectory(game)
 
 # Link to pico_stdlib (gpio, time, etc. functions)
 target_link_libraries(${PROJECT_NAME} 
     pico_stdlib
-    hardware_pio
-    hardware_dma
-    hardware_irq
-    hardware_gpio
-    pico_multicore
-    pico_malloc
+    PICO_VGA_SDK
+    GAME
 )
 
 # Enable usb output, disable uart output

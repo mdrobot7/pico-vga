@@ -1,4 +1,4 @@
-#include "../sdk.h"
+#include "../sdk/sdk.h"
 #include "game.h"
 
 void game()

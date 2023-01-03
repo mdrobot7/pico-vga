@@ -1,5 +1,5 @@
 #include "main.h"
-#include "sdk/sdk.h"
+#include "sdk/pico-vga.h"
 #include "game/game.h"
 #include "pico/stdlib.h"
 

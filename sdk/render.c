@@ -4,6 +4,18 @@
 #include "pico/multicore.h"
 #include "pico/malloc.h"
 
+volatile uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
+
+volatile RenderQueueItem background = { //First element of the linked list, can be reset to any background
+    .type = 'f',
+    .color = 0,
+    .obj = NULL,
+    .next = NULL,
+    .flags = RQI_UPDATE
+};
+volatile RenderQueueItem *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
+
+uint8_t autoRender = 0;
 static volatile uint8_t update = 0;
 
 void updateDisplay() {

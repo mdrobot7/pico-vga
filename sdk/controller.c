@@ -3,6 +3,11 @@
 #include "hardware/clocks.h"
 #include "hardware/gpio.h"
 
+volatile Controller C1;
+volatile Controller C2;
+volatile Controller C3;
+volatile Controller C4;
+
 static bool updateAllControllers(struct repeating_timer *t);
 
 void initController() {
@@ -11,7 +16,7 @@ void initController() {
     add_repeating_timer_ms(1, updateAllControllers, NULL, &controllerTimer);
 }
 
-static void updateController(Controller *c) {
+static void updateController(volatile Controller *c) {
     c->u = (sio_hw->gpio_in >> UP_PIN) & 1u;
     c->d = (sio_hw->gpio_in >> DOWN_PIN) & 1u;
     c->l = (sio_hw->gpio_in >> LEFT_PIN) & 1u;

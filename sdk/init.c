@@ -35,6 +35,9 @@ Ideas:
 #define SDK_DMA_CTRL_SNIFF_EN 23
 #define SDK_DMA_CTRL_BUSY 24
 
+uint8_t * frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER];
+uint8_t BLANK[FRAME_WIDTH];
+
 //Prototypes, for functions not defined in sdk.h (NOT for use by the user)
 static void initSecondCore();
 static void updateFramePtr();

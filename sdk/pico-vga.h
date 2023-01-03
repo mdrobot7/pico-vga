@@ -70,10 +70,10 @@ typedef struct {
     uint8_t r;
 } Controller;
 
-Controller C1;
-Controller C2;
-Controller C3;
-Controller C4;
+extern volatile Controller C1;
+extern volatile Controller C2;
+extern volatile Controller C3;
+extern volatile Controller C4;
 
 
 /*

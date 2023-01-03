@@ -13,12 +13,12 @@ set(CMAKE_CXX_STANDARD 17)
 # Creates a pico-sdk subdirectory in our project for the libraries
 pico_sdk_init()
 
+add_subdirectory(sdk)
+add_subdirectory(game)
+
 add_executable(${PROJECT_NAME} 
     main.c
 )
-
-add_subdirectory(sdk)
-add_subdirectory(game)
 
 # Link to pico_stdlib (gpio, time, etc. functions)
 target_link_libraries(${PROJECT_NAME} 

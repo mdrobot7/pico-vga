@@ -1,6 +1,7 @@
-#include "sdk/sdk.h"
 #include "main.h"
+#include "sdk/sdk.h"
 #include "game/game.h"
+#include "pico/stdlib.h"
 
 int main() {
     stdio_init_all();
@@ -10,14 +11,7 @@ int main() {
     }
     //printf("\n");
 
-    Controller P1;
-    Controller P2;
-    Controller P3;
-    Controller P4;
-    
-    initDisplay(&P1, &P2, &P3, &P4, true);
-    
-    while(1);
+    initDisplay(true);
     
     game();
 }

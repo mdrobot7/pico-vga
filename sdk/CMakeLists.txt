@@ -6,20 +6,27 @@ include(../../pico-sdk/tools/CMakeLists.txt)
 pico_sdk_init()
 
 add_library(PICO_VGA_SDK STATIC
-    sdk.c
+    audio.c
+    controller.c
+    draw-2d.c
+    draw-3d.c
+    init.c
+    render.c
+    sd.c
+    utils.c
 )
 target_include_directories(PICO_VGA_SDK PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Create C header file with the name <pio program>.pio.h
 # All 3 calls are REQUIRED, otherwise it doesn't build for some reason.
 pico_generate_pio_header(PICO_VGA_SDK  
-        ${CMAKE_CURRENT_SOURCE_DIR}/color.pio
+        ${CMAKE_CURRENT_SOURCE_DIR}/pio/color.pio
 )
 pico_generate_pio_header(PICO_VGA_SDK  
-        ${CMAKE_CURRENT_SOURCE_DIR}/hsync.pio
+        ${CMAKE_CURRENT_SOURCE_DIR}/pio/hsync.pio
 )
 pico_generate_pio_header(PICO_VGA_SDK  
-        ${CMAKE_CURRENT_SOURCE_DIR}/vsync.pio
+        ${CMAKE_CURRENT_SOURCE_DIR}/pio/vsync.pio
 )
 
 target_link_libraries(PICO_VGA_SDK 

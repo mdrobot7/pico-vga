@@ -16,6 +16,8 @@ extern uint8_t autoRender;
 extern volatile RenderQueueItem background; //First element of the linked list, can be reset to any background
 extern volatile RenderQueueItem *lastItem; //Last item in linked list, used to set *last in RenderQueueItem
 
+extern uint8_t *font; //The current font in use by the system
+
 inline void busyWait(uint64_t n) {
     for(; n > 0; n--) asm("nop");
 }

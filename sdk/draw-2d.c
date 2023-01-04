@@ -235,10 +235,11 @@ void clearScreen() {
         Text Functions
 ==============================
 */
-static uint8_t *font = (uint8_t *)cp437; //The current font in use by the system
+uint8_t *font = (uint8_t *)cp437; //The current font in use by the system
 #define CHAR_WIDTH 5
 #define CHAR_HEIGHT 8
 
+//add word wrap
 RenderQueueItem * drawText(RenderQueueItem *prev, uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;

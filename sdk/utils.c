@@ -49,3 +49,7 @@ uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value) {
 
     return rgbTo8Bit(r, g, b);
 }
+
+uint8_t invertColor(uint8_t color) {
+    return 255 - color;
+}

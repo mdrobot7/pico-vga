@@ -23,7 +23,7 @@ RenderQueueItem * drawPixel(RenderQueueItem *prev, uint16_t x, uint16_t y, uint8
         prev->next = item;
     }
 
-    item->flags = 1; //Clear bit field, set the update bit
+    item->flags = RQI_UPDATE;
 
     return item;
 }
@@ -51,7 +51,7 @@ RenderQueueItem * drawLine(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint
         prev->next = item;
     }
 
-    item->flags = 1; //Clear bit field, set the update bit
+    item->flags = RQI_UPDATE;
 
     return item;
 }
@@ -78,7 +78,7 @@ RenderQueueItem * drawRectangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1,
         prev->next = item;
     }
 
-    item->flags = 1; //Clear bit field, set the update bit
+    item->flags = RQI_UPDATE;
 
     return item;
 }
@@ -120,7 +120,7 @@ RenderQueueItem * drawCircle(RenderQueueItem *prev, uint16_t x, uint16_t y, uint
         prev->next = item;
     }
 
-    item->flags = 1; //Clear bit field, set the update bit
+    item->flags = RQI_UPDATE;
 
     return item;
 }
@@ -151,7 +151,7 @@ RenderQueueItem * drawFilledRectangle(RenderQueueItem *prev, uint16_t x1, uint16
         prev->next = item;
     }
 
-    item->flags = 1; //Clear bit field, set the update bit
+    item->flags = RQI_UPDATE;
 
     return item;
 }
@@ -181,7 +181,7 @@ RenderQueueItem * drawFilledCircle(RenderQueueItem *prev, uint16_t x, uint16_t y
         prev->next = item;
     }
 
-    item->flags = 1; //Clear bit field, set the update bit
+    item->flags = RQI_UPDATE;
 
     return item;
 }
@@ -211,7 +211,7 @@ RenderQueueItem * fillScreen(RenderQueueItem *prev, uint8_t obj[FRAME_HEIGHT][FR
         prev->next = item;
     }
 
-    item->flags = 1; //Clear bit field, set the update bit
+    item->flags = RQI_UPDATE;
 
     return item;
 }
@@ -227,7 +227,7 @@ void clearScreen() {
         item = item->next;
     }
 
-    background.flags = 1;
+    background.flags = RQI_UPDATE;
 }
 
 
@@ -236,19 +236,26 @@ void clearScreen() {
 ==============================
 */
 uint8_t *font = (uint8_t *)cp437; //The current font in use by the system
-#define CHAR_WIDTH 5
-#define CHAR_HEIGHT 8
 
-//add word wrap
-RenderQueueItem * drawText(RenderQueueItem *prev, uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale) {
+RenderQueueItem * drawText(RenderQueueItem *prev, uint16_t x1, uint16_t y, uint16_t x2, char *str,
+                           uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverride) {
     RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
     if(item == NULL) return NULL;
 
     item->type = 'c';
-    item->x1 = x;
+    item->x1 = x1;
     item->y1 = y;
+    item->x2 = x2;
+    item->y2 = bgColor;
     item->color = color;
-    item->obj = str;
+
+    if(strSizeOverride) {
+        item->obj = (uint8_t *) malloc((strSizeOverride + 1)*sizeof(char));
+    }
+    else {
+        item->obj = (uint8_t *) malloc((strlen(str) + 1)*sizeof(char));
+    }
+    strcpy(item->obj, str);
 
     if(prev == NULL) {
         item->next = NULL; //Set *next to NULL, means it is the last item in linked list
@@ -261,7 +268,8 @@ RenderQueueItem * drawText(RenderQueueItem *prev, uint16_t x, uint16_t y, char *
         prev->next = item;
     }
 
-    item->flags = 1; //Clear bit field, set the update bit
+    item->flags = RQI_UPDATE;
+    if(wrap) item->flags |= RQI_WORDWRAP;
 
     return item;
 }
@@ -280,10 +288,10 @@ RenderQueueItem * drawSprite(RenderQueueItem *prev, uint8_t *sprite, uint16_t x,
     if(item == NULL) return NULL;
 
     item->type = 's';
-    item->x1 = x; //Makes sure the point closer to (0,0) is assigned to (x,y) and not (w,h)
+    item->x1 = x;
     item->y1 = y;
-    item->x2 = x + dimX;
-    item->y2 = y + dimY;
+    item->x2 = dimX;
+    item->y2 = dimY;
     item->color = nullColor;
     item->obj = sprite;
 
@@ -298,7 +306,7 @@ RenderQueueItem * drawSprite(RenderQueueItem *prev, uint8_t *sprite, uint16_t x,
         prev->next = item;
     }
 
-    item->flags = 1; //Clear bit field, set the update bit
+    item->flags = RQI_UPDATE;
 
     return item;
 }
@@ -317,20 +325,20 @@ void setBackground(uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
     else { //set the background to a picture/sprite/something not a solid color
         background.obj = (uint8_t *)obj;
     }
-    background.flags |= 1u;
+    background.flags |= RQI_UPDATE;
 }
 
 //Set item to be hidden (true = hidden, false = showing)
 void setHidden(RenderQueueItem *item, uint8_t hidden) {
     if(hidden) item->flags |= (1u << 1);
     else item->flags &= ~(1u << 1);
-    item->flags |= 1u; //Set the update bit
+    item->flags |= RQI_UPDATE;
 }
 
 //Set the color for item.
 void setColor(RenderQueueItem *item, uint8_t color) {
     item->color = color;
-    item->flags |= 1u; //Set the update bit
+    item->flags |= RQI_UPDATE;
 }
 
 //Set the coordinates for item. Set parameter to -1 to leave it unchanged.
@@ -339,11 +347,11 @@ void setCoordinates(RenderQueueItem *item, int16_t x1, int16_t y1, int16_t x2, i
     if(y1 >= 0) item->y1 = y1;
     if(x2 >= 0) item->x2 = x2;
     if(y2 >= 0) item->y2 = y2;
-    item->flags |= 1u; //Set the update bit
+    item->flags |= RQI_UPDATE;
 }
 
 //Permanently remove item from the render queue.
 void removeItem(RenderQueueItem *item) {
     item->type = 'n';
-    item->flags |= 1u; //Set the update bit
+    item->flags |= RQI_UPDATE;
 }

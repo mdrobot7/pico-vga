@@ -16,7 +16,7 @@
 
 */
 
-const uint8_t cp437[256][8] = {
+const uint8_t cp437[256][CHAR_HEIGHT] = {
   { 0b00000,
     0b00000,
     0b00000,

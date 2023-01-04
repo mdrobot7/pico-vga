@@ -43,12 +43,12 @@ static void initSecondCore();
 static void updateFramePtr();
 
 
-int initDisplay(uint8_t autoRenderEn) {
+int initDisplay(bool autoRenderEn) {
     //Clock configuration -- 120MHz system clock frequency
     clocks_init();
     set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
-    autoRender = autoRenderEn;
+    autoRender = (uint8_t)autoRenderEn;
 
     initController();
 

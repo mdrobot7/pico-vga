@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 /*
         Structs
@@ -106,14 +107,19 @@ extern volatile Controller C4;
 #define COLOR_PURPLE  0b10000010
 
 //RenderQueueItem.flags macros
-#define RQI_UPDATE (1 << 0)
-#define RQI_HIDDEN (1 << 1)
+#define RQI_UPDATE   (1 << 0)
+#define RQI_HIDDEN   (1 << 1)
+#define RQI_WORDWRAP (1 << 2)
+
+#define RQI_UPDATE_GET(b)   (b >> RQI_UPDATE) & 1u
+#define RQI_HIDDEN_GET(b)   (b >> RQI_HIDDEN) & 1u
+#define RQI_WORDWRAP_GET(b) (b >> RQI_WORDWRAP) & 1u
 
 /*
         Functions
 =========================
 */
-int initDisplay(uint8_t autoRenderEn);
+int initDisplay(bool autoRenderEn);
 void updateDisplay();
 
 extern volatile RenderQueueItem background;
@@ -140,7 +146,7 @@ void clearScreen();
 RenderQueueItem * drawSprite(RenderQueueItem* prev, uint8_t *sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, uint8_t scale);
 
 //Draws the chars from the default character library. Dimensions are 5x8 pixels each.
-RenderQueueItem * drawText(RenderQueueItem* prev, uint16_t x, uint16_t y, char *str, uint8_t color, uint8_t scale);
+RenderQueueItem * drawText(RenderQueueItem *prev, uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverride);
 void setTextFont(uint8_t *newFont);
 
 //Modifiers:
@@ -154,5 +160,6 @@ void removeItem(RenderQueueItem *item);
 uint8_t HTMLTo8Bit(uint32_t color);
 uint8_t rgbTo8Bit(uint8_t r, uint8_t g, uint8_t b);
 uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value);
+uint8_t invertColor(uint8_t color);
 
 #endif

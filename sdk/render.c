@@ -15,6 +15,7 @@ volatile RenderQueueItem background = { //First element of the linked list, can 
 volatile RenderQueueItem *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
 
 uint8_t autoRender = 0;
+uint8_t antiAliasing = 0;
 static volatile uint8_t update = 0;
 
 void updateDisplay() {
@@ -22,6 +23,10 @@ void updateDisplay() {
     if(autoRender) background.flags |= RQI_UPDATE; //force-update in autoRender mode
 }
 
+/*
+        Render Utilities
+================================
+*/
 //Checks for out-of-bounds coordinates and writes to the frame
 static inline void writePixel(uint16_t y, uint16_t x, uint8_t color) {
     if(x >= FRAME_WIDTH || y >= FRAME_HEIGHT) return;
@@ -32,6 +37,71 @@ static inline uint8_t getFontBit(uint8_t c, uint8_t x, uint8_t y) {
     return *(font + CHAR_HEIGHT*c + y) >> (CHAR_WIDTH - x + 1) & 1u;
 }
 
+/*
+        Render Functions
+================================
+*/
+static inline void renderLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t scale) {
+    if(x1 == x2) {
+        for(uint16_t y = y1; y <= y2; y++) writePixel(y, x1, color);
+    }
+    else if(y1 == y2) {
+        for(uint16_t x = x1; x <= x2; x++) writePixel(y1, x, color);
+    }
+    else {
+        float m = ((float)(y2 - y1))/((float)(x2 - x1));
+        for(uint16_t x = x1; x <= x2; x++) {
+            writePixel((uint16_t)((m*(x - x1)) + y1), x, color);
+        }
+    }
+}
+
+static inline void renderLineAA(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t scale) {
+    return;
+}
+
+static inline void renderCircle(uint16_t x1, uint16_t y1, uint16_t radius, uint8_t color) {
+    return;
+}
+
+static inline void renderCircleAA(uint16_t x1, uint16_t y1, uint16_t radius, uint8_t color) {
+    return;
+}
+
+static inline void fillBetweenPoints(uint16_t x1, uint16_t x2, uint16_t y, uint8_t color) {
+    for(uint16_t x = x1; x <= x2; x++) {
+        writePixel(y, x, color);
+    }
+}
+
+static inline void renderRect(RenderQueueItem *item, uint8_t aa) {
+    if(aa) {
+        renderLineAA(item->x1, item->y1, item->x2, item->y1, item->color, item->scale); //top
+        renderLineAA(item->x1, item->y2, item->x2, item->y2, item->color, item->scale); //bottom
+        renderLineAA(item->x1, item->y1, item->x1, item->y2, item->color, item->scale); //left
+        renderLineAA(item->x2, item->y1, item->x2, item->y2, item->color, item->scale); //right
+    }
+    else {
+        renderLine(item->x1, item->y1, item->x2, item->y1, item->color, item->scale); //top
+        renderLine(item->x1, item->y2, item->x2, item->y2, item->color, item->scale); //bottom
+        renderLine(item->x1, item->y1, item->x1, item->y2, item->color, item->scale); //left
+        renderLine(item->x2, item->y1, item->x2, item->y2, item->color, item->scale); //right
+    }
+}
+
+static inline void renderTriangle(RenderQueueItem *item, uint8_t aa) {
+    return;
+}
+
+static inline void renderFilledRect(RenderQueueItem *item, uint8_t aa) {
+    return;
+}
+
+
+/*
+        Renderer
+========================
+*/
 void render() {
     multicore_fifo_push_blocking(13); //tell core 0 that everything is ok/it's running
 
@@ -47,7 +117,7 @@ void render() {
                 item = item->next;
                 if(item == NULL) item = (RenderQueueItem *) &background;
             }
-            if(RQI_HIDDEN_GET(item->flags) || item->type == 'n') item = (RenderQueueItem *) &background; //if the update is to hide an item, rerender the whole thing
+            if(item->flags & RQI_HIDDEN || item->type == 'n') item = (RenderQueueItem *) &background; //if the update is to hide an item, rerender the whole thing
         }
         else { //manual rendering
             while(!update); //wait until it's told to update the display
@@ -55,21 +125,13 @@ void render() {
         }
 
         while(item != NULL) {
-            if(!RQI_HIDDEN_GET(item->flags)) {
+            if(!(item->flags & RQI_HIDDEN)) {
             switch(item->type) {
                 case 'p': //Pixel
                     writePixel(item->y1, item->x1, item->color);
                     break;
                 case 'l': //Line
-                    if(item->x1 == item->x2) {
-                        for(uint16_t y = item->y1; y <= item->y2; y++) writePixel(y, item->x1, item->color);
-                    }
-                    else {
-                        float m = ((float)(item->y2 - item->y1))/((float)(item->x2 - item->x1));
-                        for(uint16_t x = item->x1; x <= item->x2; x++) {
-                            writePixel((uint16_t)((m*(x - item->x1)) + item->y1), x, item->color);
-                        }
-                    }
+                    
                     break;
                 case 'r': //Rectangle
                     for(uint16_t x = item->x1; x <= item->x2; x++) writePixel(item->y1, x, item->color); //top

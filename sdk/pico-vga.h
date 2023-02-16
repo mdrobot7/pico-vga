@@ -11,35 +11,13 @@
 #include <string.h>
 
 /*
-        Structs
-=======================
+        Render Queue
+============================
 */
-/*
-    Chart for char type;
-'p' : pixel
-'l' : line
-'r' : rectangle
-'t' : triangle
-'o' : circle
-
-'R' : filled rectangle
-'T' : filled triangle
-'O' : filled circle
-
-'f' : fill entire screen
-
-'c' : char/string
-'s' : sprite
-
-Special values:
-'n' : removed (this slot in the render queue is now open)
-
-*/
-
-//Linked list for the queue of items to be rendered to the screen
+//Linked list item for the queue of items to be rendered to the screen
 struct RenderQueueItem {
     struct RenderQueueItem *next;
-    char type;
+    uint8_t type;
 
     uint8_t flags; //Bit register for parameters
     
@@ -48,13 +26,37 @@ struct RenderQueueItem {
     uint16_t x2;
     uint16_t y2;
 
-    uint8_t thickness;
+    uint8_t scale;
+    float rotation;
 
     uint8_t color;
     uint8_t *obj;
 };
 typedef struct RenderQueueItem RenderQueueItem;
 
+//RenderQueueItem.type
+#define RQI_T_REMOVED          0
+#define RQI_T_FILL             1
+#define RQI_T_PIXEL            2
+#define RQI_T_LINE             3
+#define RQI_T_RECTANGLE        4
+#define RQI_T_FILLED_RECTANGLE 5
+#define RQI_T_TRIANGLE         6
+#define RQI_T_FILLED_TRIANGLE  7
+#define RQI_T_CIRCLE           8
+#define RQI_T_FILLED_CIRCLE    9
+#define RQI_T_STR              10
+#define RQI_T_SPRITE           11
+#define RQI_T_BITMAP           12
+#define RQI_T_POLYGON          13
+#define RQI_T_FILLED_POLYGON   14
+#define RQI_T_LIGHT            15
+#define RQI_T_SVG              16
+
+//RenderQueueItem.flags macros
+#define RQI_UPDATE   (1u << 0)
+#define RQI_HIDDEN   (1u << 1)
+#define RQI_WORDWRAP (1u << 2)
 
 /*
         Controllers
@@ -106,21 +108,12 @@ extern volatile Controller C4;
 #define COLOR_MAGENTA 0b11100011
 #define COLOR_PURPLE  0b10000010
 
-//RenderQueueItem.flags macros
-#define RQI_UPDATE   (1 << 0)
-#define RQI_HIDDEN   (1 << 1)
-#define RQI_WORDWRAP (1 << 2)
-
-#define RQI_UPDATE_GET(b)   (b >> RQI_UPDATE) & 1u
-#define RQI_HIDDEN_GET(b)   (b >> RQI_HIDDEN) & 1u
-#define RQI_WORDWRAP_GET(b) (b >> RQI_WORDWRAP) & 1u
-
 /*
         Functions
 =========================
 */
 int initDisplay(bool autoRenderEn);
-void updateDisplay();
+void updateFullDisplay();
 
 extern volatile RenderQueueItem background;
 
@@ -134,7 +127,7 @@ RenderQueueItem * drawLine(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint
 RenderQueueItem * drawRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
 RenderQueueItem * drawTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
 RenderQueueItem * drawCircle(RenderQueueItem* prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
-RenderQueueItem * drawNPoints(RenderQueueItem* prev, uint16_t points[][2], uint8_t len, uint8_t color); //draws a path between all points in the list
+RenderQueueItem * drawPolygon(RenderQueueItem* prev, uint16_t points[][2], uint8_t len, uint8_t color); //draws a path between all points in the list
 
 RenderQueueItem * drawFilledRectangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
 RenderQueueItem * drawFilledTriangle(RenderQueueItem* prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);

@@ -12,6 +12,7 @@ extern uint8_t BLANK[FRAME_WIDTH];
 
 //Configuration Options
 extern uint8_t autoRender;
+extern uint8_t antiAliasing;
 
 extern volatile RenderQueueItem background; //First element of the linked list, can be reset to any background
 extern volatile RenderQueueItem *lastItem; //Last item in linked list, used to set *last in RenderQueueItem

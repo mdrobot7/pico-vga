@@ -41,14 +41,16 @@ uint8_t BLANK[FRAME_WIDTH];
 //Prototypes, for functions not defined in sdk.h (NOT for use by the user)
 static void initSecondCore();
 static void updateFramePtr();
+static void drawLogo();
 
 
-int initDisplay(bool autoRenderEn) {
+int initDisplay(bool autoRenderEn, bool antiAliasingEn) {
     //Clock configuration -- 120MHz system clock frequency
     clocks_init();
     set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
     autoRender = (uint8_t)autoRenderEn;
+    antiAliasing = (uint8_t)antiAliasingEn;
 
     initController();
 
@@ -56,6 +58,10 @@ int initDisplay(bool autoRenderEn) {
     while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
     
     busyWait(10000000); //wait to make sure everything is stable
+
+    drawLogo();
+    busyWait(10000000);
+    clearScreen();
     
     return 0;
 }
@@ -130,4 +136,9 @@ static void updateFramePtr() {
     if(dma_hw->ch[frameCtrlDMA].read_addr >= (io_rw_32) &frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER]) {
         dma_hw->ch[frameCtrlDMA].read_addr = (io_rw_32) frameReadAddr;
     }
+}
+
+static void drawLogo() {
+    drawText(NULL, 50, 250, 350, "pico-vga -- Michael Drobot, 2023", COLOR_WHITE, COLOR_BLACK, false, 0);
+    drawText(NULL, 50, 258, 350, "   Licensed under GNU GPL v3.", COLOR_WHITE, COLOR_BLACK, false, 0);
 }

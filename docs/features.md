@@ -10,6 +10,9 @@
 - [ ] Add alternative hsync and vsync PIO files for 640x480 resolution, and sys_clk reconfiguration
 - [ ] Add 1024x768 OC mode
 
+## Renderer v2
+- [ ] Make a renderer that doesn't waste cycles overwriting data in the frame array (i.e. filling a rectangle in, then putting something else in the middle of it, making a lot of the filling operation wasted) -- see https://en.wikipedia.org/wiki/Scanline_rendering
+
 ## 2D SDK
 - [x] Make a render queue
 - [x] Make an automatic and manual rendering mode
@@ -42,6 +45,7 @@
   - [x] Draw basic filled circles
   - [ ] Draw antialiased filled circles
 - [ ] Draw sprites
+  - [ ] Draw bitmaps (two-color, smaller size)
   - [ ] Draw basic sprites
   - [ ] Add a flag that keeps the sprite's shape but makes it all one color
   - [ ] Make sprites resizable
@@ -54,6 +58,7 @@
   - [ ] Make the text resizable
   - [x] Allow the user to change the font
   - [ ] Add antialiasing
+  - [ ] Make a TTF (or other common font type) to header file converter (python)
 - [ ] Draw a set of points connected in order by lines
 - [ ] Fill a set of points connected by lines
 - [ ] Add rotation for all elements

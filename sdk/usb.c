@@ -1,5 +1,5 @@
 #include "sdk.h"
 
-void initAudio() {
+void initUSB() {
     return;
 }

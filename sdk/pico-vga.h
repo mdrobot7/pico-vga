@@ -32,31 +32,34 @@ struct RenderQueueItem {
     uint8_t color;
     uint8_t *obj;
 };
-typedef struct RenderQueueItem RenderQueueItem;
+typedef struct RenderQueueItem RenderQueueItem_t;
 
 //RenderQueueItem.type
-#define RQI_T_REMOVED          0
-#define RQI_T_FILL             1
-#define RQI_T_PIXEL            2
-#define RQI_T_LINE             3
-#define RQI_T_RECTANGLE        4
-#define RQI_T_FILLED_RECTANGLE 5
-#define RQI_T_TRIANGLE         6
-#define RQI_T_FILLED_TRIANGLE  7
-#define RQI_T_CIRCLE           8
-#define RQI_T_FILLED_CIRCLE    9
-#define RQI_T_STR              10
-#define RQI_T_SPRITE           11
-#define RQI_T_BITMAP           12
-#define RQI_T_POLYGON          13
-#define RQI_T_FILLED_POLYGON   14
-#define RQI_T_LIGHT            15
-#define RQI_T_SVG              16
+typedef enum {
+    REMOVED,
+    FILL,
+    PIXEL,
+    LINE,
+    RECTANGLE,
+    FILLED_RECTANGLE,
+    TRIANGLE,
+    FILLED_TRIANGLE,
+    CIRCLE,
+    FILLED_CIRCLE,
+    STRING,
+    SPRITE,
+    BITMAP,
+    POLYGON, 
+    FILLED_POLYGON,
+    LIGHT,
+    SVG,
+} RenderQueueItemType;
 
 //RenderQueueItem.flags macros
 #define RQI_UPDATE   (1u << 0)
 #define RQI_HIDDEN   (1u << 1)
 #define RQI_WORDWRAP (1u << 2)
+
 
 /*
         Controllers
@@ -71,25 +74,67 @@ typedef struct {
     uint8_t d;
     uint8_t l;
     uint8_t r;
-} Controller;
+} Ctrler_t;
 
-extern volatile Controller C1;
-extern volatile Controller C2;
-extern volatile Controller C3;
-extern volatile Controller C4;
+typedef struct {
+    uint8_t maxNumControllers,
+    Ctrler_t *p,
+} Controllers_t;
+
+
+/*
+        Module Configuration Structs
+============================================
+*/
+typedef enum {
+    RES_800x600,
+    RES_640x480,
+    RES_1024x768,
+} DisplayConfigBaseResolution_t;
+
+typedef enum {
+    RES_SCALED_800x600 = 1,
+    RES_SCALED_400x300,
+    RES_SCALED_200x150,
+    RES_SCALED_100x75,
+    RES_SCALED_640x480 = 1,
+    RES_SCALED_320x240,
+    RES_SCALED_160x120,
+    RES_SCALED_80x60,
+    RES_SCALED_1024x768 = 1,
+} DisplayConfigResolutionScale_t;
+
+typedef struct {
+    DisplayConfigBaseResolution_t baseResolution,
+    DisplayConfigResolutionScale_t resolutionScale,
+    uint8_t autoRender,
+    uint8_t antiAliasing,
+    uint32_t memoryAllocatedKB,
+    uint8_t peripheralMode,
+} DisplayConfig_t;
+
+typedef struct {
+    uint8_t maxNumControllers,
+    Controllers_t * controllers,
+} ControllerConfig_t;
+
+typedef struct {
+    uint8_t a,
+} AudioConfig_t;
+
+typedef struct {
+    uint8_t a,
+} SDConfig_t;
+
+typedef struct {
+    uint8_t a,
+} USBHostConfig_t;
 
 
 /*
         Constants
 =========================
 */
-#define FRAME_SCALER 2 //Resolution Scaler
-
-#define FRAME_HEIGHT (600/FRAME_SCALER)
-#define FRAME_WIDTH (800/FRAME_SCALER)
-#define FRAME_FULL_HEIGHT (628/FRAME_SCALER) //The full height/width of the frame, including porches, sync, etc
-#define FRAME_FULL_WIDTH (1056/FRAME_SCALER)
-
 #define COLOR_WHITE   0b11111111
 #define COLOR_SILVER  0b10110110
 #define COLOR_GRAY    0b10010010
@@ -112,7 +157,7 @@ extern volatile Controller C4;
         Functions
 =========================
 */
-int initDisplay(bool autoRenderEn);
+int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerConf, AudioConfig_t * audioConf, SDConfig_t * sdConf, USBHostConfig_t * usbConf)
 void updateFullDisplay();
 
 extern volatile RenderQueueItem background;
@@ -154,5 +199,10 @@ uint8_t HTMLTo8Bit(uint32_t color);
 uint8_t rgbTo8Bit(uint8_t r, uint8_t g, uint8_t b);
 uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value);
 uint8_t invertColor(uint8_t color);
+
+uint16_t getFrameWidth();
+uint16_t getFrameHeight();
+uint16_t getFrameFullWidth();
+uint16_t getFrameFullHeight();
 
 #endif

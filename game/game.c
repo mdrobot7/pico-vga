@@ -1,6 +1,20 @@
 #include "../sdk/pico-vga.h"
 #include "game.h"
 
+Controllers_t controllers = {
+    .maxNumControllers = 1,
+    .p = null,
+};
+
+DisplayConfig_t displayConf = {};
+ControllerConfig_t controllerConf = {
+    .maxNumControllers = 1,
+    .controllers = &controllers,
+};
+AudioConfig_t audioConf = {};
+SDConfig_t sdConf = {};
+USBHostConfig_t usbConf = {};
+
 void game()
 {
     stdio_init_all();

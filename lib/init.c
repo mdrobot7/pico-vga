@@ -15,24 +15,25 @@ static void drawLogo();
 
 int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerConf, AudioConfig_t * audioConf,
                 SDConfig_t * sdConf, USBHostConfig_t * usbConf) {
+    displayConfig = displayConf;
+    controllerConfig = controllerConf;
+    audioConfig = audioConf;
+    sdConfig = sdConf;
+    usbConfig = usbConf;
+
     if(displayConf != NULL) {
-        displayConfig = displayConf;
         if(initDisplay()) return 1; //initDisplay.c
     }
     if(controllerConf != NULL) {
-        controllerConfig = controllerConf;
         if(initController()) return 1; //controller.c
     }
     if(audioConf != NULL) {
-        audioConfig = audioConf;
         if(initAudio()) return 1; //audio.c
     }
     if(sdConf != NULL) {
-        sdConfig = sdConf;
         if(initSD()) return 1; //sd.c
     }
     if(usbConf != NULL) {
-        usbConfig = usbConf;
         if(initUSB()) return 1; //usb.c
     }
     
@@ -44,6 +45,25 @@ int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerCo
         clearScreen();
     }
 
+    return 0;
+}
+
+int deInitPicoVGA(bool closeDisplay, bool closeController, bool closeAudio, bool closeSD, bool closeUSB) {
+    if(closeDisplay) {
+        if(deInitDisplay()) return 1;
+    }
+    if(closeController) {
+        if(deInitController()) return 1;
+    }
+    if(closeAudio) {
+        if(deInitAudio()) return 1;
+    }
+    if(closeSD) {
+        if(deInitSD()) return 1;
+    }
+    if(closeUSB) {
+        if(deInitUSB()) return 1;
+    }
     return 0;
 }
 

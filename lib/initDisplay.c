@@ -53,13 +53,16 @@ int initDisplay() {
         uint offset = pio_add_program(pio0, &color_program);
 
         // Initialize color pio program, but DON'T enable PIO state machine
-        color_program_init(pio0, 0, offset, 0, displayConfig->resolutionScale);
+        //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock
+        color_program_init(pio0, 0, offset, 0, 3*displayConfig->resolutionScale);
 
         offset = pio_add_program(pio0, &hsync_program);
         hsync_program_init(pio0, 1, offset, HSYNC_PIN);
 
         offset = pio_add_program(pio0, &vsync_program);
         vsync_program_init(pio0, 2, offset, VSYNC_PIN);
+
+        pio_claim_sm_mask(pio0, 0b0111);
     }
     else if(displayConfig->baseResolution == RES_640x480) {
         //configure clocks for 640x480 resolution
@@ -67,6 +70,13 @@ int initDisplay() {
     else if(displayConfig->baseResolution == RES_1024x768) {
         //130MHz system clock frequency (multiple of 65MHz pixel clock)
     }
+
+    pio_sm_put_blocking(pio0, 0, (uint32_t)(displayConfig->colorDelayCycles/32));
+    pio_sm_exec_wait_blocking(pio0, 0, pio_encode_pull(false, false));
+    pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_x, 32));
+    pio_sm_put_blocking(pio0, 0, (uint32_t)(displayConfig->colorDelayCycles % 32));
+    pio_sm_exec_wait_blocking(pio0, 0, pio_encode_pull(false, false));
+    pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_y, 32));
 
     BLANK = (uint8_t *) malloc(frameWidth);
     frameReadAddr = (uint8_t **) malloc(frameFullHeight*displayConfig->resolutionScale*sizeof(uint8_t *));
@@ -104,7 +114,7 @@ int initDisplay() {
         - There will always be spares, since the number of interpolated lines will almost never perfectly
           divide into the number of total lines. This is numSpares.
         - Instead of putting an interpolated line every segmentLen and putting all of the spares at the end
-          (making the CPU work harder in the beginning of the frame) this adds the 1 element to numSpares
+          (making the CPU work harder in the beginning of the frame) this adds 1 element to numSpares
           number of segments.
         - This reddit post explains it: https://www.reddit.com/r/learnprogramming/comments/31ns44/splitting_the_contents_of_an_array_into_as_evenly/
         */
@@ -112,23 +122,23 @@ int initDisplay() {
         uint16_t numSpares = frameHeight % (frameHeight - numBufferedLines);
         for(int i = 0, j = 0, k = 0; i < frameHeight*displayConfig->resolutionScale; i++) {
             if(numSpares != 0 && i % (segmentLen + 1) == 0) {
-                frameReadAddr[i] = &line[k];
+                frameReadAddr[i] = line + k*frameWidth;
                 k = (k + 1) % displayConfig->numInterpolatedLines;
                 numSpares--;
             }
             else if(i % segmentLen == 0) {
-                frameReadAddr[i] = &line[k];
+                frameReadAddr[i] = line + k*frameWidth;
                 k = (k + 1) % displayConfig->numInterpolatedLines;
             }
             else {
-                frameReadAddr[i] = (uint8_t *)&frame[j/displayConfig->resolutionScale];
+                frameReadAddr[i] = (uint8_t *)(frame + frameWidth*(j/displayConfig->resolutionScale));
                 j++;
             }
         }
     }
     else {
         for(int i = 0; i < frameHeight*displayConfig->resolutionScale; i++) {
-            frameReadAddr[i] = (uint8_t *)&frame[i/displayConfig->resolutionScale];
+            frameReadAddr[i] = (uint8_t *)(frame + frameWidth*(i/displayConfig->resolutionScale));
         }
     }
     for(int i = frameHeight*displayConfig->resolutionScale; i < frameFullHeight*displayConfig->resolutionScale; i++) {
@@ -137,6 +147,43 @@ int initDisplay() {
 
     multicore_launch_core1(initSecondCore);
     while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
+}
+
+int deInitDisplay() {
+    dma_hw->abort = (1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA);
+    while(dma_hw->abort); //Wait until all channels are stopped
+
+    dma_hw->ch[frameCtrlDMA].al1_ctrl = 0; //clears the CTRL.EN bit (along with the rest of the reg)
+    dma_hw->ch[frameDataDMA].al1_ctrl = 0;
+    dma_hw->ch[blankDataDMA].al1_ctrl = 0;
+    
+    dma_unclaim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA));
+    irq_set_enabled(DMA_IRQ_0, false);
+
+    pio_set_sm_mask_enabled(pio0, 0b0111, false);
+    pio_sm_clear_fifos(pio0, 0);
+    pio_sm_clear_fifos(pio0, 1);
+    pio_sm_clear_fifos(pio0, 2);
+    pio_clear_instruction_memory(pio0);
+
+    free((void *)frame);
+    free((void *)frameReadAddr);
+    free((void *)BLANK);
+    free((void *)line);
+
+    if(displayConfig->clearRenderQueueOnDeInit) {
+        RenderQueueItem_t * item = &background.next;
+        RenderQueueItem_t * previousItem = &background;
+        while(item != NULL) {
+            previousItem = item;
+            item = item->next;
+            free((void *)previousItem);
+        }
+        background.next = NULL;
+        lastItem = &background;
+    }
+
+    return 0;
 }
 
 static void initDMA() {
@@ -175,17 +222,17 @@ static void initDMA() {
 
 static void initSecondCore() {
     initDMA(); //Must be run here so the IRQ runs on the second core
-    pio_enable_sm_mask_in_sync(pio0, 0b0111); //start all 4 state machines
+    pio_enable_sm_mask_in_sync(pio0, 0b0111); //start all 3 state machines
 
     render();
 }
 
 //DMA Interrupt Callback
 static void updateFramePtr() {
-    /*// Clear the interrupt request.
+    // Clear the interrupt request.
     dma_hw->ints0 = 1u << frameCtrlDMA;
 
-    if(dma_hw->ch[frameCtrlDMA].read_addr >= (io_rw_32) &frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER]) {
+    if(dma_hw->ch[frameCtrlDMA].read_addr >= (io_rw_32) &frameReadAddr[frameFullHeight*displayConfig->resolutionScale]) {
         dma_hw->ch[frameCtrlDMA].read_addr = (io_rw_32) frameReadAddr;
-    }*/
+    }
 }

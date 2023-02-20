@@ -47,6 +47,12 @@ int initAudio();
 int initSD();
 int initUSB();
 
+int deInitDisplay();
+int deInitController();
+int deInitAudio();
+int deInitSD();
+int deInitUSB();
+
 void render();
 
 #endif

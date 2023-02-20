@@ -13,6 +13,10 @@ int initController() {
     return 0;
 }
 
+int deInitController() {
+    return 0;
+}
+
 static void updateController() {
     /*c->u = (sio_hw->gpio_in >> UP_PIN) & 1u;
     c->d = (sio_hw->gpio_in >> DOWN_PIN) & 1u;

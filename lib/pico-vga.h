@@ -117,6 +117,8 @@ typedef struct {
     uint16_t frameBufferSizeKB; //Cap the size of the frame buffer (if unused, set to 0xFFFF)
     uint8_t numInterpolatedLines; //Override the default number of interpolated frame lines -- used if the frame buffer is not large enough to hold all of the frame data. Default = 2.
     uint8_t peripheralMode; //Enable command input via SPI.
+    uint8_t clearRenderQueueOnDeInit;
+    uint16_t colorDelayCycles;
 } DisplayConfig_t;
 
 typedef struct {
@@ -164,6 +166,7 @@ typedef struct {
 =========================
 */
 int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerConf, AudioConfig_t * audioConf, SDConfig_t * sdConf, USBHostConfig_t * usbConf);
+int deInitPicoVGA(bool closeDisplay, bool closeController, bool closeAudio, bool closeSD, bool closeUSB);
 void updateFullDisplay();
 
 extern volatile RenderQueueItem_t background;

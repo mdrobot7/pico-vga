@@ -1,26 +1,34 @@
-#include "sdk.h"
+#include "lib-internal.h"
 
 #include "pico/multicore.h"
 #include "pico/malloc.h"
 
-uint8_t * frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER];
-uint8_t BLANK[FRAME_WIDTH];
-volatile uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
+//Pointer to the frame buffer (a 2d array, frameHeight*frameWidth)
+volatile uint8_t * frame = NULL;
 
-volatile RenderQueueItem background = { //First element of the linked list, can be reset to any background
-    .type = 'f',
+//Pointer to an array of pointers, each pointing to the start of a line in the frame buffer OR an interpolated line in line (size = full height of the BASE resolution).
+uint8_t ** frameReadAddr = NULL;
+
+//Pointer to an array of zeros the size of a line.
+uint8_t * BLANK = NULL;
+
+//Pointer to the interpolated lines (a 2d array, displayConfig->numInterpolatedLines*frameWidth)
+uint8_t * line = NULL;
+
+volatile RenderQueueItem_t background = { //First element of the linked list, can be reset to any background
+    .type = RQI_T_FILL,
     .color = 0,
     .obj = NULL,
     .next = NULL,
     .flags = RQI_UPDATE
 };
-volatile RenderQueueItem *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
+volatile RenderQueueItem_t *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
 
 static volatile uint8_t update = 0;
 
 void updateDisplay() {
     update = 1;
-    if(autoRender) background.flags |= RQI_UPDATE; //force-update in autoRender mode
+    if(displayConfig->autoRender) background.flags |= RQI_UPDATE; //force-update in autoRender mode
 }
 
 /*
@@ -29,8 +37,8 @@ void updateDisplay() {
 */
 //Checks for out-of-bounds coordinates and writes to the frame
 static inline void writePixel(uint16_t y, uint16_t x, uint8_t color) {
-    if(x >= FRAME_WIDTH || y >= FRAME_HEIGHT) return;
-    else frame[y][x] = color;
+    if(x >= frameWidth || y >= frameWidth) return;
+    //else frame[y][x] = color;
 }
 
 static inline uint8_t getFontBit(uint8_t c, uint8_t x, uint8_t y) {
@@ -74,7 +82,7 @@ static inline void fillBetweenPoints(uint16_t x1, uint16_t x2, uint16_t y, uint8
     }
 }
 
-static inline void renderRect(RenderQueueItem *item, uint8_t aa) {
+static inline void renderRect(RenderQueueItem_t *item, uint8_t aa) {
     if(aa) {
         renderLineAA(item->x1, item->y1, item->x2, item->y1, item->color, item->scale); //top
         renderLineAA(item->x1, item->y2, item->x2, item->y2, item->color, item->scale); //bottom
@@ -89,11 +97,11 @@ static inline void renderRect(RenderQueueItem *item, uint8_t aa) {
     }
 }
 
-static inline void renderTriangle(RenderQueueItem *item, uint8_t aa) {
+static inline void renderTriangle(RenderQueueItem_t *item, uint8_t aa) {
     return;
 }
 
-static inline void renderFilledRect(RenderQueueItem *item, uint8_t aa) {
+static inline void renderFilledRect(RenderQueueItem_t *item, uint8_t aa) {
     return;
 }
 
@@ -105,23 +113,23 @@ static inline void renderFilledRect(RenderQueueItem *item, uint8_t aa) {
 void render() {
     multicore_fifo_push_blocking(13); //tell core 0 that everything is ok/it's running
 
-    RenderQueueItem *item;
-    RenderQueueItem *previousItem;
+    RenderQueueItem_t *item;
+    RenderQueueItem_t *previousItem;
 
     while(1) {
-        if(autoRender) {
-            item = (RenderQueueItem *) &background;
+        if(displayConfig->autoRender) {
+            item = (RenderQueueItem_t *) &background;
             //look for the first item that needs an update, render that item and everything after it
             while(!(item->flags & RQI_UPDATE)) {
                 previousItem = item;
                 item = item->next;
-                if(item == NULL) item = (RenderQueueItem *) &background;
+                if(item == NULL) item = (RenderQueueItem_t *) &background;
             }
-            if(item->flags & RQI_HIDDEN || item->type == 'n') item = (RenderQueueItem *) &background; //if the update is to hide an item, rerender the whole thing
+            if(item->flags & RQI_HIDDEN || item->type == RQI_T_REMOVED) item = (RenderQueueItem_t *) &background; //if the update is to hide or remove an item, rerender the whole thing
         }
         else { //manual rendering
             while(!update); //wait until it's told to update the display
-            item = (RenderQueueItem *) &background;
+            item = (RenderQueueItem_t *) &background;
         }
 
         while(item != NULL) {
@@ -178,7 +186,7 @@ void render() {
                             }
                         }
                         x += CHAR_WIDTH + 1;
-                        if(RQI_WORDWRAP_GET(item->flags) && x + CHAR_WIDTH >= item->x2) {
+                        if(item->flags & RQI_WORDWRAP && x + CHAR_WIDTH >= item->x2) {
                             x = item->x1;
                             y += CHAR_HEIGHT;
                         }
@@ -194,8 +202,8 @@ void render() {
                     }
                     break;
                 case 'f': //Fill the screen
-                    for(uint16_t y = 0; y < FRAME_HEIGHT; y++) {
-                        for(uint16_t x = 0; x < FRAME_WIDTH; x++) {
+                    for(uint16_t y = 0; y < frameHeight; y++) {
+                        for(uint16_t x = 0; x < frameWidth; x++) {
                             writePixel(y, x, item->color);
                         }
                     }

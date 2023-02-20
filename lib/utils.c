@@ -1,4 +1,4 @@
-#include "sdk.h"
+#include "lib-internal.h"
 
 uint8_t HTMLTo8Bit(uint32_t color) {
     return rgbTo8Bit((uint8_t)((color >> 16) & 255), (uint8_t)((color >> 8) & 255), (uint8_t)((color & 255)));
@@ -52,20 +52,4 @@ uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value) {
 
 uint8_t invertColor(uint8_t color) {
     return 255 - color;
-}
-
-uint16_t getFrameWidth() {
-    return frameSize[displayConfig->baseResolution][0]/displayConfig->resolutionScale;
-}
-
-uint16_t getFrameHeight() {
-    return frameSize[displayConfig->baseResolution][1]/displayConfig->resolutionScale;
-}
-
-uint16_t getFrameFullWidth() {
-    return frameSize[displayConfig->baseResolution][2]/displayConfig->resolutionScale;
-}
-
-uint16_t getFrameFullHeight() {
-    return frameSize[displayConfig->baseResolution][3]/displayConfig->resolutionScale;
 }

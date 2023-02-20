@@ -2,7 +2,7 @@
 #define GAME_H
 
 #include "pico/stdlib.h"
-#include "../sdk/pico-vga.h"
+#include "../lib/pico-vga.h"
 
 //Main Game loop -- DO NOT REMOVE!
 void game();

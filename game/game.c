@@ -1,9 +1,9 @@
-#include "../sdk/pico-vga.h"
+#include "../lib/pico-vga.h"
 #include "game.h"
 
 Controllers_t controllers = {
     .maxNumControllers = 1,
-    .p = null,
+    .p = NULL,
 };
 
 DisplayConfig_t displayConf = {};
@@ -24,43 +24,43 @@ void game()
     }
     //printf("\n");
 
-    initDisplay(true);
+    initPicoVGA(&displayConf, &controllerConf, &audioConf, &sdConf, &usbConf);
 
     //Draw lines
-    for(uint16_t i = 0; i < FRAME_WIDTH; i += 10) {
-        drawLine(NULL, FRAME_WIDTH/2, FRAME_HEIGHT/2, i, 0, COLOR_RED, 0);
+    for(uint16_t i = 0; i < frameHeight; i += 10) {
+        drawLine(NULL, frameWidth/2, frameHeight/2, i, 0, COLOR_RED, 0);
         sleep_ms(15);
     }
-    for(uint16_t i = 0; i < FRAME_HEIGHT; i += 10) {
-        drawLine(NULL, FRAME_WIDTH/2, FRAME_HEIGHT/2, FRAME_WIDTH - 1, i, COLOR_GREEN, 0);
+    for(uint16_t i = 0; i < frameHeight; i += 10) {
+        drawLine(NULL, frameWidth/2, frameHeight/2, frameWidth - 1, i, COLOR_GREEN, 0);
         sleep_ms(15);
     }
-    for(uint16_t i = FRAME_WIDTH - 1; i > 0; i -= 10) {
-        drawLine(NULL, FRAME_WIDTH/2, FRAME_HEIGHT/2, i, FRAME_HEIGHT - 1, COLOR_BLUE, 0);
+    for(uint16_t i = frameWidth - 1; i > 0; i -= 10) {
+        drawLine(NULL, frameWidth/2, frameHeight/2, i, frameHeight - 1, COLOR_BLUE, 0);
         sleep_ms(15);
     }
-    for(uint16_t i = FRAME_HEIGHT - 1; i > 0; i -= 10) {
-        drawLine(NULL, FRAME_WIDTH/2, FRAME_HEIGHT/2, 0, i, COLOR_WHITE, 0);
-        sleep_ms(15);
-    }
-    sleep_ms(250);
-    clearScreen();
-    for(uint16_t i = 0; i < FRAME_WIDTH; i += 10) {
-        drawLine(NULL, 0, FRAME_HEIGHT - 1, i, 0, COLOR_NAVY, 0);
-        sleep_ms(15);
-    }
-    for(uint16_t i = 0; i < FRAME_HEIGHT; i += 10) {
-        drawLine(NULL, 0, FRAME_HEIGHT, FRAME_WIDTH - 1, i, COLOR_PURPLE, 0);
+    for(uint16_t i = frameHeight - 1; i > 0; i -= 10) {
+        drawLine(NULL, frameWidth/2, frameHeight/2, 0, i, COLOR_WHITE, 0);
         sleep_ms(15);
     }
     sleep_ms(250);
     clearScreen();
-    for(uint16_t i = FRAME_WIDTH - 1; i > 0; i -= 10) {
-        drawLine(NULL, FRAME_WIDTH - 1, FRAME_HEIGHT - 1, i, 0, COLOR_YELLOW, 0);
+    for(uint16_t i = 0; i < frameWidth; i += 10) {
+        drawLine(NULL, 0, frameWidth - 1, i, 0, COLOR_NAVY, 0);
         sleep_ms(15);
     }
-    for(uint16_t i = 0; i < FRAME_HEIGHT; i += 10) {
-        drawLine(NULL, FRAME_WIDTH - 1, FRAME_HEIGHT - 1, 0, i, COLOR_BLUE, 0);
+    for(uint16_t i = 0; i < frameHeight; i += 10) {
+        drawLine(NULL, 0, frameHeight, frameWidth - 1, i, COLOR_PURPLE, 0);
+        sleep_ms(15);
+    }
+    sleep_ms(250);
+    clearScreen();
+    for(uint16_t i = frameWidth - 1; i > 0; i -= 10) {
+        drawLine(NULL, frameWidth - 1, frameHeight - 1, i, 0, COLOR_YELLOW, 0);
+        sleep_ms(15);
+    }
+    for(uint16_t i = 0; i < frameHeight; i += 10) {
+        drawLine(NULL, frameHeight - 1, frameHeight - 1, 0, i, COLOR_BLUE, 0);
         sleep_ms(15);
     }
     sleep_ms(250);
@@ -78,7 +78,7 @@ void game()
 
     //Draw filled rectangles
     for(uint8_t i = 0; i < 16; i++) {
-        drawFilledRectangle(NULL, i*25, i*25, FRAME_WIDTH - i*25, FRAME_HEIGHT - i*25, 127 + 128*i, 127 + 128*i);
+        drawFilledRectangle(NULL, i*25, i*25, frameWidth - i*25, frameHeight - i*25, 127 + 128*i, 127 + 128*i);
         sleep_ms(15);
     }
     sleep_ms(250);
@@ -86,7 +86,7 @@ void game()
 
     //Draw circles
     for(uint8_t i = 0; i < 32; i++) {
-        drawCircle(NULL, FRAME_WIDTH/2, FRAME_HEIGHT/2, i*25, i*8);
+        drawCircle(NULL, frameWidth/2, frameHeight/2, i*25, i*8);
         sleep_ms(15);
     }
     sleep_ms(250);
@@ -95,7 +95,7 @@ void game()
     //Draw text
     for(uint8_t i = 0; i < 255; i++) {
         char s[2] = {i, '\0'};
-        drawText(NULL, 0, 0, FRAME_WIDTH, s, COLOR_WHITE, COLOR_BLACK, true, 0);
+        drawText(NULL, 0, 0, frameWidth, s, COLOR_WHITE, COLOR_BLACK, true, 0);
     }
     sleep_ms(500);
     clearScreen();

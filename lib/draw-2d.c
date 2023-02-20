@@ -1,10 +1,10 @@
-#include "sdk.h"
+#include "lib-internal.h"
 #include "font.h"
 
 #include "pico/malloc.h"
 
-RenderQueueItem * drawPixel(RenderQueueItem *prev, uint16_t x, uint16_t y, uint8_t color) {
-    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+RenderQueueItem_t * drawPixel(RenderQueueItem_t * prev, uint16_t x, uint16_t y, uint8_t color) {
+    RenderQueueItem_t * item = (RenderQueueItem_t *) malloc(sizeof(RenderQueueItem_t));
     if(item == NULL) return NULL;
 
     item->type = RQI_T_PIXEL;
@@ -28,8 +28,8 @@ RenderQueueItem * drawPixel(RenderQueueItem *prev, uint16_t x, uint16_t y, uint8
     return item;
 }
 
-RenderQueueItem * drawLine(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness) {
-    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+RenderQueueItem_t * drawLine(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness) {
+    RenderQueueItem_t * item = (RenderQueueItem_t *) malloc(sizeof(RenderQueueItem_t));
     if(item == NULL) return NULL;
 
     item->type = RQI_T_LINE;
@@ -56,8 +56,8 @@ RenderQueueItem * drawLine(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint
     return item;
 }
 
-RenderQueueItem * drawRectangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
-    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+RenderQueueItem_t * drawRectangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
+    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
     if(item == NULL) return NULL;
 
     item->type = RQI_T_RECTANGLE;
@@ -83,10 +83,10 @@ RenderQueueItem * drawRectangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1,
     return item;
 }
 
-RenderQueueItem * drawTriangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
-    RenderQueueItem *side1 = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
-    RenderQueueItem *side2 = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
-    RenderQueueItem *side3 = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+RenderQueueItem_t * drawTriangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
+    RenderQueueItem_t * side1 = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
+    RenderQueueItem_t * side2 = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
+    RenderQueueItem_t * side3 = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
     if(side1 == NULL || side2 == NULL || side3 == NULL) return NULL;
 
     side1->type = RQI_T_TRIANGLE;
@@ -99,8 +99,8 @@ RenderQueueItem * drawTriangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, 
     return NULL;
 }
 
-RenderQueueItem * drawCircle(RenderQueueItem *prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
-    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+RenderQueueItem_t * drawCircle(RenderQueueItem_t * prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
+    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
     if(item == NULL) return NULL;
 
     item->type = RQI_T_CIRCLE;
@@ -125,12 +125,12 @@ RenderQueueItem * drawCircle(RenderQueueItem *prev, uint16_t x, uint16_t y, uint
     return item;
 }
 
-RenderQueueItem * drawPolygon(RenderQueueItem *prev, uint16_t points[][2], uint8_t len, uint8_t color) { //draws a path between all points in the list
+RenderQueueItem_t *  drawPolygon(RenderQueueItem_t * prev, uint16_t points[][2], uint8_t len, uint8_t color) { //draws a path between all points in the list
     return NULL;
 }
 
-RenderQueueItem * drawFilledRectangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
-    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+RenderQueueItem_t * drawFilledRectangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
+    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
     if(item == NULL) return NULL;
 
     item->type = RQI_T_FILLED_RECTANGLE;
@@ -156,12 +156,12 @@ RenderQueueItem * drawFilledRectangle(RenderQueueItem *prev, uint16_t x1, uint16
     return item;
 }
 
-RenderQueueItem * drawFilledTriangle(RenderQueueItem *prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
+RenderQueueItem_t * drawFilledTriangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
     return NULL;
 }
 
-RenderQueueItem * drawFilledCircle(RenderQueueItem *prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
-    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+RenderQueueItem_t * drawFilledCircle(RenderQueueItem_t * prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
+    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
     if(item == NULL) return NULL;
 
     item->type = RQI_T_FILLED_CIRCLE;
@@ -186,8 +186,8 @@ RenderQueueItem * drawFilledCircle(RenderQueueItem *prev, uint16_t x, uint16_t y
     return item;
 }
 
-RenderQueueItem * fillScreen(RenderQueueItem *prev, uint8_t obj[FRAME_HEIGHT][FRAME_WIDTH], uint8_t color) {
-    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+RenderQueueItem_t * fillScreen(RenderQueueItem_t * prev, uint8_t * obj, uint8_t color) {
+    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
     if(item == NULL) return NULL;
 
     item->type = RQI_T_FILL;
@@ -221,7 +221,7 @@ void clearScreen() {
     background.type = RQI_T_FILL;
     background.color = 0;
 
-    RenderQueueItem *item = background.next; //DO NOT REMOVE the first element of the linked list! (background)
+    RenderQueueItem_t * item = background.next; //DO NOT REMOVE the first element of the linked list! (background)
     while(item != NULL) {
         item->type = RQI_T_REMOVED;
         item = item->next;
@@ -237,12 +237,12 @@ void clearScreen() {
 */
 uint8_t *font = (uint8_t *)cp437; //The current font in use by the system
 
-RenderQueueItem * drawText(RenderQueueItem *prev, uint16_t x1, uint16_t y, uint16_t x2, char *str,
+RenderQueueItem_t *  drawText(RenderQueueItem_t * prev, uint16_t x1, uint16_t y, uint16_t x2, char *str,
                            uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverride) {
-    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
     if(item == NULL) return NULL;
 
-    item->type = RQI_T_STR;
+    item->type = RQI_T_STRING;
     item->x1 = x1;
     item->y1 = y;
     item->x2 = x2;
@@ -283,8 +283,8 @@ void setTextFont(uint8_t *newFont) {
         Sprite Drawing Functions
 ========================================
 */
-RenderQueueItem * drawSprite(RenderQueueItem *prev, uint8_t *sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, uint8_t scale) {
-    RenderQueueItem *item = (RenderQueueItem *) malloc(sizeof(RenderQueueItem));
+RenderQueueItem_t *  drawSprite(RenderQueueItem_t * prev, uint8_t *sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, uint8_t scale) {
+    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
     if(item == NULL) return NULL;
 
     item->type = RQI_T_SPRITE;
@@ -317,20 +317,20 @@ RenderQueueItem * drawSprite(RenderQueueItem *prev, uint8_t *sprite, uint16_t x,
 ======================================
 */
 //Set item to be hidden (true = hidden, false = showing)
-void setHidden(RenderQueueItem *item, uint8_t hidden) {
+void setHidden(RenderQueueItem_t * item, uint8_t hidden) {
     if(hidden) item->flags |= RQI_HIDDEN;
     else item->flags &= ~RQI_HIDDEN;
     updateFullDisplay();
 }
 
 //Set the color for item.
-void setColor(RenderQueueItem *item, uint8_t color) {
+void setColor(RenderQueueItem_t * item, uint8_t color) {
     item->color = color;
     item->flags |= RQI_UPDATE;
 }
 
 //Set the coordinates for item. Set parameter to -1 to leave it unchanged.
-void setCoordinates(RenderQueueItem *item, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
+void setCoordinates(RenderQueueItem_t * item, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
     if(item->x1 >= 0) item->x1 = x1 <= x2 ? x1 : x2; //Makes sure the point closer to x = 0 is set to (x1, y1) not (x2, y2)
     if(item->y1 >= 0) item->y1 = x1 <= x2 ? y1 : y2;
     if(item->x2 >= 0) item->x2 = x1 >  x2 ? x1 : x2;
@@ -339,23 +339,23 @@ void setCoordinates(RenderQueueItem *item, int16_t x1, int16_t y1, int16_t x2, i
 }
 
 //Set an item's scale (line thickness, sprite scale, text scale)
-void setScale(RenderQueueItem *item, uint8_t scale) {
+void setScale(RenderQueueItem_t * item, uint8_t scale) {
     item->scale = scale;
     item->flags |= RQI_UPDATE;
 }
  
 //Set the rotation of an item with a byte
-void setRotationByte(RenderQueueItem *item, uint8_t rotation) {
+void setRotationByte(RenderQueueItem_t * item, uint8_t rotation) {
     return;
 }
 
 //Set the rotation of an item with radians (range: [0-2pi])
-void setRotationRadians(RenderQueueItem *item, double rotation) {
+void setRotationRadians(RenderQueueItem_t * item, double rotation) {
     return;
 }
 
 //Set a sprite or bitmap's object
-void setSpriteObj(RenderQueueItem *item, uint8_t *obj, uint8_t dimX, uint8_t dimY) {
+void setSpriteObj(RenderQueueItem_t * item, uint8_t *obj, uint8_t dimX, uint8_t dimY) {
     if(item->x2 != dimX || item->y2 != dimY) updateFullDisplay(); //handle if the sprite shrunk, leaving artifacts
     
     item->x2 = dimX;
@@ -367,13 +367,13 @@ void setSpriteObj(RenderQueueItem *item, uint8_t *obj, uint8_t dimX, uint8_t dim
 //Set a string item's text (This copies the string given into the previously allocated memory space. Make sure
 //your string RenderQueueItem has enough space allocated for the new string, otherwise the program may have
 //issues. If unsure, make a new RenderQueueItem using drawText and delete this one using removeItem.)
-void setText(RenderQueueItem *item, char *str) {
+void setText(RenderQueueItem_t * item, char *str) {
     strcpy(item->obj, str);
     item->flags |= RQI_UPDATE;
 }
 
 //Permanently remove item from the render queue.
-void removeItem(RenderQueueItem *item) {
+void removeItem(RenderQueueItem_t * item) {
     item->type = RQI_T_REMOVED;
     updateFullDisplay();
 }

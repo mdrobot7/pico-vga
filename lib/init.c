@@ -1,4 +1,4 @@
-#include "sdk.h"
+#include "lib-internal.h"
 
 /*
 Ideas:
@@ -15,34 +15,36 @@ static void drawLogo();
 
 int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerConf, AudioConfig_t * audioConf,
                 SDConfig_t * sdConf, USBHostConfig_t * usbConf) {
-    if(displayConf != null) {
+    if(displayConf != NULL) {
         displayConfig = displayConf;
-        initDisplay();
+        if(initDisplay()) return 1; //initDisplay.c
     }
-    if(controllerConf != null) {
+    if(controllerConf != NULL) {
         controllerConfig = controllerConf;
-        initController(); //controller.c
+        if(initController()) return 1; //controller.c
     }
-    if(audioConf != null) {
+    if(audioConf != NULL) {
         audioConfig = audioConf;
-        initAudio(); //audio.c
+        if(initAudio()) return 1; //audio.c
     }
-    if(sdConf != null) {
+    if(sdConf != NULL) {
         sdConfig = sdConf;
-        initSD(); //sd.c
+        if(initSD()) return 1; //sd.c
     }
-    if(usbConf != null) {
+    if(usbConf != NULL) {
         usbConfig = usbConf;
-        initUSB(); //usb.c
+        if(initUSB()) return 1; //usb.c
     }
     
     busyWait(10000000); //wait to make sure everything is stable
 
-    if(displayConf != null) {
+    if(displayConf != NULL) {
         drawLogo();
         busyWait(10000000);
         clearScreen();
     }
+
+    return 0;
 }
 
 static void drawLogo() {

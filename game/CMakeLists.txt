@@ -14,7 +14,7 @@ target_include_directories(GAME PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Link to pico_stdlib (gpio, time, etc. functions)
 target_link_libraries(GAME 
-    PICO_VGA_SDK
+    PICO_VGA_LIB
     pico_stdlib
     hardware_gpio
 )

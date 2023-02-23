@@ -1,7 +1,7 @@
-; Drive a 400x300 @ 60Hz (upscaled to 800x600) 8-bit-color VGA signal over 8 digital IO pins.
+; Drive a 800x600 @ 60Hz 8-bit-color VGA signal (40MHz pixel clock)
 ;  - vsync.pio manages the VSYNC line of the VGA signal.
 
-.program vsync
+.program vsync_800x600
 
 .wrap_target
     set x 17 [23]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
@@ -18,7 +18,7 @@ waitloop:
 
 // Helper function (for use in C program) to initialize this PIO program
 
-static inline void vsync_program_init(PIO pio, uint sm, uint offset, uint dataPin) {
+static inline void vsync_800x600_program_init(PIO pio, uint sm, uint offset, uint dataPin) {
     //Initialize VSYNC pin
     pio_gpio_init(pio, dataPin);
 
@@ -26,7 +26,7 @@ static inline void vsync_program_init(PIO pio, uint sm, uint offset, uint dataPi
     pio_sm_set_consecutive_pindirs(pio, sm, dataPin, 1, true);
 
     //Get default state machine configuration
-    pio_sm_config c = vsync_program_get_default_config(offset);
+    pio_sm_config c = vsync_800x600_program_get_default_config(offset);
 
     //Set pin to 'set'
     sm_config_set_set_pins(&c, dataPin, 1);

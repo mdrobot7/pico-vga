@@ -56,11 +56,11 @@ int initDisplay() {
         //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock
         color_program_init(pio0, 0, offset, 0, 3*displayConfig->resolutionScale);
 
-        offset = pio_add_program(pio0, &hsync_program);
-        hsync_program_init(pio0, 1, offset, HSYNC_PIN);
+        offset = pio_add_program(pio0, &hsync_800x600_program);
+        hsync_800x600_program_init(pio0, 1, offset, HSYNC_PIN);
 
-        offset = pio_add_program(pio0, &vsync_program);
-        vsync_program_init(pio0, 2, offset, VSYNC_PIN);
+        offset = pio_add_program(pio0, &vsync_800x600_program);
+        vsync_800x600_program_init(pio0, 2, offset, VSYNC_PIN);
 
         pio_claim_sm_mask(pio0, 0b0111);
     }

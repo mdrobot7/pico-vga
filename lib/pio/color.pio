@@ -1,4 +1,4 @@
-; Drive a 400x300 @ 60Hz (upscaled to 800x600) 8-bit-color VGA signal over 8 digital IO pins.
+; Drive an 8-bit-color VGA signal over 8 digital IO pins.
 ;  - color.pio manages the 8 color pins, for 8 bit color. The hsync and vsync lines are managed separately.
 
 .program color

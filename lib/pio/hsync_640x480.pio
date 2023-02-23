@@ -1,7 +1,7 @@
-; Drive a 400x300 @ 60Hz (upscaled to 800x600) 8-bit-color VGA signal over 8 digital IO pins.
+; Drive a 640x480 @ 60Hz 8-bit-color VGA signal (25.175MHz pixel frequency)
 ;  - hsync.pio manages the HSYNC line of the VGA signal.
 
-.program hsync
+.program hsync_640x480
 
 .wrap_target
     nop [31]        ; Line is being displayed, wait
@@ -18,7 +18,7 @@
 
 // Helper function (for use in C program) to initialize this PIO program
 
-static inline void hsync_program_init(PIO pio, uint sm, uint offset, uint dataPin) {
+static inline void hsync_640x480_program_init(PIO pio, uint sm, uint offset, uint dataPin) {
     //Initialize HSYNC pin
     pio_gpio_init(pio, dataPin);
 
@@ -26,7 +26,7 @@ static inline void hsync_program_init(PIO pio, uint sm, uint offset, uint dataPi
     pio_sm_set_consecutive_pindirs(pio, sm, dataPin, 1, true);
 
     //Get default state machine configuration
-    pio_sm_config c = hsync_program_get_default_config(offset);
+    pio_sm_config c = hsync_640x480_program_get_default_config(offset);
 
     //Set pin to 'set'
     sm_config_set_set_pins(&c, dataPin, 1);

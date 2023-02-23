@@ -12,6 +12,7 @@ add_library(PICO_VGA_LIB STATIC
     draw-3d.c
     init.c
     initDisplay.c
+    peripheralMode.c
     render.c
     sd.c
     usb.c
@@ -25,10 +26,22 @@ pico_generate_pio_header(PICO_VGA_LIB
         ${CMAKE_CURRENT_SOURCE_DIR}/pio/color.pio
 )
 pico_generate_pio_header(PICO_VGA_LIB  
-        ${CMAKE_CURRENT_SOURCE_DIR}/pio/hsync.pio
+        ${CMAKE_CURRENT_SOURCE_DIR}/pio/hsync_640x480.pio
 )
 pico_generate_pio_header(PICO_VGA_LIB  
-        ${CMAKE_CURRENT_SOURCE_DIR}/pio/vsync.pio
+        ${CMAKE_CURRENT_SOURCE_DIR}/pio/vsync_640x480.pio
+)
+pico_generate_pio_header(PICO_VGA_LIB  
+        ${CMAKE_CURRENT_SOURCE_DIR}/pio/hsync_800x600.pio
+)
+pico_generate_pio_header(PICO_VGA_LIB  
+        ${CMAKE_CURRENT_SOURCE_DIR}/pio/vsync_800x600.pio
+)
+pico_generate_pio_header(PICO_VGA_LIB  
+        ${CMAKE_CURRENT_SOURCE_DIR}/pio/hsync_1024x768.pio
+)
+pico_generate_pio_header(PICO_VGA_LIB  
+        ${CMAKE_CURRENT_SOURCE_DIR}/pio/vsync_1024x768.pio
 )
 
 target_link_libraries(PICO_VGA_LIB 

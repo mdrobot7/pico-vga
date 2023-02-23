@@ -86,6 +86,9 @@ typedef struct {
         Module Configuration Structs
 ============================================
 */
+//Switch to true if running in peripheral mode
+#define PERIPHERAL_MODE false
+
 extern uint16_t frameWidth;
 extern uint16_t frameHeight;
 extern uint16_t frameFullWidth;
@@ -137,6 +140,10 @@ typedef struct {
 typedef struct {
     uint8_t a;
 } USBHostConfig_t;
+
+typedef struct {
+    uint8_t a;
+} PeripheralModeConfig_t;
 
 
 /*

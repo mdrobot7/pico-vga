@@ -13,8 +13,12 @@
 #include "pico/multicore.h"
 
 #include "color.pio.h"
-#include "vsync.pio.h"
-#include "hsync.pio.h"
+#include "vsync_640x480.pio.h"
+#include "hsync_640x480.pio.h"
+#include "vsync_800x600.pio.h"
+#include "hsync_800x600.pio.h"
+#include "vsync_1024x768.pio.h"
+#include "hsync_1024x768.pio.h"
 
 extern const uint16_t frameSize[3][4];
 
@@ -46,12 +50,14 @@ int initController();
 int initAudio();
 int initSD();
 int initUSB();
+int initPeripheralMode();
 
 int deInitDisplay();
 int deInitController();
 int deInitAudio();
 int deInitSD();
 int deInitUSB();
+int deInitPeripheralMode();
 
 void render();
 

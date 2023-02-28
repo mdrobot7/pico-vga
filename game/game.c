@@ -1,15 +1,17 @@
 #include "../lib/pico-vga.h"
 #include "game.h"
 
-Controllers_t controllers = {
-    .maxNumControllers = 1,
-    .p = NULL,
-};
+//The name of your program. Used to load/store data from the SD card.
+const char name[] = "Test";
+
+//The *total* amount of memory that the entire Pico-VGA library is allowed to use (framebuffer, render elements, etc).
+//Try to maximize this, since the more memory the library is given the better it will perform (recommended: 256kB)
+//Allocated at compile-time, so be careful of other memory-intensive parts of your program.
+#define PICO_VGA_MAX_MEMORY_BYTES 175000
 
 DisplayConfig_t displayConf = {};
 ControllerConfig_t controllerConf = {
-    .maxNumControllers = 1,
-    .controllers = &controllers,
+    .numControllers = 4,
 };
 AudioConfig_t audioConf = {};
 SDConfig_t sdConf = {};

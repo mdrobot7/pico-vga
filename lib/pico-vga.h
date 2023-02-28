@@ -65,22 +65,18 @@ typedef struct RenderQueueItem_t RenderQueueItem_t;
         Controllers
 ===========================
 */
-typedef struct {
-    uint8_t a;
-    uint8_t b;
-    uint8_t x;
-    uint8_t y;
-    uint8_t u;
-    uint8_t d;
-    uint8_t l;
-    uint8_t r;
-} Ctrler_t;
+typedef enum {
+    CONTROLLER_UP,
+    CONTROLLER_DOWN,
+    CONTROLLER_LEFT,
+    CONTROLLER_RIGHT,
+    CONTROLLER_A,
+    CONTROLLER_B,
+    CONTROLLER_X,
+    CONTROLLER_Y,
+} ControllerBits_t;
 
-typedef struct {
-    uint8_t maxNumControllers;
-    Ctrler_t * p;
-} Controllers_t;
-
+bool getControllerButton(uint8_t controllerNum, uint8_t button);
 
 /*
         Module Configuration Structs
@@ -117,16 +113,16 @@ typedef struct {
     DisplayConfigResolutionScale_t resolutionScale;
     uint8_t autoRender; //Turn on autoRendering (no manual updateDisplay() call required)
     uint8_t antiAliasing;
-    uint16_t frameBufferSizeKB; //Cap the size of the frame buffer (if unused, set to 0xFFFF)
+    uint16_t frameBufferSizeKB; //Cap the size of the frame buffer (if unused, set to 0xFFFF) -- Initializer will write back the amount of memory used.
     uint8_t numInterpolatedLines; //Override the default number of interpolated frame lines -- used if the frame buffer is not large enough to hold all of the frame data. Default = 2.
     uint8_t peripheralMode; //Enable command input via SPI.
     uint8_t clearRenderQueueOnDeInit;
     uint16_t colorDelayCycles;
 } DisplayConfig_t;
 
-typedef struct {
-    uint8_t maxNumControllers;
-    Controllers_t * controllers;
+typedef struct __packed {
+    uint8_t numControllers; //Max controllers: 8 [edit once v2 pcb is finalized]
+    uint8_t controllerData[8]; //*DO NOT INITIALIZE*
 } ControllerConfig_t;
 
 typedef struct {

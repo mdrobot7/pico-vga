@@ -22,10 +22,32 @@
 
 extern const uint16_t frameSize[3][4];
 
-extern volatile uint8_t * frame;
-extern uint8_t ** frameReadAddr;
-extern uint8_t * BLANK;
-extern uint8_t * line;
+//Unified Pico-VGA memory buffer
+extern uint8_t buffer[PICO_VGA_MAX_MEMORY_BYTES];
+
+/* Pointers to each block in the Pico VGA unified memory buffer. Written in order of how it's organized
+ * (render queue first, at buffer[0]). End pointers are where the next element of the render queue, for example,
+ * will be added, *not* where the block ends (it ends at the start of the next one).
+*/
+extern uint8_t * renderQueueStart;
+extern uint8_t * renderQueueEnd;
+extern uint8_t * sdStart;
+extern uint8_t * sdEnd;
+extern uint8_t * audioStart;
+extern uint8_t * audioEnd;
+extern uint8_t * controllerStart;
+extern uint8_t * controllerEnd;
+extern uint8_t * frameReadAddrStart;
+extern uint8_t * frameReadAddrEnd;
+extern uint8_t * blankLineStart;
+extern uint8_t * interpolatedLineStart;
+extern uint8_t * frameBufferStart;
+extern uint8_t * frameBufferEnd;
+
+extern uint8_t frameCtrlDMA;
+extern uint8_t frameDataDMA;
+extern uint8_t blankDataDMA;
+extern uint8_t controllerDataDMA;
 
 //Configuration Options
 extern DisplayConfig_t * displayConfig;

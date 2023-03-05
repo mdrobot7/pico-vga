@@ -4,12 +4,17 @@
 //The name of your program. Used to load/store data from the SD card.
 const char name[] = "Test";
 
-//The *total* amount of memory that the entire Pico-VGA library is allowed to use (framebuffer, render elements, etc).
-//Try to maximize this, since the more memory the library is given the better it will perform (recommended: 256kB)
-//Allocated at compile-time, so be careful of other memory-intensive parts of your program.
-#define PICO_VGA_MAX_MEMORY_BYTES 175000
-
-DisplayConfig_t displayConf = {};
+DisplayConfig_t displayConf = {
+    .baseResolution = RES_800x600,
+    .resolutionScale = RES_SCALED_400x300,
+    .autoRender = true,
+    .antiAliasing = false,
+    .frameBufferSizeBytes = 0xFFFF,
+    .numInterpolatedLines = 0,
+    .peripheralMode = false,
+    .clearRenderQueueOnDeInit = false,
+    .colorDelayCycles = 0
+};
 ControllerConfig_t controllerConf = {
     .numControllers = 4,
 };

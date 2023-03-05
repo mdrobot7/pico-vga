@@ -10,6 +10,11 @@
 #include <math.h>
 #include <string.h>
 
+//The *total* amount of memory that the entire Pico-VGA library is allowed to use (framebuffer, render elements, etc).
+//Try to maximize this, since the more memory the library is given the better it will perform (recommended: 256kB)
+//Allocated at compile-time, so be careful of other memory-intensive parts of your program.
+#define PICO_VGA_MAX_MEMORY_BYTES 200000
+
 /*
         Render Queue
 ============================
@@ -113,7 +118,7 @@ typedef struct {
     DisplayConfigResolutionScale_t resolutionScale;
     uint8_t autoRender; //Turn on autoRendering (no manual updateDisplay() call required)
     uint8_t antiAliasing;
-    uint16_t frameBufferSizeKB; //Cap the size of the frame buffer (if unused, set to 0xFFFF) -- Initializer will write back the amount of memory used.
+    uint32_t frameBufferSizeBytes; //Cap the size of the frame buffer (if unused, set to 0xFFFF) -- Initializer will write back the amount of memory used. Default: Either the size of one frame or 75% of PICO_VGA_MAX_MEMORY_BYTES, whichever is less.
     uint8_t numInterpolatedLines; //Override the default number of interpolated frame lines -- used if the frame buffer is not large enough to hold all of the frame data. Default = 2.
     uint8_t peripheralMode; //Enable command input via SPI.
     uint8_t clearRenderQueueOnDeInit;

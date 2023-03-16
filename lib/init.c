@@ -15,25 +15,24 @@ static void drawLogo();
 
 int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerConf, AudioConfig_t * audioConf,
                 SDConfig_t * sdConf, USBHostConfig_t * usbConf) {
-    displayConfig = displayConf;
-    controllerConfig = controllerConf;
-    audioConfig = audioConf;
-    sdConfig = sdConf;
-    usbConfig = usbConf;
-
     if(displayConf != NULL) {
+        displayConfig = displayConf;
         if(initDisplay()) return 1; //initDisplay.c
     }
     if(controllerConf != NULL) {
+        controllerConfig = controllerConf;
         if(initController()) return 1; //controller.c
     }
     if(audioConf != NULL) {
+        audioConfig = audioConf;
         if(initAudio()) return 1; //audio.c
     }
     if(sdConf != NULL) {
+        sdConfig = sdConf;
         if(initSD()) return 1; //sd.c
     }
     if(usbConf != NULL) {
+        usbConfig = usbConf;
         if(initUSB()) return 1; //usb.c
     }
     

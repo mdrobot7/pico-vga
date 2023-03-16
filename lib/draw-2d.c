@@ -3,231 +3,294 @@
 
 #include "pico/malloc.h"
 
-RenderQueueItem_t * drawPixel(RenderQueueItem_t * prev, uint16_t x, uint16_t y, uint8_t color) {
-    RenderQueueItem_t * item = (RenderQueueItem_t *) malloc(sizeof(RenderQueueItem_t));
-    if(item == NULL) return NULL;
+uint32_t drawPixel(int16_t x, int16_t y, uint8_t color) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    item->type = RQI_T_PIXEL;
-    item->x1 = x;
-    item->y1 = y;
-    item->color = color;
+    lastItem->type = RQI_T_PIXEL;
+    lastItem->uid = uid;
+    lastItem->x = x;
+    lastItem->y = y;
+    lastItem->thetaZ = color;
 
-    if(prev == NULL) {
-        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-
-        lastItem->next = item; //Link the last item to this one
-        lastItem = item; //Reset lastItem
-    }
-    else {
-        item->next = prev->next; //insert item into the linked list
-        prev->next = item;
-    }
-
-    item->flags = RQI_UPDATE;
-
-    return item;
+    lastItem->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
 }
 
-RenderQueueItem_t * drawLine(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness) {
-    RenderQueueItem_t * item = (RenderQueueItem_t *) malloc(sizeof(RenderQueueItem_t));
-    if(item == NULL) return NULL;
+uint32_t drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color, uint8_t thickness) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    item->type = RQI_T_LINE;
-    item->x1 = x1 <= x2 ? x1 : x2; //Makes sure the point closer to x = 0 is set to (x1, y1) not (x2, y2)
-    item->y1 = x1 <= x2 ? y1 : y2;
-    item->x2 = x1 >  x2 ? x1 : x2;
-    item->y2 = x1 >  x2 ? y1 : y2;
-    item->color = color;
-    item->scale = thickness;
+    lastItem->type = RQI_T_LINE;
+    lastItem->uid = uid;
+    lastItem->x = (x1 + x2)/2;
+    lastItem->y = (y1 + y2)/2;
+    lastItem->scaleZ = (int8_t)thickness;
 
-    if(prev == NULL) {
-        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    lastItem->numPointsOrTriangles = 1;
+    lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
-        lastItem->next = item; //Link the last item to this one
-        lastItem = item; //Reset lastItem
-    }
-    else {
-        item->next = prev->next; //insert item into the linked list
-        prev->next = item;
-    }
+    //lastItem now points to a Points_t struct right after the RenderQueueItem.
+    clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
+    ((Points_t *)lastItem)->color = color;
+    ((Points_t *)lastItem)->numPoints = 4;
+    ((Points_t *)lastItem)->points[0] = x1;
+    ((Points_t *)lastItem)->points[1] = y1;
+    ((Points_t *)lastItem)->points[2] = x2;
+    ((Points_t *)lastItem)->points[3] = y2;
 
-    item->flags = RQI_UPDATE;
-
-    return item;
+    (lastItem - 1)->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
 }
 
-RenderQueueItem_t * drawRectangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
-    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    if(item == NULL) return NULL;
+uint32_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t thickness, uint8_t color) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    item->type = RQI_T_RECTANGLE;
-    item->x1 = x1 <= x2 ? x1 : x2; //Makes sure the point closer to x = 0 is set to (x1, y1) not (x2, y2)
-    item->y1 = x1 <= x2 ? y1 : y2;
-    item->x2 = x1 >  x2 ? x1 : x2;
-    item->y2 = x1 >  x2 ? y1 : y2;
-    item->color = color;
+    lastItem->type = RQI_T_RECTANGLE;
+    lastItem->uid = uid;
+    lastItem->x = (x1 + x2)/2;
+    lastItem->y = (y1 + y2)/2;
+    lastItem->scaleZ = (int8_t)thickness;
 
-    if(prev == NULL) {
-        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    lastItem->numPointsOrTriangles = 1;
+    lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
-        lastItem->next = item; //Link the last item to this one
-        lastItem = item; //Reset lastItem
-    }
-    else {
-        item->next = prev->next; //insert item into the linked list
-        prev->next = item;
-    }
+    //lastItem now points to a Points_t struct right after the RenderQueueItem.
+    clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
+    ((Points_t *)lastItem)->color = color;
+    ((Points_t *)lastItem)->numPoints = 8;
+    ((Points_t *)lastItem)->points[0] = x1;
+    ((Points_t *)lastItem)->points[1] = y1;
+    ((Points_t *)lastItem)->points[2] = x2;
+    ((Points_t *)lastItem)->points[3] = y1;
+    ((Points_t *)lastItem)->points[4] = x2;
+    ((Points_t *)lastItem)->points[5] = y2;
+    ((Points_t *)lastItem)->points[6] = x1;
+    ((Points_t *)lastItem)->points[7] = y2;
 
-    item->flags = RQI_UPDATE;
-
-    return item;
+    (lastItem - 1)->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
 }
 
-RenderQueueItem_t * drawTriangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
-    RenderQueueItem_t * side1 = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    RenderQueueItem_t * side2 = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    RenderQueueItem_t * side3 = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    if(side1 == NULL || side2 == NULL || side3 == NULL) return NULL;
+uint32_t drawTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t thickness, uint8_t color) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    side1->type = RQI_T_TRIANGLE;
-    side2->type = RQI_T_TRIANGLE;
-    side3->type = RQI_T_TRIANGLE;
+    lastItem->type = RQI_T_TRIANGLE;
+    lastItem->uid = uid;
+    lastItem->x = (x1 + x2 + x3)/3;
+    lastItem->y = (y1 + y2 + y3)/3;
+    lastItem->scaleZ = (int8_t)thickness;
 
-    //sort points by x value
-    //assign
+    lastItem->numPointsOrTriangles = 1;
+    lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
-    return NULL;
+    //lastItem now points to a Points_t struct right after the RenderQueueItem.
+    clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
+    ((Points_t *)lastItem)->color = color;
+    ((Points_t *)lastItem)->numPoints = 6;
+    ((Points_t *)lastItem)->points[0] = x1;
+    ((Points_t *)lastItem)->points[1] = y1;
+    ((Points_t *)lastItem)->points[2] = x2;
+    ((Points_t *)lastItem)->points[3] = y2;
+    ((Points_t *)lastItem)->points[4] = x3;
+    ((Points_t *)lastItem)->points[5] = y3;
+
+    (lastItem - 1)->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
 }
 
-RenderQueueItem_t * drawCircle(RenderQueueItem_t * prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
-    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    if(item == NULL) return NULL;
+uint32_t drawEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, uint8_t thickness, uint8_t color) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    item->type = RQI_T_CIRCLE;
-    item->x1 = x;
-    item->y1 = y;
-    item->x2 = radius;
-    item->color = color;
+    lastItem->type = RQI_T_CIRCLE;
+    lastItem->uid = uid;
+    lastItem->x = x;
+    lastItem->y = y;
+    lastItem->z = radiusX; //Can't use scaleX/Y/Z because they are 8 bit signed (not big enough).
+    lastItem->numPointsOrTriangles = radiusY;
+    lastItem->scaleZ = thickness;
+    lastItem->thetaZ = color;
 
-    if(prev == NULL) {
-        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-
-        lastItem->next = item; //Link the last item to this one
-        lastItem = item; //Reset lastItem
-    }
-    else {
-        item->next = prev->next; //insert item into the linked list
-        prev->next = item;
-    }
-
-    item->flags = RQI_UPDATE;
-
-    return item;
+    lastItem->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
 }
 
-RenderQueueItem_t *  drawPolygon(RenderQueueItem_t * prev, uint16_t points[][2], uint8_t len, uint8_t color) { //draws a path between all points in the list
-    return NULL;
+//Draws lines between all points in the list.
+uint32_t drawPolygon(int16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
+
+    lastItem->type = RQI_T_POLYGON;
+    lastItem->uid = uid;
+    lastItem->scaleZ = (int8_t)thickness;
+    lastItem->flags = RQI_UPDATE;
+
+    lastItem->numPointsOrTriangles = numPoints/6;
+    if(numPoints % 6 != 0) lastItem->numPointsOrTriangles++;
+    lastItem->pointsOrTriangles = (Points_t *)++lastItem;
+
+    /* This convoluted loop copies the data from points[][] into the Points_t structs. Each Points_t holds 12
+     * values (6 coordinate pairs in 2D space). This copies 6 points in, then goes to the next Points_t. This
+     * is done with pointer math, treating the points[][] array as a flat 1D array, because it's easier.
+    */
+    for(int i = 0; i < numPoints*2; i++) {
+        if(i % 12 == 0) {
+            lastItem++;
+            clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
+            ((Points_t *)lastItem)->color = color;
+            if(numPoints - i > 6) ((Points_t *)lastItem)->numPoints = 12;
+            else ((Points_t *)lastItem)->numPoints = (numPoints - i)*2;
+        }
+        ((Points_t *)lastItem)->points[i % 12] = *(points + i);
+    }
+
+    lastItem++;
+    return uid++;
 }
 
-RenderQueueItem_t * drawFilledRectangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill) {
-    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    if(item == NULL) return NULL;
+uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t borderColor, uint8_t fillColor) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    item->type = RQI_T_FILLED_RECTANGLE;
-    item->x1 = x1 <= x2 ? x1 : x2; //Makes sure the point closer to x = 0 is set to (x1, y1) not (x2, y2)
-    item->y1 = x1 <= x2 ? y1 : y2;
-    item->x2 = x1 >  x2 ? x1 : x2;
-    item->y2 = x1 >  x2 ? y1 : y2;
-    item->color = color;
+    lastItem->type = RQI_T_FILLED_RECTANGLE;
+    lastItem->uid = uid;
+    lastItem->x = (x1 + x2)/2;
+    lastItem->y = (y1 + y2)/2;
+    lastItem->thetaZ = (int8_t)fillColor;
 
-    if(prev == NULL) {
-        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    lastItem->numPointsOrTriangles = 1;
+    lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
-        lastItem->next = item; //Link the last item to this one
-        lastItem = item; //Reset lastItem
-    }
-    else {
-        item->next = prev->next; //insert item into the linked list
-        prev->next = item;
-    }
+    //lastItem now points to a Points_t struct right after the RenderQueueItem.
+    clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
+    ((Points_t *)lastItem)->color = borderColor;
+    ((Points_t *)lastItem)->numPoints = 8;
+    ((Points_t *)lastItem)->points[0] = x1;
+    ((Points_t *)lastItem)->points[1] = y1;
+    ((Points_t *)lastItem)->points[2] = x2;
+    ((Points_t *)lastItem)->points[3] = y1;
+    ((Points_t *)lastItem)->points[4] = x2;
+    ((Points_t *)lastItem)->points[5] = y2;
+    ((Points_t *)lastItem)->points[6] = x1;
+    ((Points_t *)lastItem)->points[7] = y2;
 
-    item->flags = RQI_UPDATE;
-
-    return item;
+    (lastItem - 1)->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
 }
 
-RenderQueueItem_t * drawFilledTriangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill) {
-    return NULL;
+uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t borderColor, uint8_t fillColor) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
+
+    lastItem->type = RQI_T_FILLED_TRIANGLE;
+    lastItem->uid = uid;
+    lastItem->x = (x1 + x2 + x3)/3;
+    lastItem->y = (y1 + y2 + y3)/3;
+    lastItem->thetaZ = (int8_t)fillColor;
+
+    lastItem->numPointsOrTriangles = 1;
+    lastItem->pointsOrTriangles = (Points_t *)++lastItem;
+
+    //lastItem now points to a Points_t struct right after the RenderQueueItem.
+    clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
+    ((Points_t *)lastItem)->color = borderColor;
+    ((Points_t *)lastItem)->numPoints = 6;
+    ((Points_t *)lastItem)->points[0] = x1;
+    ((Points_t *)lastItem)->points[1] = y1;
+    ((Points_t *)lastItem)->points[2] = x2;
+    ((Points_t *)lastItem)->points[3] = y2;
+    ((Points_t *)lastItem)->points[4] = x3;
+    ((Points_t *)lastItem)->points[5] = y3;
+
+    (lastItem - 1)->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
 }
 
-RenderQueueItem_t * drawFilledCircle(RenderQueueItem_t * prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill) {
-    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    if(item == NULL) return NULL;
+uint32_t drawFilledEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, uint8_t borderColor, uint8_t fillColor) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    item->type = RQI_T_FILLED_CIRCLE;
-    item->x1 = x;
-    item->y1 = y;
-    item->x2 = radius;
-    item->color = color;
+    lastItem->type = RQI_T_FILLED_CIRCLE;
+    lastItem->uid = uid;
+    lastItem->x = x;
+    lastItem->y = y;
+    lastItem->z = radiusX; //Can't use scaleX/Y/Z because they are 8 bit signed (not big enough).
+    lastItem->numPointsOrTriangles = radiusY;
+    lastItem->scaleZ = borderColor;
+    lastItem->thetaZ = fillColor;
 
-    if(prev == NULL) {
-        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-
-        lastItem->next = item; //Link the last item to this one
-        lastItem = item; //Reset lastItem
-    }
-    else {
-        item->next = prev->next; //insert item into the linked list
-        prev->next = item;
-    }
-
-    item->flags = RQI_UPDATE;
-
-    return item;
+    lastItem->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
 }
 
-RenderQueueItem_t * fillScreen(RenderQueueItem_t * prev, uint8_t * obj, uint8_t color) {
-    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    if(item == NULL) return NULL;
+//Draws lines and fills between all points in the list.
+uint32_t fillPolygon(int16_t points[][2], uint8_t numPoints, uint8_t borderColor, uint8_t fillColor) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    item->type = RQI_T_FILL;
-    if(obj == NULL) {
-        item->obj = NULL;
-        item->color = color;
+    lastItem->type = RQI_T_FILLED_POLYGON;
+    lastItem->uid = uid;
+    lastItem->thetaZ = (int8_t) fillColor;
+    lastItem->flags = RQI_UPDATE;
+
+    lastItem->numPointsOrTriangles = numPoints/6;
+    if(numPoints % 6 != 0) lastItem->numPointsOrTriangles++;
+    lastItem->pointsOrTriangles = (Points_t *)++lastItem;
+
+    /* This convoluted loop copies the data from points[][] into the Points_t structs. Each Points_t holds 12
+     * values (6 coordinate pairs in 2D space). This copies 6 points in, then goes to the next Points_t. This
+     * is done with pointer math, treating the points[][] array as a flat 1D array, because it's easier.
+    */
+    for(int i = 0; i < numPoints*2; i++) {
+        if(i % 12 == 0) {
+            lastItem++;
+            clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
+            ((Points_t *)lastItem)->color = borderColor;
+            if(numPoints - i > 6) ((Points_t *)lastItem)->numPoints = 12;
+            else ((Points_t *)lastItem)->numPoints = (numPoints - i)*2;
+        }
+        ((Points_t *)lastItem)->points[i % 12] = *(points + i);
     }
-    else {
-        item->obj = (uint8_t *)obj;
-        item->color = color;
-    }
 
-    if(prev == NULL) {
-        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-
-        lastItem->next = item; //Link the last item to this one
-        lastItem = item; //Reset lastItem
-    }
-    else {
-        item->next = prev->next; //insert item into the linked list
-        prev->next = item;
-    }
-
-    item->flags = RQI_UPDATE;
-
-    return item;
+    lastItem++;
+    return uid++;
 }
 
-//Removes everything from the linked list, marks all elements for deletion (handled in render()), resets background to black
+uint32_t fillScreen(uint8_t * obj, uint8_t color) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
+
+    lastItem->type = RQI_T_FILL;
+    lastItem->uid = uid;
+    lastItem->thetaZ = color;
+    lastItem->pointsOrTriangles = (void *)obj;
+
+    lastItem->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
+}
+
+//Removes everything from the list, marks all elements for deletion (handled in garbage collector)
 void clearScreen() {
-    background.type = RQI_T_FILL;
-    background.color = 0;
-
-    RenderQueueItem_t * item = background.next; //DO NOT REMOVE the first element of the linked list! (background)
-    while(item != NULL) {
+    RenderQueueItem_t * item = (RenderQueueItem_t *)buffer;
+    while(item < lastItem) {
         item->type = RQI_T_REMOVED;
-        item = item->next;
+        item += item->numPointsOrTriangles + 1; //get past the Points_t or Triangle_t structs packed next to the item
     }
 
-    background.flags = RQI_UPDATE;
+    lastItem = (RenderQueueItem_t *)buffer;
+    uid = 1;
 }
 
 
@@ -237,41 +300,45 @@ void clearScreen() {
 */
 uint8_t *font = (uint8_t *)cp437; //The current font in use by the system
 
-RenderQueueItem_t *  drawText(RenderQueueItem_t * prev, uint16_t x1, uint16_t y, uint16_t x2, char *str,
-                           uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverride) {
-    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    if(item == NULL) return NULL;
+uint32_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverrideBytes) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    item->type = RQI_T_STRING;
-    item->x1 = x1;
-    item->y1 = y;
-    item->x2 = x2;
-    item->y2 = bgColor;
-    item->color = color;
-
-    if(strSizeOverride) {
-        item->obj = (uint8_t *) malloc((strSizeOverride + 1)*sizeof(uint8_t));
+    lastItem->type = RQI_T_STRING;
+    lastItem->uid = uid;
+    if(wrap) {
+        lastItem->x = (x1 + x2)/2;
+        lastItem->y = (y + (CHAR_HEIGHT*(((x2 - x1)/(CHAR_WIDTH + 1)) + 1)))/2;
     }
     else {
-        item->obj = (uint8_t *) malloc((strlen(str) + 1)*sizeof(uint8_t));
+        lastItem->x = (x1 + x2)/2;
+        lastItem->y = y;
     }
-    strcpy(item->obj, str);
+    lastItem->scaleZ = (int8_t)bgColor;
+    lastItem->thetaZ = (int8_t)color;
 
-    if(prev == NULL) {
-        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
-
-        lastItem->next = item; //Link the last item to this one
-        lastItem = item; //Reset lastItem
+    if(strSizeOverrideBytes != 0) {
+        if(strSizeOverrideBytes % sizeof(Points_t) == 0) {
+            lastItem->numPointsOrTriangles = strSizeOverrideBytes/sizeof(Points_t);
+        }
+        else lastItem->numPointsOrTriangles = (strSizeOverrideBytes/sizeof(Points_t)) + 1;
     }
     else {
-        item->next = prev->next; //insert item into the linked list
-        prev->next = item;
+        if(strlen(str) % sizeof(Points_t) == 0) {
+            lastItem->numPointsOrTriangles = strlen(str)/sizeof(Points_t);
+        }
+        else lastItem->numPointsOrTriangles = (strlen(str)/sizeof(Points_t)) + 1;
     }
+    uint16_t tempNumPointsOrTriangles = lastItem->numPointsOrTriangles;
+    lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
-    item->flags = RQI_UPDATE;
-    if(wrap) item->flags |= RQI_WORDWRAP;
+    //lastItem now points to the memory location right after the RenderQueueItem.
+    strcpy((char *)lastItem, str);
 
-    return item;
+    (lastItem - 1)->flags = RQI_UPDATE;
+    if(wrap) (lastItem - 1)->flags |= RQI_WORDWRAP;
+    lastItem += tempNumPointsOrTriangles + 1;
+    return uid++;
 }
 
 void setTextFont(uint8_t *newFont) {
@@ -283,32 +350,25 @@ void setTextFont(uint8_t *newFont) {
         Sprite Drawing Functions
 ========================================
 */
-RenderQueueItem_t *  drawSprite(RenderQueueItem_t * prev, uint8_t *sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, uint8_t scale) {
-    RenderQueueItem_t * item = (RenderQueueItem_t * ) malloc(sizeof(RenderQueueItem_t));
-    if(item == NULL) return NULL;
+uint32_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, int8_t scaleX, int8_t scaleY) {
+    if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+    clearRenderQueueItemData(lastItem);
 
-    item->type = RQI_T_SPRITE;
-    item->x1 = x;
-    item->y1 = y;
-    item->x2 = dimX;
-    item->y2 = dimY;
-    item->color = nullColor;
-    item->obj = sprite;
+    lastItem->type = RQI_T_SPRITE;
+    lastItem->uid = uid;
+    lastItem->x = (x + (x + dimX))/2;
+    lastItem->y = (y + (y + dimY))/2;
+    lastItem->scaleX = scaleX;
+    lastItem->scaleY = scaleY;
+    lastItem->thetaZ = nullColor;
+    lastItem->z = dimX;                    //Using the z and numPoints... field because there are no other uint16_t fields available.
+    lastItem->numPointsOrTriangles = dimY;
 
-    if(prev == NULL) {
-        item->next = NULL; //Set *next to NULL, means it is the last item in linked list
+    lastItem->pointsOrTriangles = sprite;
 
-        lastItem->next = item; //Link the last item to this one
-        lastItem = item; //Reset lastItem
-    }
-    else {
-        item->next = prev->next; //insert item into the linked list
-        prev->next = item;
-    }
-
-    item->flags = RQI_UPDATE;
-
-    return item;
+    lastItem->flags = RQI_UPDATE;
+    lastItem++;
+    return uid++;
 }
 
 
@@ -317,63 +377,17 @@ RenderQueueItem_t *  drawSprite(RenderQueueItem_t * prev, uint8_t *sprite, uint1
 ======================================
 */
 //Set item to be hidden (true = hidden, false = showing)
-void setHidden(RenderQueueItem_t * item, uint8_t hidden) {
-    if(hidden) item->flags |= RQI_HIDDEN;
-    else item->flags &= ~RQI_HIDDEN;
+void setHidden(uint32_t itemUID, uint8_t hidden) {
+    RenderQueueItem_t * item = findRenderQueueItem(itemUID);
+    if(item->flags & RQI_HIDDEN) item->flags &= ~RQI_HIDDEN;
+    else item->flags |= RQI_HIDDEN;
+
     updateFullDisplay();
-}
-
-//Set the color for item.
-void setColor(RenderQueueItem_t * item, uint8_t color) {
-    item->color = color;
-    item->flags |= RQI_UPDATE;
-}
-
-//Set the coordinates for item. Set parameter to -1 to leave it unchanged.
-void setCoordinates(RenderQueueItem_t * item, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
-    if(item->x1 >= 0) item->x1 = x1 <= x2 ? x1 : x2; //Makes sure the point closer to x = 0 is set to (x1, y1) not (x2, y2)
-    if(item->y1 >= 0) item->y1 = x1 <= x2 ? y1 : y2;
-    if(item->x2 >= 0) item->x2 = x1 >  x2 ? x1 : x2;
-    if(item->y2 >= 0) item->y2 = x1 >  x2 ? y1 : y2;
-    updateFullDisplay();
-}
-
-//Set an item's scale (line thickness, sprite scale, text scale)
-void setScale(RenderQueueItem_t * item, uint8_t scale) {
-    item->scale = scale;
-    item->flags |= RQI_UPDATE;
-}
- 
-//Set the rotation of an item with a byte
-void setRotationByte(RenderQueueItem_t * item, uint8_t rotation) {
-    return;
-}
-
-//Set the rotation of an item with radians (range: [0-2pi])
-void setRotationRadians(RenderQueueItem_t * item, double rotation) {
-    return;
-}
-
-//Set a sprite or bitmap's object
-void setSpriteObj(RenderQueueItem_t * item, uint8_t *obj, uint8_t dimX, uint8_t dimY) {
-    if(item->x2 != dimX || item->y2 != dimY) updateFullDisplay(); //handle if the sprite shrunk, leaving artifacts
-    
-    item->x2 = dimX;
-    item->y2 = dimY;
-    item->obj = obj;
-    item->flags |= RQI_UPDATE;
-}
-
-//Set a string item's text (This copies the string given into the previously allocated memory space. Make sure
-//your string RenderQueueItem has enough space allocated for the new string, otherwise the program may have
-//issues. If unsure, make a new RenderQueueItem using drawText and delete this one using removeItem.)
-void setText(RenderQueueItem_t * item, char *str) {
-    strcpy(item->obj, str);
-    item->flags |= RQI_UPDATE;
 }
 
 //Permanently remove item from the render queue.
-void removeItem(RenderQueueItem_t * item) {
+void removeItem(uint32_t itemUID) {
+    RenderQueueItem_t * item = findRenderQueueItem(itemUID);
     item->type = RQI_T_REMOVED;
     updateFullDisplay();
 }

@@ -3,26 +3,8 @@
 #include "pico/multicore.h"
 #include "pico/malloc.h"
 
-//Pointer to the frame buffer (a 2d array, frameHeight*frameWidth)
-volatile uint8_t * frame = NULL;
-
-//Pointer to an array of pointers, each pointing to the start of a line in the frame buffer OR an interpolated line in line (size = full height of the BASE resolution).
-uint8_t ** frameReadAddr = NULL;
-
-//Pointer to an array of zeros the size of a line.
-uint8_t * BLANK = NULL;
-
-//Pointer to the interpolated lines (a 2d array, displayConfig->numInterpolatedLines*frameWidth)
-uint8_t * line = NULL;
-
-volatile RenderQueueItem_t background = { //First element of the linked list, can be reset to any background
-    .type = RQI_T_FILL,
-    .color = 0,
-    .obj = NULL,
-    .next = NULL,
-    .flags = RQI_UPDATE
-};
-volatile RenderQueueItem_t *lastItem = &background; //Last item in linked list, used to set *last in RenderQueueItem
+//Next unique ID to assign to a render queue item, used so items can be modified after initialization
+uint32_t uid = 1;
 
 static volatile uint8_t update = 0;
 

@@ -87,7 +87,7 @@ int initDisplay() {
         //130MHz system clock frequency (multiple of 65MHz pixel clock)
     }
 
-    //Trim the frame left or right on the screen, configurable at runtime.
+    //Shift the frame left or right on the screen, configurable at runtime.
     pio_sm_put_blocking(pio0, 0, (uint32_t)(displayConfig->colorDelayCycles/32));
     pio_sm_exec_wait_blocking(pio0, 0, pio_encode_pull(false, false));
     pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_x, 32));
@@ -123,8 +123,8 @@ int initDisplay() {
     frameReadAddrStart = frameBufferStart - frameFullHeight*displayConfig->resolutionScale*sizeof(uint8_t *);
     frameReadAddrEnd = frameBufferStart;
 
-    //If the allocation ran out of space (started writing to reserved memory), then fail
-    if(frameReadAddrStart < SRAM_BASE) return 1;
+    //If the allocation ran out of space (started writing to other memory), then fail
+    if(frameReadAddrStart < buffer) return 1;
 
     if(numBufferedLines != 0) {
         /*
@@ -167,6 +167,18 @@ int initDisplay() {
         ((uint8_t **)frameReadAddrStart)[i] = blankLineStart;
     }
 
+    renderQueueStart = buffer;
+    if(displayConfig->renderQueueSizeBytes != 0) {
+        renderQueueEnd = buffer + displayConfig->renderQueueSizeBytes;
+    }
+    else {
+        renderQueueEnd = NULL;
+    }
+    lastItem = (RenderQueueItem_t *) buffer;
+
+    //Fail if there isn't enough memory (started running into frame buffer space)
+    if(renderQueueEnd > frameReadAddrStart) return 1;
+
     multicore_launch_core1(initSecondCore);
     while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
     return 0;
@@ -178,9 +190,8 @@ int deInitDisplay() {
 
     dma_hw->ch[frameCtrlDMA].al1_ctrl = 0; //clears the CTRL.EN bit (along with the rest of the reg)
     dma_hw->ch[frameDataDMA].al1_ctrl = 0;
-    dma_hw->ch[blankDataDMA].al1_ctrl = 0;
     
-    dma_unclaim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA));
+    dma_unclaim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA));
     irq_set_enabled(DMA_IRQ_0, false);
 
     pio_set_sm_mask_enabled(pio0, 0b0111, false);
@@ -190,16 +201,18 @@ int deInitDisplay() {
     pio_clear_instruction_memory(pio0);
 
     if(displayConfig->clearRenderQueueOnDeInit) {
-        RenderQueueItem_t * item = &background.next;
-        RenderQueueItem_t * previousItem = &background;
-        while(item != NULL) {
-            previousItem = item;
-            item = item->next;
-            free((void *)previousItem);
-        }
-        background.next = NULL;
-        lastItem = &background;
+        renderQueueStart = NULL;
+        renderQueueEnd = NULL;
+        lastItem = NULL;
+        uid = 1;
     }
+
+    frameReadAddrStart = NULL;
+    frameReadAddrEnd = NULL;
+    blankLineStart = NULL;
+    interpolatedLineStart = NULL;
+    frameBufferStart = NULL;
+    frameBufferEnd = NULL;
 
     return 0;
 }

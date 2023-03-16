@@ -16,74 +16,6 @@
 #define PICO_VGA_MAX_MEMORY_BYTES 200000
 
 /*
-        Render Queue
-============================
-*/
-//RenderQueueItem_t.type
-typedef enum {
-    RQI_T_REMOVED,
-    RQI_T_FILL,
-    RQI_T_PIXEL,
-    RQI_T_LINE,
-    RQI_T_RECTANGLE,
-    RQI_T_FILLED_RECTANGLE,
-    RQI_T_TRIANGLE,
-    RQI_T_FILLED_TRIANGLE,
-    RQI_T_CIRCLE,
-    RQI_T_FILLED_CIRCLE,
-    RQI_T_STRING,
-    RQI_T_SPRITE,
-    RQI_T_BITMAP,
-    RQI_T_POLYGON, 
-    RQI_T_FILLED_POLYGON,
-    RQI_T_LIGHT,
-    RQI_T_SVG,
-} RenderQueueItemType_t;
-
-//Linked list item for the queue of items to be rendered to the screen
-struct RenderQueueItem_t {
-    struct RenderQueueItem_t * next;
-    RenderQueueItemType_t type;
-
-    uint8_t flags; //Bit register for parameters
-    
-    uint16_t x1; //rectangular bounding box for the item
-    uint16_t y1;
-    uint16_t x2;
-    uint16_t y2;
-
-    uint8_t scale;
-    float rotation;
-
-    uint8_t color;
-    uint8_t * obj;
-};
-typedef struct RenderQueueItem_t RenderQueueItem_t;
-
-//RenderQueueItem.flags macros
-#define RQI_UPDATE   (1u << 0)
-#define RQI_HIDDEN   (1u << 1)
-#define RQI_WORDWRAP (1u << 2)
-
-
-/*
-        Controllers
-===========================
-*/
-typedef enum {
-    CONTROLLER_UP,
-    CONTROLLER_DOWN,
-    CONTROLLER_LEFT,
-    CONTROLLER_RIGHT,
-    CONTROLLER_A,
-    CONTROLLER_B,
-    CONTROLLER_X,
-    CONTROLLER_Y,
-} ControllerBits_t;
-
-bool getControllerButton(uint8_t controllerNum, uint8_t button);
-
-/*
         Module Configuration Structs
 ============================================
 */
@@ -120,6 +52,7 @@ typedef struct {
     uint8_t antiAliasing;
     uint32_t frameBufferSizeBytes; //Cap the size of the frame buffer (if unused, set to 0xFFFF) -- Initializer will write back the amount of memory used. Default: Either the size of one frame or 75% of PICO_VGA_MAX_MEMORY_BYTES, whichever is less.
     uint8_t numInterpolatedLines; //Override the default number of interpolated frame lines -- used if the frame buffer is not large enough to hold all of the frame data. Default = 2.
+    uint32_t renderQueueSizeBytes; //Cap the size of the render queue (if unused, set to 0).
     uint8_t peripheralMode; //Enable command input via SPI.
     uint8_t clearRenderQueueOnDeInit;
     uint16_t colorDelayCycles;
@@ -148,6 +81,94 @@ typedef struct {
 
 
 /*
+        Initialization
+==============================
+*/
+int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerConf, AudioConfig_t * audioConf, SDConfig_t * sdConf, USBHostConfig_t * usbConf);
+int deInitPicoVGA(bool closeDisplay, bool closeController, bool closeAudio, bool closeSD, bool closeUSB);
+void updateFullDisplay();
+
+
+/*
+        Drawing
+=======================
+*/
+uint32_t drawPixel(int16_t x, int16_t y, uint8_t color);
+uint32_t drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color, uint8_t thickness);
+uint32_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t thickness, uint8_t color);
+uint32_t drawTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t thickness, uint8_t color);
+uint32_t drawEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, uint8_t thickness, uint8_t color);
+uint32_t drawPolygon(int16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color);
+
+uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t borderColor, uint8_t fillColor);
+uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t borderColor, uint8_t fillColor);
+uint32_t drawFilledEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, uint8_t borderColor, uint8_t fillColor);
+uint32_t fillPolygon(int16_t points[][2], uint8_t numPoints, uint8_t borderColor, uint8_t fillColor);
+uint32_t fillScreen(uint8_t * obj, uint8_t color);
+
+uint32_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverrideBytes);
+void setTextFont(uint8_t *newFont)
+
+uint32_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, int8_t scaleX, int8_t scaleY);
+
+void clearScreen()
+
+
+/*
+        Drawing Modifiers
+=================================
+*/
+void setHidden(uint32_t itemUID, uint8_t hidden);
+void removeItem(uint32_t itemUID);
+
+
+/*
+        Controllers
+===========================
+*/
+typedef enum {
+    CONTROLLER_UP,
+    CONTROLLER_DOWN,
+    CONTROLLER_LEFT,
+    CONTROLLER_RIGHT,
+    CONTROLLER_A,
+    CONTROLLER_B,
+    CONTROLLER_X,
+    CONTROLLER_Y,
+} ControllerBits_t;
+
+bool getControllerButton(uint8_t controllerNum, uint8_t button);
+
+
+/*
+        Utilities
+=========================
+*/
+/// @brief Convert a 3 byte HTML color code into an 8 bit color.
+/// @param color The HTML color code.
+/// @return An 8 bit compressed color.
+uint8_t HTMLTo8Bit(uint32_t color);
+
+/// @brief Convert red, green, and blue color values into a single 8 bit color.
+/// @param r Red value
+/// @param g Blue value
+/// @param b Green value
+/// @return An 8 bit compressed color.
+uint8_t rgbTo8Bit(uint8_t r, uint8_t g, uint8_t b);
+
+/// @brief Convert HSV colors into 8 bit compressed RGB.
+/// @param hue Hue value, 0-255
+/// @param saturation Saturation value, 0-255
+/// @param value Brightness, 0-255
+/// @return An 8 bit compressed color
+uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value);
+
+/// @brief Invert a color.
+/// @param color A color to invert.
+/// @return The inverted version of the supplied color.
+uint8_t invertColor(uint8_t color);
+
+/*
         Constants
 =========================
 */
@@ -168,53 +189,5 @@ typedef struct {
 #define COLOR_NAVY    0b00000010
 #define COLOR_MAGENTA 0b11100011
 #define COLOR_PURPLE  0b10000010
-
-/*
-        Functions
-=========================
-*/
-int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerConf, AudioConfig_t * audioConf, SDConfig_t * sdConf, USBHostConfig_t * usbConf);
-int deInitPicoVGA(bool closeDisplay, bool closeController, bool closeAudio, bool closeSD, bool closeUSB);
-void updateFullDisplay();
-
-extern volatile RenderQueueItem_t background;
-
-//Basic Drawing
-//xN and yN are coordinates, in pixels, color is the color of the element.
-//draw functions just draw the element, fill elements draw and fill it in.
-//All functions return the index in the render queue that the element takes up.
-
-RenderQueueItem_t * drawPixel(RenderQueueItem_t * prev, uint16_t x, uint16_t y, uint8_t color);
-RenderQueueItem_t * drawLine(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness);
-RenderQueueItem_t * drawRectangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
-RenderQueueItem_t * drawTriangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
-RenderQueueItem_t * drawCircle(RenderQueueItem_t * prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
-RenderQueueItem_t * drawPolygon(RenderQueueItem_t * prev, uint16_t points[][2], uint8_t len, uint8_t color); //draws a path between all points in the list
-
-RenderQueueItem_t * drawFilledRectangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t fill);
-RenderQueueItem_t * drawFilledTriangle(RenderQueueItem_t * prev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t fill);
-RenderQueueItem_t * drawFilledCircle(RenderQueueItem_t * prev, uint16_t x, uint16_t y, uint16_t radius, uint8_t color, uint8_t fill);
-
-RenderQueueItem_t * fillScreen(RenderQueueItem_t * prev, uint8_t * obj, uint8_t color);
-void clearScreen();
-
-RenderQueueItem_t * drawSprite(RenderQueueItem_t * prev, uint8_t *sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, uint8_t scale);
-
-//Draws the chars from the default character library. Dimensions are 5x8 pixels each.
-RenderQueueItem_t * drawText(RenderQueueItem_t * prev, uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverride);
-void setTextFont(uint8_t *newFont);
-
-//Modifiers:
-void setBackground(uint8_t * obj, uint8_t color);
-void setHidden(RenderQueueItem_t * item, uint8_t hidden);
-void setColor(RenderQueueItem_t * item, uint8_t color);
-void setCoordinates(RenderQueueItem_t * item, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
-void removeItem(RenderQueueItem_t * item);
-
-//Utilities:
-uint8_t HTMLTo8Bit(uint32_t color);
-uint8_t rgbTo8Bit(uint8_t r, uint8_t g, uint8_t b);
-uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value);
-uint8_t invertColor(uint8_t color);
 
 #endif

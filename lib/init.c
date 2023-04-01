@@ -67,6 +67,6 @@ int deInitPicoVGA(bool closeDisplay, bool closeController, bool closeAudio, bool
 }
 
 static void drawLogo() {
-    drawText(NULL, 50, 250, 350, "pico-vga -- Michael Drobot, 2023", COLOR_WHITE, COLOR_BLACK, false, 0);
-    drawText(NULL, 50, 258, 350, "   Licensed under GNU GPL v3.", COLOR_WHITE, COLOR_BLACK, false, 0);
+    drawText(50, 250, 350, "pico-vga -- Michael Drobot, 2023", COLOR_WHITE, COLOR_BLACK, false, 0);
+    drawText(50, 258, 350, "   Licensed under GNU GPL v3.", COLOR_WHITE, COLOR_BLACK, false, 0);
 }

@@ -10,6 +10,7 @@
 #include "hardware/clocks.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
+#include "hardware/structs/syscfg.h"
 #include "pico/multicore.h"
 
 #include "color.pio.h"
@@ -50,6 +51,12 @@ extern uint8_t frameDataDMA;
 extern uint8_t blankDataDMA;
 extern uint8_t controllerDataDMA;
 
+extern struct repeating_timer garbageCollectorTimer;
+
+extern volatile uint8_t interpolatedLine; //The interpolated line currently being written to
+extern volatile uint8_t startInterpolation; //start rendering the next interpolated line
+extern volatile uint8_t interpolationIncomplete; //Number of uncompleted interpolated lines (not enough time to finish before needing to be pushed)
+
 //Configuration Options
 extern DisplayConfig_t * displayConfig;
 extern ControllerConfig_t * controllerConfig;
@@ -64,12 +71,16 @@ int initSD();
 int initUSB();
 int initPeripheralMode();
 
+void initGarbageCollector();
+
 int deInitDisplay();
 int deInitController();
 int deInitAudio();
 int deInitSD();
 int deInitUSB();
 int deInitPeripheralMode();
+
+void deInitGarbageCollector();
 
 /*
         Render Queue
@@ -78,6 +89,32 @@ int deInitPeripheralMode();
 //Number of bits in some fields below that make up the "fractional" part of the fixed-point field
 #define NUM_FRAC_BITS 6
 
+//The type of a particular render queue item (RenderQueueItem.type)
+typedef enum {
+    RQI_T_FILL,
+    RQI_T_PIXEL,
+    RQI_T_LINE,
+    RQI_T_RECTANGLE,
+    RQI_T_FILLED_RECTANGLE,
+    RQI_T_TRIANGLE,
+    RQI_T_FILLED_TRIANGLE,
+    RQI_T_CIRCLE,
+    RQI_T_FILLED_CIRCLE,
+    RQI_T_STRING,
+    RQI_T_SPRITE,
+    RQI_T_BITMAP,
+    RQI_T_POLYGON, 
+    RQI_T_FILLED_POLYGON,
+    RQI_T_LIGHT,
+    RQI_T_SVG,
+    RQI_T_EXTENDED = 64,
+    RQI_T_DBL_EXTENDED = 128,
+    RQI_T_MAX = 255, //Ensure that a RenderQueueItemType_t variable is 8 bits
+} RenderQueueItemType_t;
+
+#define RQI_UID_REMOVED 0
+
+struct __packed RenderQueueItem_t; //Predefinition, takes care of warnings later on from the function pointers
 typedef struct __packed {
     //Unique ID for this RenderQueueItem, so the user can modify it after initialization and remove
     //individually instead of only by clearing the screen.
@@ -102,13 +139,14 @@ typedef struct __packed {
     
     //Pointer to an array of points that make up polygons in 2D or triangles that make up the triangle
     //mesh for 3D rendering (Either Points_t or Triangle_t)
-    void * pointsOrTriangles;
     uint16_t numPointsOrTriangles;
+    void * pointsOrTriangles;
 
     //Pointer to a function that modifies the current RenderQueueItem to animate it. Called every frame (60Hz).
-    void (* animate)(RenderQueueItem_t *);
+    void (* animate)(struct RenderQueueItem_t *);
 } RenderQueueItem_t;
 
+//Currently Unused
 //Double the size of a normal RenderQueueItem_t. The extra space goes to an extended points[] buffer, which
 //allows this RenderQueueItem to be drawn in multiple places around the screen.
 typedef struct __packed {
@@ -136,13 +174,14 @@ typedef struct __packed {
     
     //Pointer to an array of points that make up polygons in 2D or triangles that make up the triangle
     //mesh for 3D rendering (Either Points_t or Triangle_t)
-    void * pointsOrTriangles;
     uint16_t numPointsOrTriangles;
+    void * pointsOrTriangles;
 
     //Pointer to a function that modifies the current RenderQueueItem to animate it. Called every frame (60Hz).
     void (* animate)(RenderQueueItem_t *);
 } RenderQueueItemExt_t;
 
+//Currently Unused
 //Double-extended RenderQueueItem, with even more space allocated to the points[] buffer (4x the size of normal)
 typedef struct __packed {
     //Unique ID for this RenderQueueItem, so the user can modify it after initialization and remove
@@ -169,36 +208,12 @@ typedef struct __packed {
     
     //Pointer to an array of points that make up polygons in 2D or triangles that make up the triangle
     //mesh for 3D rendering (Either Points_t or Triangle_t)
-    void * pointsOrTriangles;
     uint16_t numPointsOrTriangles;
+    void * pointsOrTriangles;
 
     //Pointer to a function that modifies the current RenderQueueItem to animate it. Called every frame (60Hz).
     void (* animate)(RenderQueueItem_t *);
 } RenderQueueItemDblExt_t;
-
-//The type of a particular render queue item (RenderQueueItem.type)
-typedef enum {
-    RQI_T_REMOVED,
-    RQI_T_FILL,
-    RQI_T_PIXEL,
-    RQI_T_LINE,
-    RQI_T_RECTANGLE,
-    RQI_T_FILLED_RECTANGLE,
-    RQI_T_TRIANGLE,
-    RQI_T_FILLED_TRIANGLE,
-    RQI_T_CIRCLE,
-    RQI_T_FILLED_CIRCLE,
-    RQI_T_STRING,
-    RQI_T_SPRITE,
-    RQI_T_BITMAP,
-    RQI_T_POLYGON, 
-    RQI_T_FILLED_POLYGON,
-    RQI_T_LIGHT,
-    RQI_T_SVG,
-    RQI_T_EXTENDED = 64,
-    RQI_T_DBL_EXTENDED = 128;
-    RQI_T_MAX = 255, //Ensure that a RenderQueueItemType_t variable is 8 bits
-} RenderQueueItemType_t;
 
 //RenderQueueItem.flags macros
 #define RQI_UPDATE   (1u << 0)
@@ -208,11 +223,7 @@ typedef enum {
 //A list of points in 2D space, used for saving the vertices of RenderQueueItems. Same size as RenderQueueItem_t
 //and Triangle_t.
 typedef struct __packed {
-    int16_t points[12];
-    uint8_t numPoints;
-    uint8_t color;
-    uint8_t hidden;
-    uint8_t __SPACER;
+    uint16_t points[14];
 } Points_t;
 
 //A single triangle, used for polygon meshes in 3D rendering. Same size as RenderQueueItem_t and Points_t.
@@ -284,10 +295,42 @@ inline void clearRenderQueueItemData(RenderQueueItem_t * item) {
 }
 
 inline RenderQueueItem_t * findRenderQueueItem(uint32_t itemUID) {
-    for(RenderQueueItem_t * i = renderQueueStart; i < lastItem; i++) {
+    for(RenderQueueItem_t * i = (RenderQueueItem_t *)renderQueueStart; i < lastItem; i++) {
         if(i->uid == itemUID) return i;
         i += i->numPointsOrTriangles; //skip over the Points_t or Triangle_t structs
     }
 }
+
+inline uint16_t min(uint16_t a, uint16_t b, uint16_t c) {
+    if(a < b && a < c) return a;
+    if(b < a && b < c) return b;
+    else return c;
+}
+
+inline uint16_t max(uint16_t a, uint16_t b, uint16_t c) {
+    if(a > b && a > c) return a;
+    if(b > a && b > c) return b;
+    else return c;
+}
+
+
+/*
+        Constants
+=========================
+*/
+//LSBs for DMA CTRL register bits (pico's SDK constants weren't great)
+#define SDK_DMA_CTRL_EN 0
+#define SDK_DMA_CTRL_HIGH_PRIORITY 1
+#define SDK_DMA_CTRL_DATA_SIZE 2
+#define SDK_DMA_CTRL_INCR_READ 4
+#define SDK_DMA_CTRL_INCR_WRITE 5
+#define SDK_DMA_CTRL_RING_SIZE 6
+#define SDK_DMA_CTRL_RING_SEL 10
+#define SDK_DMA_CTRL_CHAIN_TO 11
+#define SDK_DMA_CTRL_TREQ_SEL 15
+#define SDK_DMA_CTRL_IRQ_QUIET 21
+#define SDK_DMA_CTRL_BSWAP 22
+#define SDK_DMA_CTRL_SNIFF_EN 23
+#define SDK_DMA_CTRL_BUSY 24
 
 #endif

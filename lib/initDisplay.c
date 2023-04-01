@@ -1,20 +1,5 @@
 #include "lib-internal.h"
 
-//LSBs for DMA CTRL register bits (pico's SDK constants weren't great)
-#define SDK_DMA_CTRL_EN 0
-#define SDK_DMA_CTRL_HIGH_PRIORITY 1
-#define SDK_DMA_CTRL_DATA_SIZE 2
-#define SDK_DMA_CTRL_INCR_READ 4
-#define SDK_DMA_CTRL_INCR_WRITE 5
-#define SDK_DMA_CTRL_RING_SIZE 6
-#define SDK_DMA_CTRL_RING_SEL 10
-#define SDK_DMA_CTRL_CHAIN_TO 11
-#define SDK_DMA_CTRL_TREQ_SEL 15
-#define SDK_DMA_CTRL_IRQ_QUIET 21
-#define SDK_DMA_CTRL_BSWAP 22
-#define SDK_DMA_CTRL_SNIFF_EN 23
-#define SDK_DMA_CTRL_BUSY 24
-
 static void initSecondCore();
 static void updateFramePtr();
 
@@ -185,13 +170,18 @@ int initDisplay() {
 }
 
 int deInitDisplay() {
+    //Stop core 1
+
+    deInitGarbageCollector();
+    
     dma_hw->abort = (1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA);
     while(dma_hw->abort); //Wait until all channels are stopped
 
     dma_hw->ch[frameCtrlDMA].al1_ctrl = 0; //clears the CTRL.EN bit (along with the rest of the reg)
     dma_hw->ch[frameDataDMA].al1_ctrl = 0;
+    dma_hw->ch[blankDataDMA].al1_ctrl = 0;
     
-    dma_unclaim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA));
+    dma_unclaim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA));
     irq_set_enabled(DMA_IRQ_0, false);
 
     pio_set_sm_mask_enabled(pio0, 0b0111, false);
@@ -245,10 +235,13 @@ static void initDMA() {
                                         (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL)| (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
     dma_hw->inte0 = (1 << frameCtrlDMA);
+    syscfg_hw->proc1_nmi_mask = (1 << DMA_IRQ_0); //Make the DMA interrupt the NMI for core 1 (will run immediately and regardless of anything)
 
     // Configure the processor to update the line count when DMA IRQ 0 is asserted
     irq_set_exclusive_handler(DMA_IRQ_0, updateFramePtr);
     irq_set_enabled(DMA_IRQ_0, true);
+
+    initGarbageCollector();
 
     dma_hw->multi_channel_trigger = (1 << frameCtrlDMA); //Start!
 }
@@ -264,6 +257,15 @@ static void initSecondCore() {
 static void updateFramePtr() {
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << frameCtrlDMA;
+
+    //Grab the element in frameReadAddr that frameCtrlDMA just wrote (hence the -1) and see if it was an
+    //interpolated line. If so, incrememt the interpolated line counter and flag the renderer so it can start
+    //re-rendering it.
+    if((((uint8_t *)dma_hw->ch[frameCtrlDMA].read_addr) - 1) < frameBufferStart && 
+       (((uint8_t *)dma_hw->ch[frameCtrlDMA].read_addr) - 1) >= (blankLineStart + frameWidth)) {
+        interpolatedLine = (interpolatedLine + 1) % displayConfig->numInterpolatedLines;
+        startInterpolation = true;
+    }
 
     if(dma_hw->ch[frameCtrlDMA].read_addr >= (io_rw_32) &frameReadAddrStart[frameFullHeight*displayConfig->resolutionScale]) {
         dma_hw->ch[frameCtrlDMA].read_addr = (io_rw_32) frameReadAddrStart;

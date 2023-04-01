@@ -30,7 +30,7 @@ void game()
         //sleep_ms(250);
     }
     //printf("\n");
-
+    /*
     initPicoVGA(&displayConf, &controllerConf, &audioConf, &sdConf, &usbConf);
 
     //Draw lines
@@ -106,6 +106,6 @@ void game()
     }
     sleep_ms(500);
     clearScreen();
-
+    */
 
 }

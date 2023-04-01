@@ -93,25 +93,25 @@ void updateFullDisplay();
         Drawing
 =======================
 */
-uint32_t drawPixel(int16_t x, int16_t y, uint8_t color);
-uint32_t drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color, uint8_t thickness);
+uint32_t drawPixel(uint16_t x, uint16_t y, uint8_t color);
+uint32_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness);
 uint32_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t thickness, uint8_t color);
-uint32_t drawTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t thickness, uint8_t color);
-uint32_t drawEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, uint8_t thickness, uint8_t color);
-uint32_t drawPolygon(int16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color);
+uint32_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t thickness, uint8_t color);
+uint32_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness, uint8_t color);
+uint32_t drawPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color);
 
-uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t borderColor, uint8_t fillColor);
-uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t borderColor, uint8_t fillColor);
-uint32_t drawFilledEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, uint8_t borderColor, uint8_t fillColor);
-uint32_t fillPolygon(int16_t points[][2], uint8_t numPoints, uint8_t borderColor, uint8_t fillColor);
+uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
+uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
+uint32_t drawFilledCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
+uint32_t fillPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t color);
 uint32_t fillScreen(uint8_t * obj, uint8_t color);
 
 uint32_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverrideBytes);
-void setTextFont(uint8_t *newFont)
+void setTextFont(uint8_t *newFont);
 
 uint32_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, int8_t scaleX, int8_t scaleY);
 
-void clearScreen()
+void clearScreen();
 
 
 /*
@@ -144,28 +144,40 @@ bool getControllerButton(uint8_t controllerNum, uint8_t button);
         Utilities
 =========================
 */
-/// @brief Convert a 3 byte HTML color code into an 8 bit color.
-/// @param color The HTML color code.
-/// @return An 8 bit compressed color.
+
+/**
+ * @brief Convert a 3 byte HTML color code into an 8 bit color.
+ * 
+ * @param color The HTML color code.
+ * @return An 8 bit compressed color.
+ */
 uint8_t HTMLTo8Bit(uint32_t color);
 
-/// @brief Convert red, green, and blue color values into a single 8 bit color.
-/// @param r Red value
-/// @param g Blue value
-/// @param b Green value
-/// @return An 8 bit compressed color.
+/**
+ * @brief Convert red, green, and blue color values into a single 8 bit color.
+ * 
+ * @param r Red value
+ * @param g Blue value
+ * @param b Green value
+ * @return An 8 bit compressed color.
+ */
 uint8_t rgbTo8Bit(uint8_t r, uint8_t g, uint8_t b);
 
-/// @brief Convert HSV colors into 8 bit compressed RGB.
-/// @param hue Hue value, 0-255
-/// @param saturation Saturation value, 0-255
-/// @param value Brightness, 0-255
-/// @return An 8 bit compressed color
+/**
+ * @brief Convert HSV colors into 8 bit compressed RGB.
+ * @param hue Hue value, 0-255
+ * @param saturation Saturation value, 0-255
+ * @param value Brightness, 0-255
+ * @return An 8 bit compressed color 
+ */
 uint8_t hsvToRGB(uint8_t hue, uint8_t saturation, uint8_t value);
 
-/// @brief Invert a color.
-/// @param color A color to invert.
-/// @return The inverted version of the supplied color.
+/**
+ * @brief Invert a color.
+ * 
+ * @param color A color to invert.
+ * @return The inverted version of the supplied color.
+ */
 uint8_t invertColor(uint8_t color);
 
 /*

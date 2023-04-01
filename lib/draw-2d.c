@@ -3,7 +3,7 @@
 
 #include "pico/malloc.h"
 
-uint32_t drawPixel(int16_t x, int16_t y, uint8_t color) {
+uint32_t drawPixel(uint16_t x, uint16_t y, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -18,7 +18,7 @@ uint32_t drawPixel(int16_t x, int16_t y, uint8_t color) {
     return uid++;
 }
 
-uint32_t drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color, uint8_t thickness) {
+uint32_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -27,14 +27,13 @@ uint32_t drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color,
     lastItem->x = (x1 + x2)/2;
     lastItem->y = (y1 + y2)/2;
     lastItem->scaleZ = (int8_t)thickness;
+    lastItem->thetaZ = (int8_t)color;
 
-    lastItem->numPointsOrTriangles = 1;
+    lastItem->numPointsOrTriangles = 4;
     lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
     //lastItem now points to a Points_t struct right after the RenderQueueItem.
     clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
-    ((Points_t *)lastItem)->color = color;
-    ((Points_t *)lastItem)->numPoints = 4;
     ((Points_t *)lastItem)->points[0] = x1;
     ((Points_t *)lastItem)->points[1] = y1;
     ((Points_t *)lastItem)->points[2] = x2;
@@ -54,14 +53,13 @@ uint32_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8
     lastItem->x = (x1 + x2)/2;
     lastItem->y = (y1 + y2)/2;
     lastItem->scaleZ = (int8_t)thickness;
+    lastItem->thetaZ = (int8_t)color;
 
-    lastItem->numPointsOrTriangles = 1;
+    lastItem->numPointsOrTriangles = 8;
     lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
     //lastItem now points to a Points_t struct right after the RenderQueueItem.
     clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
-    ((Points_t *)lastItem)->color = color;
-    ((Points_t *)lastItem)->numPoints = 8;
     ((Points_t *)lastItem)->points[0] = x1;
     ((Points_t *)lastItem)->points[1] = y1;
     ((Points_t *)lastItem)->points[2] = x2;
@@ -76,7 +74,7 @@ uint32_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8
     return uid++;
 }
 
-uint32_t drawTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t thickness, uint8_t color) {
+uint32_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t thickness, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -85,14 +83,13 @@ uint32_t drawTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3
     lastItem->x = (x1 + x2 + x3)/3;
     lastItem->y = (y1 + y2 + y3)/3;
     lastItem->scaleZ = (int8_t)thickness;
+    lastItem->thetaZ = (int8_t)color;
 
-    lastItem->numPointsOrTriangles = 1;
+    lastItem->numPointsOrTriangles = 6;
     lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
     //lastItem now points to a Points_t struct right after the RenderQueueItem.
     clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
-    ((Points_t *)lastItem)->color = color;
-    ((Points_t *)lastItem)->numPoints = 6;
     ((Points_t *)lastItem)->points[0] = x1;
     ((Points_t *)lastItem)->points[1] = y1;
     ((Points_t *)lastItem)->points[2] = x2;
@@ -105,7 +102,7 @@ uint32_t drawTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3
     return uid++;
 }
 
-uint32_t drawEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, uint8_t thickness, uint8_t color) {
+uint32_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -113,8 +110,7 @@ uint32_t drawEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, u
     lastItem->uid = uid;
     lastItem->x = x;
     lastItem->y = y;
-    lastItem->z = radiusX; //Can't use scaleX/Y/Z because they are 8 bit signed (not big enough).
-    lastItem->numPointsOrTriangles = radiusY;
+    lastItem->z = radius; //Can't use scaleX/Y/Z because they are 8 bit signed (not big enough).
     lastItem->scaleZ = thickness;
     lastItem->thetaZ = color;
 
@@ -123,18 +119,18 @@ uint32_t drawEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, u
     return uid++;
 }
 
-//Draws lines between all points in the list.
-uint32_t drawPolygon(int16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color) {
+//Draws lines between all points in the list. Points must be in clockwise order.
+uint32_t drawPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
     lastItem->type = RQI_T_POLYGON;
     lastItem->uid = uid;
     lastItem->scaleZ = (int8_t)thickness;
+    lastItem->thetaZ = (int8_t)color;
     lastItem->flags = RQI_UPDATE;
 
-    lastItem->numPointsOrTriangles = numPoints/6;
-    if(numPoints % 6 != 0) lastItem->numPointsOrTriangles++;
+    lastItem->numPointsOrTriangles = numPoints;
     lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
     /* This convoluted loop copies the data from points[][] into the Points_t structs. Each Points_t holds 12
@@ -145,18 +141,15 @@ uint32_t drawPolygon(int16_t points[][2], uint8_t numPoints, uint8_t thickness, 
         if(i % 12 == 0) {
             lastItem++;
             clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
-            ((Points_t *)lastItem)->color = color;
-            if(numPoints - i > 6) ((Points_t *)lastItem)->numPoints = 12;
-            else ((Points_t *)lastItem)->numPoints = (numPoints - i)*2;
         }
-        ((Points_t *)lastItem)->points[i % 12] = *(points + i);
+        ((Points_t *)lastItem)->points[i % 12] = *((uint16_t *)points + i);
     }
 
     lastItem++;
     return uid++;
 }
 
-uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t borderColor, uint8_t fillColor) {
+uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -164,15 +157,13 @@ uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
     lastItem->uid = uid;
     lastItem->x = (x1 + x2)/2;
     lastItem->y = (y1 + y2)/2;
-    lastItem->thetaZ = (int8_t)fillColor;
+    lastItem->thetaZ = (int8_t)color;
 
-    lastItem->numPointsOrTriangles = 1;
+    lastItem->numPointsOrTriangles = 8;
     lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
     //lastItem now points to a Points_t struct right after the RenderQueueItem.
     clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
-    ((Points_t *)lastItem)->color = borderColor;
-    ((Points_t *)lastItem)->numPoints = 8;
     ((Points_t *)lastItem)->points[0] = x1;
     ((Points_t *)lastItem)->points[1] = y1;
     ((Points_t *)lastItem)->points[2] = x2;
@@ -187,7 +178,7 @@ uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
     return uid++;
 }
 
-uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t borderColor, uint8_t fillColor) {
+uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -195,15 +186,13 @@ uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, 
     lastItem->uid = uid;
     lastItem->x = (x1 + x2 + x3)/3;
     lastItem->y = (y1 + y2 + y3)/3;
-    lastItem->thetaZ = (int8_t)fillColor;
+    lastItem->thetaZ = (int8_t)color;
 
-    lastItem->numPointsOrTriangles = 1;
+    lastItem->numPointsOrTriangles = 6;
     lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
     //lastItem now points to a Points_t struct right after the RenderQueueItem.
     clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
-    ((Points_t *)lastItem)->color = borderColor;
-    ((Points_t *)lastItem)->numPoints = 6;
     ((Points_t *)lastItem)->points[0] = x1;
     ((Points_t *)lastItem)->points[1] = y1;
     ((Points_t *)lastItem)->points[2] = x2;
@@ -216,7 +205,7 @@ uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, 
     return uid++;
 }
 
-uint32_t drawFilledEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radiusY, uint8_t borderColor, uint8_t fillColor) {
+uint32_t drawFilledCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -224,28 +213,24 @@ uint32_t drawFilledEllipse(int16_t x, int16_t y, uint16_t radiusX, uint16_t radi
     lastItem->uid = uid;
     lastItem->x = x;
     lastItem->y = y;
-    lastItem->z = radiusX; //Can't use scaleX/Y/Z because they are 8 bit signed (not big enough).
-    lastItem->numPointsOrTriangles = radiusY;
-    lastItem->scaleZ = borderColor;
-    lastItem->thetaZ = fillColor;
-
+    lastItem->z = radius; //Can't use scaleX/Y/Z because they are 8 bit signed (not big enough).
+    lastItem->thetaZ = color;
     lastItem->flags = RQI_UPDATE;
     lastItem++;
     return uid++;
 }
 
-//Draws lines and fills between all points in the list.
-uint32_t fillPolygon(int16_t points[][2], uint8_t numPoints, uint8_t borderColor, uint8_t fillColor) {
+//Draws lines and fills between all points in the list. Points must be in clockwise order.
+uint32_t fillPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
     lastItem->type = RQI_T_FILLED_POLYGON;
     lastItem->uid = uid;
-    lastItem->thetaZ = (int8_t) fillColor;
+    lastItem->thetaZ = (int8_t)color;
     lastItem->flags = RQI_UPDATE;
 
-    lastItem->numPointsOrTriangles = numPoints/6;
-    if(numPoints % 6 != 0) lastItem->numPointsOrTriangles++;
+    lastItem->numPointsOrTriangles = numPoints;
     lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
     /* This convoluted loop copies the data from points[][] into the Points_t structs. Each Points_t holds 12
@@ -256,11 +241,8 @@ uint32_t fillPolygon(int16_t points[][2], uint8_t numPoints, uint8_t borderColor
         if(i % 12 == 0) {
             lastItem++;
             clearRenderQueueItemData(lastItem); //Clear out garbage data in the Points_t struct
-            ((Points_t *)lastItem)->color = borderColor;
-            if(numPoints - i > 6) ((Points_t *)lastItem)->numPoints = 12;
-            else ((Points_t *)lastItem)->numPoints = (numPoints - i)*2;
         }
-        ((Points_t *)lastItem)->points[i % 12] = *(points + i);
+        ((Points_t *)lastItem)->points[i % 12] = *((uint16_t *)points + i);
     }
 
     lastItem++;
@@ -285,7 +267,7 @@ uint32_t fillScreen(uint8_t * obj, uint8_t color) {
 void clearScreen() {
     RenderQueueItem_t * item = (RenderQueueItem_t *)buffer;
     while(item < lastItem) {
-        item->type = RQI_T_REMOVED;
+        item->uid = RQI_UID_REMOVED;
         item += item->numPointsOrTriangles + 1; //get past the Points_t or Triangle_t structs packed next to the item
     }
 
@@ -333,7 +315,10 @@ uint32_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color
     lastItem->pointsOrTriangles = (Points_t *)++lastItem;
 
     //lastItem now points to the memory location right after the RenderQueueItem.
-    strcpy((char *)lastItem, str);
+    ((Points_t *)lastItem)->points[0] = x1;
+    ((Points_t *)lastItem)->points[1] = y;
+    ((Points_t *)lastItem)->points[2] = x2;
+    strcpy((char *)(((Points_t *)lastItem)->points[3]), str); //Copy the string in *after* the metadata above
 
     (lastItem - 1)->flags = RQI_UPDATE;
     if(wrap) (lastItem - 1)->flags |= RQI_WORDWRAP;
@@ -387,7 +372,8 @@ void setHidden(uint32_t itemUID, uint8_t hidden) {
 
 //Permanently remove item from the render queue.
 void removeItem(uint32_t itemUID) {
+    if(itemUID == 0) return;
     RenderQueueItem_t * item = findRenderQueueItem(itemUID);
-    item->type = RQI_T_REMOVED;
+    item->uid = RQI_UID_REMOVED;
     updateFullDisplay();
 }

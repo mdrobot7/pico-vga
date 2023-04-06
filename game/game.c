@@ -9,7 +9,7 @@ DisplayConfig_t displayConf = {
     .resolutionScale = RES_SCALED_400x300,
     .autoRender = true,
     .antiAliasing = false,
-    .frameBufferSizeBytes = 0xFFFF,
+    .frameBufferSizeBytes = 0xFFFFFFFF,
     .numInterpolatedLines = 0,
     .peripheralMode = false,
     .clearRenderQueueOnDeInit = false,
@@ -30,15 +30,15 @@ void game()
         //sleep_ms(250);
     }
     //printf("\n");
-    /*
+    
     initPicoVGA(&displayConf, &controllerConf, &audioConf, &sdConf, &usbConf);
-
+    
     //Draw lines
-    for(uint16_t i = 0; i < frameHeight; i += 10) {
-        drawLine(NULL, frameWidth/2, frameHeight/2, i, 0, COLOR_RED, 0);
+    /*for(uint16_t i = 0; i < frameHeight; i += 10) {
+        drawLine(frameWidth/2, frameHeight/2, i, 0, COLOR_RED, 0);
         sleep_ms(15);
-    }
-    for(uint16_t i = 0; i < frameHeight; i += 10) {
+    }*/
+    /*for(uint16_t i = 0; i < frameHeight; i += 10) {
         drawLine(NULL, frameWidth/2, frameHeight/2, frameWidth - 1, i, COLOR_GREEN, 0);
         sleep_ms(15);
     }

@@ -16,6 +16,10 @@ uint16_t frameFullHeight = 0;
 
 uint8_t buffer[PICO_VGA_MAX_MEMORY_BYTES];
 
+//Next unique ID to assign to a render queue item, used so items can be modified after initialization
+uint32_t uid = 1;
+RenderQueueItem_t * lastItem = NULL;
+
 uint8_t * renderQueueStart = NULL;
 uint8_t * renderQueueEnd = NULL;
 uint8_t * sdStart = NULL;
@@ -81,37 +85,40 @@ int initDisplay() {
     pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_y, 32));
 
     //Cap the frame buffer size at the size of one frame or 256kB, whichever is smaller
-    if(displayConfig->frameBufferSizeBytes >= frameWidth*frameHeight) {
+    //Fail if the frame buffer is too small
+    if(displayConfig->frameBufferSizeBytes < frameWidth*5) return 1;
+    if(displayConfig->frameBufferSizeBytes >= frameWidth*frameHeight && frameWidth*frameHeight < PICO_VGA_MAX_MEMORY_BYTES) {
         displayConfig->frameBufferSizeBytes = frameWidth*frameHeight;
     }
+    else if(displayConfig->frameBufferSizeBytes >= 256000 && displayConfig->frameBufferSizeBytes < PICO_VGA_MAX_MEMORY_BYTES) {
+        displayConfig->frameBufferSizeBytes = 256000;
+    }
     else if(displayConfig->frameBufferSizeBytes > 0.75*PICO_VGA_MAX_MEMORY_BYTES) {
-        displayConfig->frameBufferSizeBytes = (uint32_t)0.75*PICO_VGA_MAX_MEMORY_BYTES;
-        //Fail if the frame buffer is too small
-        if(displayConfig->frameBufferSizeBytes < frameWidth*5) return 1;
+        displayConfig->frameBufferSizeBytes = (uint32_t)(0.75*PICO_VGA_MAX_MEMORY_BYTES);
     }
 
     uint32_t numBufferedLines = displayConfig->frameBufferSizeBytes/frameWidth;
+    frameBufferEnd = buffer + PICO_VGA_MAX_MEMORY_BYTES;
 
     //If no interpolation is required
     if(numBufferedLines == frameHeight) {
-        frameBufferStart = buffer + PICO_VGA_MAX_MEMORY_BYTES - frameHeight*frameWidth;
+        frameBufferStart = frameBufferEnd - frameHeight*frameWidth;
         interpolatedLineStart = frameBufferStart;
         blankLineStart = frameBufferStart - frameWidth;
     }
     else {
-        frameBufferStart = buffer + PICO_VGA_MAX_MEMORY_BYTES - numBufferedLines*frameWidth;
+        frameBufferStart = frameBufferEnd - numBufferedLines*frameWidth;
         interpolatedLineStart = frameBufferStart - displayConfig->numInterpolatedLines*frameWidth;
         blankLineStart = interpolatedLineStart - frameWidth;
     }
-    frameBufferEnd = buffer + PICO_VGA_MAX_MEMORY_BYTES;
 
-    frameReadAddrStart = frameBufferStart - frameFullHeight*displayConfig->resolutionScale*sizeof(uint8_t *);
-    frameReadAddrEnd = frameBufferStart;
+    frameReadAddrStart = blankLineStart - frameFullHeight*displayConfig->resolutionScale*sizeof(uint8_t *);
+    frameReadAddrEnd = blankLineStart;
 
     //If the allocation ran out of space (started writing to other memory), then fail
     if(frameReadAddrStart < buffer) return 1;
 
-    if(numBufferedLines != 0) {
+    if(numBufferedLines != frameHeight) {
         /*
             Even distribution algorithm:
         - Finds the distance between each of the interpolated lines (segmentLen)
@@ -123,22 +130,29 @@ int initDisplay() {
         - This algorithm interpolates a line every (segmentLen + 1) lines until it runs out of spares, then
           interpolates every segmentLen lines.
         - This reddit post explains it: https://www.reddit.com/r/learnprogramming/comments/31ns44/splitting_the_contents_of_an_array_into_as_evenly/
+        - i = line in frame, j = buffer line counter, k = interpolated line counter, l = frameReadAddr index counter
         */
         uint16_t segmentLen = frameHeight/(frameHeight - numBufferedLines);
         uint16_t numSpares = frameHeight % (frameHeight - numBufferedLines);
-        for(int i = 0, j = 0, k = 0; i < frameHeight*displayConfig->resolutionScale; i++) {
+        for(int i = 0, j = 0, k = 0; i < frameHeight; i++) {
             if(numSpares != 0 && i % (segmentLen + 1) == 0) {
-                ((uint8_t **)frameReadAddrStart)[i] = interpolatedLineStart + k*frameWidth;
+                for(int l = 0; l < displayConfig->resolutionScale; l++) {
+                    ((uint8_t **)frameReadAddrStart)[(i*displayConfig->resolutionScale) + l] = interpolatedLineStart + k*frameWidth;
+                }
                 k = (k + 1) % displayConfig->numInterpolatedLines;
                 numSpares--;
             }
-            else if(i % segmentLen == 0) {
-                ((uint8_t **)frameReadAddrStart)[i] = interpolatedLineStart + k*frameWidth;
+            else if(numSpares == 0 && i % segmentLen == 0) {
+                for(int l = 0; l < displayConfig->resolutionScale; l++) {
+                    ((uint8_t **)frameReadAddrStart)[(i*displayConfig->resolutionScale) + l] = interpolatedLineStart + k*frameWidth;
+                }
                 k = (k + 1) % displayConfig->numInterpolatedLines;
             }
             else {
                 //If this line isn't interpolated, grab the next buffered line from the framebuffer
-                ((uint8_t **)frameReadAddrStart)[i] = (uint8_t *)(frameBufferStart + frameWidth*(j/displayConfig->resolutionScale));
+                for(int l = 0; l < displayConfig->resolutionScale; l++) {
+                    ((uint8_t **)frameReadAddrStart)[(i*displayConfig->resolutionScale) + l] = (uint8_t *)(frameBufferStart + frameWidth*j);
+                }
                 j++;
             }
         }
@@ -148,8 +162,13 @@ int initDisplay() {
             ((uint8_t **)frameReadAddrStart)[i] = frameBufferStart + frameWidth*(i/displayConfig->resolutionScale);
         }
     }
+    
     for(int i = frameHeight*displayConfig->resolutionScale; i < frameFullHeight*displayConfig->resolutionScale; i++) {
         ((uint8_t **)frameReadAddrStart)[i] = blankLineStart;
+    }
+    //Hacky fix: Since the true height of 640x480 is 525 lines, integer division becomes an issue. This is the fix
+    if(displayConfig->baseResolution == RES_640x480) {
+        ((uint8_t **)frameReadAddrStart)[524] = blankLineStart;
     }
 
     renderQueueStart = buffer;
@@ -235,13 +254,14 @@ static void initDMA() {
                                         (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL)| (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
     dma_hw->inte0 = (1 << frameCtrlDMA);
-    syscfg_hw->proc1_nmi_mask = (1 << DMA_IRQ_0); //Make the DMA interrupt the NMI for core 1 (will run immediately and regardless of anything)
+    //syscfg_hw->proc1_nmi_mask = (1 << DMA_IRQ_0); //Make the DMA interrupt the NMI for core 1 (will run immediately and regardless of anything)
 
     // Configure the processor to update the line count when DMA IRQ 0 is asserted
     irq_set_exclusive_handler(DMA_IRQ_0, updateFramePtr);
     irq_set_enabled(DMA_IRQ_0, true);
 
-    initGarbageCollector();
+    //TODO: Causes hardfaults
+    //initGarbageCollector();
 
     dma_hw->multi_channel_trigger = (1 << frameCtrlDMA); //Start!
 }

@@ -318,7 +318,7 @@ uint32_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color
     ((Points_t *)lastItem)->points[0] = x1;
     ((Points_t *)lastItem)->points[1] = y;
     ((Points_t *)lastItem)->points[2] = x2;
-    strcpy((char *)(((Points_t *)lastItem)->points[3]), str); //Copy the string in *after* the metadata above
+    strcpy((char *)(&((Points_t *)lastItem)->points[3]), str); //Copy the string in *after* the metadata above
 
     (lastItem - 1)->flags = RQI_UPDATE;
     if(wrap) (lastItem - 1)->flags |= RQI_WORDWRAP;

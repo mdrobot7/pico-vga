@@ -13,9 +13,10 @@ add_library(PICO_VGA_LIB STATIC
     init.c
     initDisplay.c
     peripheralMode.c
-    render.c
+    render/render.c
     sd.c
     usb.c
+    utils-internal.c
     utils.c
 )
 target_include_directories(PICO_VGA_LIB PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

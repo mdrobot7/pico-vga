@@ -1,10 +1,4 @@
-#include "lib-internal.h"
-
-#include "pico/multicore.h"
-#include "pico/malloc.h"
-
-//Next unique ID to assign to a render queue item, used so items can be modified after initialization
-uint32_t uid = 1;
+#include "render.h"
 
 static volatile uint8_t update = 0;
 volatile uint8_t interpolatedLine = 0;
@@ -345,7 +339,7 @@ void render() {
 =================================
 */
 static volatile bool garbageCollectorActive = false;
-static uint8_t garbageCollectorDMA = 0;
+static int8_t garbageCollectorDMA = 0;
 struct repeating_timer garbageCollectorTimer;
 
 static void garbageCollectorHandler() {

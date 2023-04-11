@@ -64,7 +64,7 @@ typedef struct __packed {
 } ControllerConfig_t;
 
 typedef struct {
-    uint8_t a;
+    bool stereo; //False = mono audio, true = stereo
 } AudioConfig_t;
 
 typedef struct {

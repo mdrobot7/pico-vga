@@ -62,13 +62,11 @@ extern DisplayConfig_t * displayConfig;
 extern ControllerConfig_t * controllerConfig;
 extern AudioConfig_t * audioConfig;
 extern SDConfig_t * sdConfig;
-extern USBHostConfig_t * usbConfig;
 
 int initDisplay();
 int initController();
 int initAudio();
 int initSD();
-int initUSB();
 int initPeripheralMode();
 
 void initGarbageCollector();
@@ -77,7 +75,6 @@ int deInitDisplay();
 int deInitController();
 int deInitAudio();
 int deInitSD();
-int deInitUSB();
 int deInitPeripheralMode();
 
 void deInitGarbageCollector();
@@ -118,7 +115,7 @@ struct __packed RenderQueueItem_t; //Predefinition, takes care of warnings later
 typedef struct __packed {
     //Unique ID for this RenderQueueItem, so the user can modify it after initialization and remove
     //individually instead of only by clearing the screen.
-    uint32_t uid;
+    RenderQueueUID_t uid;
 
     //The type of object this RenderQueueItem represents.
     RenderQueueItemType_t type;
@@ -152,7 +149,7 @@ typedef struct __packed {
 typedef struct __packed {
     //Unique ID for this RenderQueueItem, so the user can modify it after initialization and remove
     //individually instead of only by clearing the screen.
-    uint32_t uid;
+    RenderQueueUID_t uid;
 
     //The type of object this RenderQueueItem represents.
     RenderQueueItemType_t type;
@@ -186,7 +183,7 @@ typedef struct __packed {
 typedef struct __packed {
     //Unique ID for this RenderQueueItem, so the user can modify it after initialization and remove
     //individually instead of only by clearing the screen.
-    uint32_t uid;
+    RenderQueueUID_t uid;
 
     //The type of object this RenderQueueItem represents.
     RenderQueueItemType_t type;
@@ -234,7 +231,7 @@ typedef struct __packed {
     int16_t x3, y3, z3;
 
     //Coordinates of the normal vector to the triangle (indicates which side is "up", where to apply textures).
-    int16_t normX1, normX2, normX3;
+    int16_t normX, normY, normZ;
 
     //The color of this triangle.
     uint8_t color;
@@ -247,13 +244,13 @@ typedef struct __packed {
 } Triangle_t;
 
 extern RenderQueueItem_t * lastItem;
-extern uint32_t uid;
+extern RenderQueueUID_t uid;
 
 void render();
 
 #define CHAR_WIDTH 5
 #define CHAR_HEIGHT 8
-extern uint8_t *font; //The current font in use by the system
+extern uint8_t * font; //The current font in use by the system
 
 
 /*
@@ -265,7 +262,7 @@ int16_t dotProduct(int16_t * v1, int16_t * v2);
 void multiplyMatrices(int16_t m1[4][4], int16_t m2[4][4], int16_t res[4][4]);
 int32_t renderQueueNumBytesFree();
 void clearRenderQueueItemData(RenderQueueItem_t * item);
-RenderQueueItem_t * findRenderQueueItem(uint32_t itemUID);
+RenderQueueItem_t * findRenderQueueItem(RenderQueueUID_t itemUID);
 uint16_t min(uint16_t a, uint16_t b, uint16_t c);
 uint16_t max(uint16_t a, uint16_t b, uint16_t c);
 

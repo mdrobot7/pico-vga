@@ -35,7 +35,7 @@ void clearRenderQueueItemData(RenderQueueItem_t * item) {
     }
 }
 
-RenderQueueItem_t * findRenderQueueItem(uint32_t itemUID) {
+RenderQueueItem_t * findRenderQueueItem(RenderQueueUID_t itemUID) {
     for(RenderQueueItem_t * i = (RenderQueueItem_t *)renderQueueStart; i < lastItem; i++) {
         if(i->uid == itemUID) return i;
         i += i->numPointsOrTriangles; //skip over the Points_t or Triangle_t structs

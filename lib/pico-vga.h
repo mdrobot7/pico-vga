@@ -16,6 +16,15 @@
 #define PICO_VGA_MAX_MEMORY_BYTES 200000
 
 /*
+        Typedefs
+========================
+*/
+
+//The Unique ID of an item in the render queue, used to modify that item after initialization.
+typedef uint32_t RenderQueueUID_t;
+
+
+/*
         Module Configuration Structs
 ============================================
 */
@@ -73,10 +82,6 @@ typedef struct {
 
 typedef struct {
     uint8_t a;
-} USBHostConfig_t;
-
-typedef struct {
-    uint8_t a;
 } PeripheralModeConfig_t;
 
 
@@ -84,8 +89,8 @@ typedef struct {
         Initialization
 ==============================
 */
-int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerConf, AudioConfig_t * audioConf, SDConfig_t * sdConf, USBHostConfig_t * usbConf);
-int deInitPicoVGA(bool closeDisplay, bool closeController, bool closeAudio, bool closeSD, bool closeUSB);
+int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerConf, AudioConfig_t * audioConf, SDConfig_t * sdConf);
+int deInitPicoVGA(bool closeDisplay, bool closeController, bool closeAudio, bool closeSD);
 void updateFullDisplay();
 
 
@@ -93,23 +98,23 @@ void updateFullDisplay();
         Drawing
 =======================
 */
-uint32_t drawPixel(uint16_t x, uint16_t y, uint8_t color);
-uint32_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness);
-uint32_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t thickness, uint8_t color);
-uint32_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t thickness, uint8_t color);
-uint32_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness, uint8_t color);
-uint32_t drawPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color);
+RenderQueueUID_t drawPixel(uint16_t x, uint16_t y, uint8_t color);
+RenderQueueUID_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness);
+RenderQueueUID_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t thickness, uint8_t color);
+RenderQueueUID_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t thickness, uint8_t color);
+RenderQueueUID_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness, uint8_t color);
+RenderQueueUID_t drawPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color);
 
-uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
-uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
-uint32_t drawFilledCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
-uint32_t fillPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t color);
-uint32_t fillScreen(uint8_t * obj, uint8_t color);
+RenderQueueUID_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
+RenderQueueUID_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
+RenderQueueUID_t drawFilledCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
+RenderQueueUID_t fillPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t color);
+RenderQueueUID_t fillScreen(uint8_t * obj, uint8_t color);
 
-uint32_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverrideBytes);
+RenderQueueUID_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverrideBytes);
 void setTextFont(uint8_t *newFont);
 
-uint32_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, int8_t scaleX, int8_t scaleY);
+RenderQueueUID_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, int8_t scaleX, int8_t scaleY);
 
 void clearScreen();
 
@@ -118,8 +123,8 @@ void clearScreen();
         Drawing Modifiers
 =================================
 */
-void setHidden(uint32_t itemUID, uint8_t hidden);
-void removeItem(uint32_t itemUID);
+void setHidden(RenderQueueUID_t itemUID, bool hidden);
+void removeItem(RenderQueueUID_t itemUID);
 
 
 /*
@@ -201,5 +206,45 @@ uint8_t invertColor(uint8_t color);
 #define COLOR_NAVY    0b00000010
 #define COLOR_MAGENTA 0b11100011
 #define COLOR_PURPLE  0b10000010
+
+
+/*
+        Default Configuration Structs
+=============================================
+*/
+
+//Default configuration for DisplayConfig_t
+#define DISPLAY_CONFIG_DEFAULT {\
+    .baseResolution = RES_800x600,\
+    .resolutionScale = RES_SCALED_400x300,\
+    .autoRender = true,\
+    .antiAliasing = false,\
+    .frameBufferSizeBytes = 0xFFFFFFFF,\
+    .renderQueueSizeBytes = 0,\
+    .numInterpolatedLines = 0,\
+    .peripheralMode = false,\
+    .clearRenderQueueOnDeInit = false,\
+    .colorDelayCycles = 0,\
+}
+
+//Default configuration for ControllerConfig_t
+#define CONTROLLER_CONFIG_DEFAULT {\
+    .numControllers = 8,\
+}
+
+//Default configuration for AudioConfig_t
+#define AUDIO_CONFIG_DEFAULT {\
+    .stereo = true,\
+}
+
+//Default configuration for SDConfig_t
+#define SD_CONFIG_DEFAULT {\
+    .a = 0,\
+}
+
+//Default configuration for PeripheralModeConfig_t
+#define PERIPHERAL_MODE_CONFIG_DEFAULT {\
+    .a = 0,\
+}
 
 #endif

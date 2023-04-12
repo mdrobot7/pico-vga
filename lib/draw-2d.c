@@ -3,7 +3,7 @@
 
 #include "pico/malloc.h"
 
-uint32_t drawPixel(uint16_t x, uint16_t y, uint8_t color) {
+RenderQueueUID_t drawPixel(uint16_t x, uint16_t y, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -18,7 +18,7 @@ uint32_t drawPixel(uint16_t x, uint16_t y, uint8_t color) {
     return uid++;
 }
 
-uint32_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness) {
+RenderQueueUID_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -44,7 +44,7 @@ uint32_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t co
     return uid++;
 }
 
-uint32_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t thickness, uint8_t color) {
+RenderQueueUID_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t thickness, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -74,7 +74,7 @@ uint32_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8
     return uid++;
 }
 
-uint32_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t thickness, uint8_t color) {
+RenderQueueUID_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t thickness, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -102,7 +102,7 @@ uint32_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16
     return uid++;
 }
 
-uint32_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness, uint8_t color) {
+RenderQueueUID_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -120,7 +120,7 @@ uint32_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness, 
 }
 
 //Draws lines between all points in the list. Points must be in clockwise order.
-uint32_t drawPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color) {
+RenderQueueUID_t drawPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -149,7 +149,7 @@ uint32_t drawPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t thickness,
     return uid++;
 }
 
-uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
+RenderQueueUID_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -178,7 +178,7 @@ uint32_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
     return uid++;
 }
 
-uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
+RenderQueueUID_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -205,7 +205,7 @@ uint32_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, 
     return uid++;
 }
 
-uint32_t drawFilledCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
+RenderQueueUID_t drawFilledCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -221,7 +221,7 @@ uint32_t drawFilledCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color
 }
 
 //Draws lines and fills between all points in the list. Points must be in clockwise order.
-uint32_t fillPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t color) {
+RenderQueueUID_t fillPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -249,7 +249,7 @@ uint32_t fillPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t color) {
     return uid++;
 }
 
-uint32_t fillScreen(uint8_t * obj, uint8_t color) {
+RenderQueueUID_t fillScreen(uint8_t * obj, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -282,7 +282,7 @@ void clearScreen() {
 */
 uint8_t *font = (uint8_t *)cp437; //The current font in use by the system
 
-uint32_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverrideBytes) {
+RenderQueueUID_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char *str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverrideBytes) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -335,7 +335,7 @@ void setTextFont(uint8_t *newFont) {
         Sprite Drawing Functions
 ========================================
 */
-uint32_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, int8_t scaleX, int8_t scaleY) {
+RenderQueueUID_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, int8_t scaleX, int8_t scaleY) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);
 
@@ -362,7 +362,7 @@ uint32_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uin
 ======================================
 */
 //Set item to be hidden (true = hidden, false = showing)
-void setHidden(uint32_t itemUID, uint8_t hidden) {
+void setHidden(RenderQueueUID_t itemUID, bool hidden) {
     RenderQueueItem_t * item = findRenderQueueItem(itemUID);
     if(item->flags & RQI_HIDDEN) item->flags &= ~RQI_HIDDEN;
     else item->flags |= RQI_HIDDEN;
@@ -371,7 +371,7 @@ void setHidden(uint32_t itemUID, uint8_t hidden) {
 }
 
 //Permanently remove item from the render queue.
-void removeItem(uint32_t itemUID) {
+void removeItem(RenderQueueUID_t itemUID) {
     if(itemUID == 0) return;
     RenderQueueItem_t * item = findRenderQueueItem(itemUID);
     item->uid = RQI_UID_REMOVED;

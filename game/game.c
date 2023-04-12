@@ -10,6 +10,7 @@ DisplayConfig_t displayConf = {
     .autoRender = true,
     .antiAliasing = false,
     .frameBufferSizeBytes = 0xFFFFFFFF,
+    .renderQueueSizeBytes = 0,
     .numInterpolatedLines = 0,
     .peripheralMode = false,
     .clearRenderQueueOnDeInit = false,
@@ -20,7 +21,6 @@ ControllerConfig_t controllerConf = {
 };
 AudioConfig_t audioConf = {};
 SDConfig_t sdConf = {};
-USBHostConfig_t usbConf = {};
 
 void game()
 {
@@ -31,7 +31,7 @@ void game()
     }
     //printf("\n");
     
-    initPicoVGA(&displayConf, &controllerConf, &audioConf, &sdConf, &usbConf);
+    initPicoVGA(&displayConf, &controllerConf, &audioConf, &sdConf);
     
     //Draw lines
     /*for(uint16_t i = 0; i < frameHeight; i += 10) {

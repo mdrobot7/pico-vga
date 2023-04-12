@@ -191,7 +191,8 @@ int initDisplay() {
 int deInitDisplay() {
     //Stop core 1
 
-    deInitGarbageCollector();
+    //TODO: Init causes hardfaults
+    //deInitGarbageCollector();
     
     dma_hw->abort = (1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA);
     while(dma_hw->abort); //Wait until all channels are stopped
@@ -254,7 +255,7 @@ static void initDMA() {
                                         (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL)| (1 << SDK_DMA_CTRL_IRQ_QUIET);
 
     dma_hw->inte0 = (1 << frameCtrlDMA);
-    //syscfg_hw->proc1_nmi_mask = (1 << DMA_IRQ_0); //Make the DMA interrupt the NMI for core 1 (will run immediately and regardless of anything)
+    irq_set_priority(DMA_IRQ_0, 0); //Set the DMA interrupt to the highest priority
 
     // Configure the processor to update the line count when DMA IRQ 0 is asserted
     irq_set_exclusive_handler(DMA_IRQ_0, updateFramePtr);

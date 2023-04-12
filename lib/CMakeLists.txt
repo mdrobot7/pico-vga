@@ -15,7 +15,6 @@ add_library(PICO_VGA_LIB STATIC
     peripheralMode.c
     render/render.c
     sd.c
-    usb.c
     utils-internal.c
     utils.c
 )

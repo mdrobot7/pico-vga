@@ -1,7 +1,7 @@
 #include "lib-internal.h"
 
 static void initSecondCore();
-static void updateFramePtr();
+static irq_handler_t updateFramePtr();
 
 //Widths and heights for the three base resolutions
 const uint16_t frameSize[3][4] = {{800, 600, 1056, 628},
@@ -17,7 +17,7 @@ uint16_t frameFullHeight = 0;
 uint8_t buffer[PICO_VGA_MAX_MEMORY_BYTES];
 
 //Next unique ID to assign to a render queue item, used so items can be modified after initialization
-uint32_t uid = 1;
+RenderQueueUID_t uid = 1;
 RenderQueueItem_t * lastItem = NULL;
 
 uint8_t * renderQueueStart = NULL;
@@ -39,6 +39,8 @@ uint8_t frameCtrlDMA = 0;
 uint8_t frameDataDMA = 0;
 uint8_t blankDataDMA = 0;
 
+static DisplayConfigBaseResolution_t lastResolution = 7; //Random unused enum value
+
 int initDisplay() {
     clocks_init();
     frameWidth = frameSize[displayConfig->baseResolution][0]/displayConfig->resolutionScale;
@@ -49,40 +51,45 @@ int initDisplay() {
     //Override if there are less than 2 interpolated lines
     if(displayConfig->numInterpolatedLines < 2) displayConfig->numInterpolatedLines = 2;
 
-    if(displayConfig->baseResolution == RES_800x600) {
-        //120MHz system clock frequency (multiple of 40MHz pixel clock)
-        set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
+    if(displayConfig->disconnectDisplay || (!displayConfig->disconnectDisplay && lastResolution != displayConfig->baseResolution)) {
+        if((displayConfig->baseResolution == RES_800x600 && displayConfig->disconnectDisplay) || 
+        (!displayConfig->disconnectDisplay && lastResolution != displayConfig->baseResolution)) {
+            //120MHz system clock frequency (multiple of 40MHz pixel clock)
+            set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
-        // Add PIO program to PIO instruction memory. SDK will find location and
-        // return with the memory offset of the program.
-        uint offset = pio_add_program(pio0, &color_program);
+            // Add PIO program to PIO instruction memory. SDK will find location and
+            // return with the memory offset of the program.
+            uint offset = pio_add_program(pio0, &color_program);
 
-        // Initialize color pio program, but DON'T enable PIO state machine
-        //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock
-        color_program_init(pio0, 0, offset, 0, 3*displayConfig->resolutionScale);
+            // Initialize color pio program, but DON'T enable PIO state machine
+            //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock
+            color_program_init(pio0, 0, offset, 0, 3*displayConfig->resolutionScale);
 
-        offset = pio_add_program(pio0, &hsync_800x600_program);
-        hsync_800x600_program_init(pio0, 1, offset, HSYNC_PIN);
+            offset = pio_add_program(pio0, &hsync_800x600_program);
+            hsync_800x600_program_init(pio0, 1, offset, HSYNC_PIN);
 
-        offset = pio_add_program(pio0, &vsync_800x600_program);
-        vsync_800x600_program_init(pio0, 2, offset, VSYNC_PIN);
+            offset = pio_add_program(pio0, &vsync_800x600_program);
+            vsync_800x600_program_init(pio0, 2, offset, VSYNC_PIN);
 
-        pio_claim_sm_mask(pio0, 0b0111);
+            pio_claim_sm_mask(pio0, 0b0111);
+        }
+        else if(displayConfig->baseResolution == RES_640x480) {
+            //configure clocks for 640x480 resolution
+        }
+        else if(displayConfig->baseResolution == RES_1024x768) {
+            //130MHz system clock frequency (multiple of 65MHz pixel clock)
+        }
+
+        //Shift the frame left or right on the screen, configurable at runtime.
+        pio_sm_put_blocking(pio0, 0, (uint32_t)(displayConfig->colorDelayCycles/32));
+        pio_sm_exec_wait_blocking(pio0, 0, pio_encode_pull(false, false));
+        pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_x, 32));
+        pio_sm_put_blocking(pio0, 0, (uint32_t)(displayConfig->colorDelayCycles % 32));
+        pio_sm_exec_wait_blocking(pio0, 0, pio_encode_pull(false, false));
+        pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_y, 32));
     }
-    else if(displayConfig->baseResolution == RES_640x480) {
-        //configure clocks for 640x480 resolution
-    }
-    else if(displayConfig->baseResolution == RES_1024x768) {
-        //130MHz system clock frequency (multiple of 65MHz pixel clock)
-    }
 
-    //Shift the frame left or right on the screen, configurable at runtime.
-    pio_sm_put_blocking(pio0, 0, (uint32_t)(displayConfig->colorDelayCycles/32));
-    pio_sm_exec_wait_blocking(pio0, 0, pio_encode_pull(false, false));
-    pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_x, 32));
-    pio_sm_put_blocking(pio0, 0, (uint32_t)(displayConfig->colorDelayCycles % 32));
-    pio_sm_exec_wait_blocking(pio0, 0, pio_encode_pull(false, false));
-    pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_y, 32));
+    lastResolution = displayConfig->baseResolution;
 
     //Cap the frame buffer size at the size of one frame or 256kB, whichever is smaller
     //Fail if the frame buffer is too small
@@ -189,10 +196,12 @@ int initDisplay() {
 }
 
 int deInitDisplay() {
-    //Stop core 1
+    multicore_reset_core1(); //Stop core 1
 
     //TODO: Init causes hardfaults
     //deInitGarbageCollector();
+
+    deInitLineInterpolation();
     
     dma_hw->abort = (1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA);
     while(dma_hw->abort); //Wait until all channels are stopped
@@ -261,31 +270,33 @@ static void initDMA() {
     irq_set_exclusive_handler(DMA_IRQ_0, updateFramePtr);
     irq_set_enabled(DMA_IRQ_0, true);
 
-    //TODO: Causes hardfaults
-    //initGarbageCollector();
-
     dma_hw->multi_channel_trigger = (1 << frameCtrlDMA); //Start!
 }
 
 static void initSecondCore() {
     initDMA(); //Must be run here so the IRQ runs on the second core
+    //TODO: Causes hardfaults
+    //initGarbageCollector();
+    if(displayConfig->interpolatedRenderingMode) {
+        initLineInterpolation();
+    }
     pio_enable_sm_mask_in_sync(pio0, 0b0111); //start all 3 state machines
 
     render();
 }
 
 //DMA Interrupt Callback
-static void updateFramePtr() {
-    // Clear the interrupt request.
-    dma_hw->ints0 = 1u << frameCtrlDMA;
+static irq_handler_t updateFramePtr() {
+    dma_hw->ints0 = 1u << frameCtrlDMA; //Clear interrupt
 
     //Grab the element in frameReadAddr that frameCtrlDMA just wrote (hence the -1) and see if it was an
     //interpolated line. If so, incrememt the interpolated line counter and flag the renderer so it can start
     //re-rendering it.
-    if((((uint8_t *)dma_hw->ch[frameCtrlDMA].read_addr) - 1) < frameBufferStart && 
+    if(displayConfig->interpolatedRenderingMode && 
+       (((uint8_t *)dma_hw->ch[frameCtrlDMA].read_addr) - 1) < frameBufferStart && 
        (((uint8_t *)dma_hw->ch[frameCtrlDMA].read_addr) - 1) >= (blankLineStart + frameWidth)) {
         interpolatedLine = (interpolatedLine + 1) % displayConfig->numInterpolatedLines;
-        startInterpolation = true;
+        irq_set_pending(lineInterpolationIRQ);
     }
 
     if(dma_hw->ch[frameCtrlDMA].read_addr >= (io_rw_32) &frameReadAddrStart[frameFullHeight*displayConfig->resolutionScale]) {

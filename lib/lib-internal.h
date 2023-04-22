@@ -54,8 +54,9 @@ extern uint8_t controllerDataDMA;
 extern struct repeating_timer garbageCollectorTimer;
 
 extern volatile uint8_t interpolatedLine; //The interpolated line currently being written to
-extern volatile uint8_t startInterpolation; //start rendering the next interpolated line
 extern volatile uint8_t interpolationIncomplete; //Number of uncompleted interpolated lines (not enough time to finish before needing to be pushed)
+extern volatile uint8_t lineInterpolationIRQ = 0;
+
 
 //Configuration Options
 extern DisplayConfig_t * displayConfig;
@@ -67,17 +68,21 @@ int initDisplay();
 int initController();
 int initAudio();
 int initSD();
+int initStats();
 int initPeripheralMode();
 
 void initGarbageCollector();
+void initLineInterpolation();
 
 int deInitDisplay();
 int deInitController();
 int deInitAudio();
 int deInitSD();
+int deInitStats();
 int deInitPeripheralMode();
 
 void deInitGarbageCollector();
+void deInitLineInterpolation();
 
 /*
         Render Queue

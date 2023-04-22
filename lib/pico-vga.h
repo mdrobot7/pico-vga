@@ -57,13 +57,15 @@ typedef enum {
 typedef struct {
     DisplayConfigBaseResolution_t baseResolution;
     DisplayConfigResolutionScale_t resolutionScale;
-    uint8_t autoRender; //Turn on autoRendering (no manual updateDisplay() call required)
-    uint8_t antiAliasing;
+    bool autoRender; //Turn on autoRendering (no manual updateDisplay() call required)
+    bool antiAliasing; //Turn antialiasing on or off
     uint32_t frameBufferSizeBytes; //Cap the size of the frame buffer (if unused, set to 0xFFFF) -- Initializer will write back the amount of memory used. Default: Either the size of one frame or 75% of PICO_VGA_MAX_MEMORY_BYTES, whichever is less.
     uint8_t numInterpolatedLines; //Override the default number of interpolated frame lines -- used if the frame buffer is not large enough to hold all of the frame data. Default = 2.
     uint32_t renderQueueSizeBytes; //Cap the size of the render queue (if unused, set to 0).
-    uint8_t peripheralMode; //Enable command input via SPI.
-    uint8_t clearRenderQueueOnDeInit;
+    bool peripheralMode; //Enable command input via SPI.
+    bool clearRenderQueueOnDeInit; //Clear the render queue after a call to deInitPicoVGA()
+    bool disconnectDisplay; //Setting to true causes the display to disconnect and go to sleep after a call to deInitPicoVGA().
+    bool interpolatedRenderingMode; //Set the rendering mode when interpolating lines. False: begin interpolating lines after rendering the rest of the frame. True: Interpolate lines as they are displayed in real time
     uint16_t colorDelayCycles;
 } DisplayConfig_t;
 
@@ -224,6 +226,8 @@ uint8_t invertColor(uint8_t color);
     .numInterpolatedLines = 0,\
     .peripheralMode = false,\
     .clearRenderQueueOnDeInit = false,\
+    .disconnectDisplay = false,\
+    .interpolatedRenderingMode = false,\
     .colorDelayCycles = 0,\
 }
 

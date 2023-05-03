@@ -252,6 +252,7 @@ extern RenderQueueItem_t * lastItem;
 extern RenderQueueUID_t uid;
 
 void render();
+void renderAA();
 
 #define CHAR_WIDTH 5
 #define CHAR_HEIGHT 8

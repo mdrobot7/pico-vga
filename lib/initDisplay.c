@@ -282,7 +282,8 @@ static void initSecondCore() {
     }
     pio_enable_sm_mask_in_sync(pio0, 0b0111); //start all 3 state machines
 
-    render();
+    if(displayConfig->antiAliasing) renderAA();
+    else render();
 }
 
 //DMA Interrupt Callback

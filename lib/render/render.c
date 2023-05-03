@@ -43,34 +43,29 @@ void render() {
             if(!(item->flags & RQI_HIDDEN) && item->uid == RQI_UID_REMOVED) {
             switch(item->type) {
                 case RQI_T_PIXEL:
-                    writePixel(item->y, item->x, item->thetaZ);
+                    writeBufferedPixel(item->y, item->x, item->thetaZ);
                     break;
                 case RQI_T_LINE:
+                    Points_t * pts = (Points_t *)item->pointsOrTriangles;
+                    renderLine(pts->points[0], pts->points[1], pts->points[2], pts->points[3], item->thetaZ, item->scaleZ);
                     break;
                 case RQI_T_RECTANGLE:
                     break;
                 case RQI_T_TRIANGLE:
+                    Points_t * pts = (Points_t *)item->pointsOrTriangles;
+                    renderTriangle(pts->points[0], pts->points[1], pts->points[2], pts->points[3], pts->points[4], pts->points[5], item->thetaZ, item->scaleZ);
                     break;
                 case RQI_T_CIRCLE:
-                    //x1, y1 = center, z = radius in x direction
-                    for(uint16_t y = item->y - item->z; y <= item->y + item->z; y++) {
-                        uint16_t x = sqrt(pow(item->z, 2.0) - pow(y - item->y, 2.0));
-                        writePixel(y, item->x + x, item->thetaZ); //handle the +/- from the sqrt (the 2 sides of the circle)
-                        writePixel(y, item->x - x, item->thetaZ);
-                    }
+                    renderCircle(item->x, item->y, item->z, item->thetaZ);
                     break;
                 case RQI_T_FILLED_RECTANGLE:
                     break;
                 case RQI_T_FILLED_TRIANGLE:
+                    Points_t * pts = (Points_t *)item->pointsOrTriangles;
+                    renderFilledTriangle(pts->points[0], pts->points[1], pts->points[2], pts->points[3], pts->points[4], pts->points[5], item->thetaZ);
                     break;
                 case RQI_T_FILLED_CIRCLE:
-                    //x1, y1 = center, z = radius in x direction
-                    for(uint16_t y = item->y - item->z; y <= item->y + item->z; y++) {
-                        uint16_t x = sqrt(pow(item->z, 2.0) - pow(y - item->y, 2.0));
-                        for(uint16_t i = item->x - x; i <= item->x + x; i++) {
-                            writePixel(y, i, item->thetaZ);
-                        }
-                    }
+                    renderFilledCircle(item->x, item->y, item->z, item->thetaZ);
                     break;
                 case RQI_T_STRING:
                     /*//x1, y = top left corner, x2 = right side (for word wrap), thetaZ = color, scaleZ = background
@@ -130,6 +125,16 @@ void render() {
 
         update = 0;
     }
+}
+
+/**
+ * @brief The renderer, but with antialiasing! Splitting the functions like this saves CPU cycles and
+ * makes the code neater, but it's entirely the same code except it calls renderThingAA() instead of the
+ * standard render functions.
+ * 
+ */
+void renderAA() {
+    return;
 }
 
 static void interpolate(uint16_t line) {

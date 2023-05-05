@@ -108,13 +108,13 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
     gpio_set_function(8, GPIO_FUNC_PWM);
     gpio_set_function(10, GPIO_FUNC_PWM);
 
-    //Leave CSR at default
+    pwm_hw->slice[4].csr = 1u << PWM_CH4_CSR_A_INV_LSB;
     pwm_hw->slice[4].div = 5 << 4; //Base frequency of 125MHz/5 = 25MHz
     pwm_hw->slice[4].top = 800 - 1; //num pixels in the line
     pwm_hw->slice[4].ctr = 96 + 48; //Write to the counter -- sync pulse + back porch
     pwm_hw->slice[4].cc = 96; //length of the sync pulse
 
-    //Leave CSR at default
+    pwm_hw->slice[5].csr = 1u << PWM_CH5_CSR_A_INV_LSB;
     pwm_hw->slice[5].div = 250 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
     pwm_hw->slice[5].top = (525*16) - 1; //num lines in frame, adjusted for clk div fix
     pwm_hw->slice[5].ctr = (2 + 33)*16; // sync pulse + back porch

@@ -51,7 +51,7 @@ static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPi
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
     
     //Setup state machine clock divider
-    sm_config_set_clkdiv(&c, 3.0*divider); //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock
+    sm_config_set_clkdiv(&c, 5.0*divider); //CPU Base clock (after reconfig): 125.0 MHz. 125/5 = 25Mhz pixel clock
     
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);

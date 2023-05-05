@@ -81,9 +81,9 @@ static void render();
 ===========================================
 */
 int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, uint8_t autoRenderEn) {
-    //Clock configuration -- 120MHz system clock frequency
+    //Clock configuration -- 125MHz system clock frequency
     clocks_init();
-    set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
+    set_sys_clock_pll(1500000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
     if(P1 != NULL) C1 = P1;
     if(P2 != NULL) C2 = P2;
@@ -108,32 +108,17 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
     gpio_set_function(8, GPIO_FUNC_PWM);
     gpio_set_function(10, GPIO_FUNC_PWM);
 
-
-    /*
     //Leave CSR at default
-    pwm_hw->slice[4].div = 3 << 4; //Base frequency of 120MHz/3 = 40MHz
-    pwm_hw->slice[4].top = 1056; //num pixels in the line
-    pwm_hw->slice[4].ctr = 128 + 88; //Write to the counter -- sync pulse + back porch
-    pwm_hw->slice[4].cc = 128; //length of the sync pulse
+    pwm_hw->slice[4].div = 5 << 4; //Base frequency of 125MHz/5 = 25MHz
+    pwm_hw->slice[4].top = 800 - 1; //num pixels in the line
+    pwm_hw->slice[4].ctr = 96 + 48; //Write to the counter -- sync pulse + back porch
+    pwm_hw->slice[4].cc = 96; //length of the sync pulse
 
     //Leave CSR at default
-    pwm_hw->slice[5].div = 198 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
-    pwm_hw->slice[5].top = 628*16; //num lines in frame, adjusted for clk div fix
-    pwm_hw->slice[5].ctr = (4 + 23)*16; // sync pulse + back porch
-    pwm_hw->slice[5].cc = 4*16; //length of sync
-    */
-
-    //Leave CSR at default
-    pwm_hw->slice[4].div = 3 << 4; //Base frequency of 120MHz/3 = 40MHz
-    pwm_hw->slice[4].top = 1056 - 1; //num pixels in the line
-    pwm_hw->slice[4].ctr = 128 + 88; //Write to the counter -- sync pulse + back porch
-    pwm_hw->slice[4].cc = 128; //length of the sync pulse
-
-    //Leave CSR at default
-    pwm_hw->slice[5].div = 198 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
-    pwm_hw->slice[5].top = (628*16) - 1; //num lines in frame, adjusted for clk div fix
-    pwm_hw->slice[5].ctr = (4 + 23)*16; // sync pulse + back porch
-    pwm_hw->slice[5].cc = 4*16; //length of sync
+    pwm_hw->slice[5].div = 250 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
+    pwm_hw->slice[5].top = (525*16) - 1; //num lines in frame, adjusted for clk div fix
+    pwm_hw->slice[5].ctr = (2 + 33)*16; // sync pulse + back porch
+    pwm_hw->slice[5].cc = 2*16; //length of sync
 
     pio0_hw->ctrl |= 1u | (1u << 8); //Enable and restart clock for color state machine
     pwm_hw->en |= (1 << 4) | (1 << 5);

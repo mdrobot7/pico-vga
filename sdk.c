@@ -135,8 +135,8 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
     pwm_hw->slice[5].ctr = (4 + 23)*16; // sync pulse + back porch
     pwm_hw->slice[5].cc = 4*16; //length of sync
 
-    pwm_hw->en |= (1 << 4) | (1 << 5);
     pio0_hw->ctrl |= 1u | (1u << 8); //Enable and restart clock for color state machine
+    pwm_hw->en |= (1 << 4) | (1 << 5);
 
 //=======================================================================//
     multicore_launch_core1(render);

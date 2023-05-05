@@ -30,6 +30,11 @@ int main() {
     
     initDisplay(&P1, &P2, &P3, &P4, true);
 
+    fillScreen(NULL, NULL, 0b11100000);
+    drawFilledRectangle(NULL, 0, 0, 10, FRAME_HEIGHT - 1, 0b00011100, 0b00011100);
+    drawFilledRectangle(NULL, FRAME_WIDTH - 11, 0, FRAME_WIDTH - 1, FRAME_HEIGHT - 1, 0b11, 0b11);
+    while(1);
+
     RenderQueueItem *temp = drawRectangle(NULL, 150, 150, 350, 250, 0b00011100);
     //updateDisplay();
 

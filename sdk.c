@@ -1,6 +1,8 @@
 #include "sdk.h"
 #include "sdk-chars.h"
 
+#include "hardware/pwm.h"
+
 /*
 TODO:
 - Finish draw functions
@@ -96,8 +98,47 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
 
     initPIO();
     initDMA();
-    pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111); //start all 4 state machines
+    //pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111); //start all 4 state machines
 
+//======================================================================//
+
+    //HSYNC - gpio8, slice 4a
+    //VSYNC - gpio10, slice 5a
+
+    gpio_set_function(8, GPIO_FUNC_PWM);
+    gpio_set_function(10, GPIO_FUNC_PWM);
+
+
+    /*
+    //Leave CSR at default
+    pwm_hw->slice[4].div = 3 << 4; //Base frequency of 120MHz/3 = 40MHz
+    pwm_hw->slice[4].top = 1056; //num pixels in the line
+    pwm_hw->slice[4].ctr = 128 + 88; //Write to the counter -- sync pulse + back porch
+    pwm_hw->slice[4].cc = 128; //length of the sync pulse
+
+    //Leave CSR at default
+    pwm_hw->slice[5].div = 198 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
+    pwm_hw->slice[5].top = 628*16; //num lines in frame, adjusted for clk div fix
+    pwm_hw->slice[5].ctr = (4 + 23)*16; // sync pulse + back porch
+    pwm_hw->slice[5].cc = 4*16; //length of sync
+    */
+
+    //Leave CSR at default
+    pwm_hw->slice[4].div = 3 << 4; //Base frequency of 120MHz/3 = 40MHz
+    pwm_hw->slice[4].top = 1056 - 1; //num pixels in the line
+    pwm_hw->slice[4].ctr = 128 + 88; //Write to the counter -- sync pulse + back porch
+    pwm_hw->slice[4].cc = 128; //length of the sync pulse
+
+    //Leave CSR at default
+    pwm_hw->slice[5].div = 198 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
+    pwm_hw->slice[5].top = (628*16) - 1; //num lines in frame, adjusted for clk div fix
+    pwm_hw->slice[5].ctr = (4 + 23)*16; // sync pulse + back porch
+    pwm_hw->slice[5].cc = 4*16; //length of sync
+
+    pwm_hw->en |= (1 << 4) | (1 << 5);
+    pio0_hw->ctrl |= 1u | (1u << 8); //Enable and restart clock for color state machine
+
+//=======================================================================//
     multicore_launch_core1(render);
     while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
     
@@ -153,11 +194,11 @@ static void initPIO() {
     // Initialize color pio program, but DON'T enable PIO state machine
     color_program_init(pio0, 0, offset, 0, FRAME_SCALER);
 
-    offset = pio_add_program(pio0, &hsync_program);
-    hsync_program_init(pio0, 1, offset, HSYNC_PIN);
+    //offset = pio_add_program(pio0, &hsync_program);
+    //hsync_program_init(pio0, 1, offset, HSYNC_PIN);
 
-    offset = pio_add_program(pio0, &vsync_program);
-    vsync_program_init(pio0, 2, offset, VSYNC_PIN);
+    //offset = pio_add_program(pio0, &vsync_program);
+    //vsync_program_init(pio0, 2, offset, VSYNC_PIN);
 }
 
 

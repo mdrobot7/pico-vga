@@ -53,6 +53,7 @@ target_link_libraries(PICO_VGA_LIB
     hardware_irq
     hardware_gpio
     hardware_i2c
+    hardware_pwm
     pico_multicore
     pico_malloc
 )

@@ -81,9 +81,11 @@ static void render();
 ===========================================
 */
 int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, uint8_t autoRenderEn) {
-    //Clock configuration -- 120MHz system clock frequency
+    //Clock configuration -- 150MHz system clock frequency
     clocks_init();
-    set_sys_clock_pll(1560000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
+    set_sys_clock_pll(1500000000, 5, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
+
+    printf("test %d %d", frequency_count_khz(CLOCKS_FC0_SRC_VALUE_CLK_SYS), clock_get_hz(clk_sys));
 
     if(P1 != NULL) C1 = P1;
     if(P2 != NULL) C2 = P2;
@@ -109,14 +111,15 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
     gpio_set_function(10, GPIO_FUNC_PWM);
 
     pwm_hw->slice[4].csr = 1u << PWM_CH4_CSR_A_INV_LSB;
-    pwm_hw->slice[4].div = 2 << 4; //Base frequency of 130MHz/2 = 65MHz
-    pwm_hw->slice[4].top = 1344 - 1; //num pixels in the line
-    pwm_hw->slice[4].ctr = 136 + 160; //Write to the counter -- sync pulse + back porch
+    pwm_hw->slice[4].div = 2 << 4; //Base frequency of 150MHz/2 = 75MHz
+    pwm_hw->slice[4].top = 1328 - 1; //num pixels in the line
+    pwm_hw->slice[4].ctr = 136 + 144; //Write to the counter -- sync pulse + back porch
     pwm_hw->slice[4].cc = 136; //length of the sync pulse
 
-    //Leave CSR at default
-    pwm_hw->slice[5].csr = 1u << PWM_CH4_CSR_A_INV_LSB;
-    pwm_hw->slice[5].div = 168 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
+    // Take clk_sys, divide down to pixel clock (/2), div by num pixels per line (1328).
+    // Take that number, then divide it by powers of 2 until you get under 256
+    pwm_hw->slice[5].csr = 1u << PWM_CH5_CSR_A_INV_LSB;
+    pwm_hw->slice[5].div = 166 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
     pwm_hw->slice[5].top = (806*16) - 1; //num lines in frame, adjusted for clk div fix
     pwm_hw->slice[5].ctr = (6 + 29)*16; // sync pulse + back porch
     pwm_hw->slice[5].cc = 6*16; //length of sync

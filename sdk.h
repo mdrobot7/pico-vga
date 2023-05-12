@@ -89,7 +89,7 @@ typedef struct {
 
 #define FRAME_HEIGHT (480/FRAME_SCALER)
 #define FRAME_WIDTH (640/FRAME_SCALER)
-#define FRAME_FULL_HEIGHT (525/FRAME_SCALER) //The full height/width of the frame, including porches, sync, etc
+#define FRAME_FULL_HEIGHT (521/FRAME_SCALER) //The full height/width of the frame, including porches, sync, etc
 #define FRAME_FULL_WIDTH (800/FRAME_SCALER)
 
 #define COLOR_WHITE   0b11111111

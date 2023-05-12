@@ -45,7 +45,7 @@ Ideas:
 #define SDK_DMA_CTRL_BUSY 24
 
 static volatile uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
-static uint8_t * frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER];
+static uint8_t * frameReadAddr[521];
 static uint8_t BLANK[FRAME_WIDTH];
 
 volatile RenderQueueItem background = { //First element of the linked list, can be reset to any background
@@ -85,6 +85,8 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
     clocks_init();
     set_sys_clock_pll(1500000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
+    //printf("test %d %d", frequency_count_khz(CLOCKS_FC0_SRC_VALUE_CLK_SYS), clock_get_hz(clk_sys));
+
     if(P1 != NULL) C1 = P1;
     if(P2 != NULL) C2 = P2;
     if(P3 != NULL) C3 = P3;
@@ -101,6 +103,13 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
     //pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111); //start all 4 state machines
 
 //======================================================================//
+    int i = 0;
+    for(; i < FRAME_WIDTH; i++) {
+        BLANK[i] = 0;
+    }
+
+    //Source: https://www.eevblog.com/forum/microcontrollers/implementing-a-vga-controller-on-spartan-3-board-with-25-0-mhz-clock/
+    //Source, pg 24: https://docs.xilinx.com/v/u/en-US/ug130
 
     //HSYNC - gpio8, slice 4a
     //VSYNC - gpio10, slice 5a
@@ -116,8 +125,8 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
 
     pwm_hw->slice[5].csr = 1u << PWM_CH5_CSR_A_INV_LSB;
     pwm_hw->slice[5].div = 250 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
-    pwm_hw->slice[5].top = (525*16) - 1; //num lines in frame, adjusted for clk div fix
-    pwm_hw->slice[5].ctr = (2 + 33)*16; // sync pulse + back porch
+    pwm_hw->slice[5].top = (521*16) - 1; //num lines in frame, adjusted for clk div fix
+    pwm_hw->slice[5].ctr = (2 + 29)*16; // sync pulse + back porch
     pwm_hw->slice[5].cc = 2*16; //length of sync
 
     pio0_hw->ctrl |= 1u | (1u << 8); //Enable and restart clock for color state machine
@@ -133,7 +142,7 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
 }
 
 static void initDMA() {
-    for(uint16_t i = 0; i < FRAME_FULL_HEIGHT*FRAME_SCALER; i++) {
+    for(uint16_t i = 0; i < 521; i++) {
         if(i >= FRAME_HEIGHT*FRAME_SCALER) frameReadAddr[i] = BLANK;
         else frameReadAddr[i] = frame[i/FRAME_SCALER];
     }
@@ -195,7 +204,7 @@ static void updateFramePtr() {
     // Clear the interrupt request.
     dma_hw->ints0 = 1u << frameCtrlDMA;
 
-    if(dma_hw->ch[frameCtrlDMA].read_addr >= &frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER]) {
+    if(dma_hw->ch[frameCtrlDMA].read_addr >= &frameReadAddr[521]) {
         dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
     }
 }

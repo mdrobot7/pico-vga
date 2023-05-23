@@ -1,19 +1,6 @@
 ; Drive an 8-bit-color VGA signal over 8 digital IO pins.
-;  - color.pio manages the 8 color pins, for 8 bit color. The hsync and vsync lines are managed separately.
 
 .program color
-
-; Sync color state machine
-; USE FOR DORM MONITOR --> set x 29 [0]    ; Active frame (600 lines, 600 cycles, 24 from set + 18*32 from loop)
-
-; set x 31 [31] ; now handled in initDisplay();
-
-waitloop_small:
-    jmp y-- waitloop_small ; 1 cycle loop, for more precise tuning
-
-waitloop:
-    nop [30]         ; 32 cycle loop -- nop + 30 + jmp = 32
-    jmp x-- waitloop
 
 .wrap_target
     out pins 8 ; Shift 8 bits of data from the OSR to the pins.
@@ -24,15 +11,15 @@ waitloop:
 // Helper function (for use in C program) to initialize this PIO program
 
 static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPin, uint divider) {
-    //Initialize 8 data pins for 8 bit color (R1, R2, R3, G1, G2, G3, B1, B2), RRRGGGBB
-    pio_gpio_init(pio, dataPin);
+    //Initialize 8 data pins for 8 bit color
+    pio_gpio_init(pio, dataPin);     //B2 -- LSB (reversed because of how the RP2040 works internally)
     pio_gpio_init(pio, dataPin + 1);
     pio_gpio_init(pio, dataPin + 2);
     pio_gpio_init(pio, dataPin + 3);
     pio_gpio_init(pio, dataPin + 4);
     pio_gpio_init(pio, dataPin + 5);
     pio_gpio_init(pio, dataPin + 6);
-    pio_gpio_init(pio, dataPin + 7);
+    pio_gpio_init(pio, dataPin + 7); //R1 -- MSB
 
     //Set all 8 pins to outputs
     pio_sm_set_consecutive_pindirs(pio, sm, dataPin, 8, true);
@@ -55,7 +42,7 @@ static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPi
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);
 
-    //Start state machine with this configuration
+    //Initialize state machine with this configuration
     pio_sm_init(pio, sm, offset, &c);
 }
 

@@ -4,6 +4,7 @@
 #define PICO_VGA_H
 
 #include "pico/stdlib.h"
+#include "hardware/pio.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,6 +56,7 @@ typedef enum {
 } DisplayConfigResolutionScale_t;
 
 typedef struct {
+    PIO pio; //Which PIO to use for color
     DisplayConfigBaseResolution_t baseResolution;
     DisplayConfigResolutionScale_t resolutionScale;
     bool autoRender; //Turn on autoRendering (no manual updateDisplay() call required)
@@ -217,6 +219,7 @@ uint8_t invertColor(uint8_t color);
 
 //Default configuration for DisplayConfig_t
 #define DISPLAY_CONFIG_DEFAULT {\
+    .PIO = pio0\
     .baseResolution = RES_800x600,\
     .resolutionScale = RES_SCALED_400x300,\
     .autoRender = true,\

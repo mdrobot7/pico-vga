@@ -132,50 +132,42 @@ irq_handler_t audio_irq_handler() {
     l /= volume;
     r /= volume;
 
-    pwm_set_gpio_level(AUDIO_L_PIN, l);
-    pwm_set_gpio_level(AUDIO_R_PIN, r);
+    pwm_set_chan_level(AUDIO_L_PWM_SLICE, AUDIO_L_PWM_CHAN, l);
+    pwm_set_chan_level(AUDIO_R_PWM_SLICE, AUDIO_R_PWM_CHAN, r);
 
-    pwm_clear_irq(pwm_gpio_to_slice_num(AUDIO_L_PIN));
-    pwm_clear_irq(pwm_gpio_to_slice_num(AUDIO_R_PIN));
+    pwm_clear_irq(AUDIO_L_PWM_SLICE);
+    pwm_clear_irq(AUDIO_R_PWM_SLICE);
 }
 
 int initAudio() {
     if(clock_get_hz(clk_sys) < 120000000) return 1;
 
-    uint8_t slice_l = pwm_gpio_to_slice_num(AUDIO_L_PIN);
-    bool chan_l = pwm_gpio_to_channel(AUDIO_L_PIN);
-    uint8_t slice_r = pwm_gpio_to_slice_num(AUDIO_R_PIN);
-    bool chan_r = pwm_gpio_to_channel(AUDIO_R_PIN);
-
     gpio_set_function(AUDIO_L_PIN, GPIO_FUNC_PWM);
     gpio_set_function(AUDIO_R_PIN, GPIO_FUNC_PWM);
 
-    pwm_set_clkdiv(slice_l, (float)clock_get_hz(clk_sys)/(MAX_SAMPLE_FREQ_HZ * SUPER_SAMPLE_AT_MAX_SAMPLE_FREQ * PWM_BITS_PER_SAMP));
-    pwm_set_clkdiv(slice_r, (float)clock_get_hz(clk_sys)/(MAX_SAMPLE_FREQ_HZ * SUPER_SAMPLE_AT_MAX_SAMPLE_FREQ * PWM_BITS_PER_SAMP));
+    pwm_set_clkdiv(AUDIO_L_PWM_SLICE, (float)clock_get_hz(clk_sys)/(MAX_SAMPLE_FREQ_HZ * SUPER_SAMPLE_AT_MAX_SAMPLE_FREQ * PWM_BITS_PER_SAMP));
+    pwm_set_clkdiv(AUDIO_R_PWM_SLICE, (float)clock_get_hz(clk_sys)/(MAX_SAMPLE_FREQ_HZ * SUPER_SAMPLE_AT_MAX_SAMPLE_FREQ * PWM_BITS_PER_SAMP));
 
-    pwm_set_wrap(slice_l, 1u << PWM_BITS_PER_SAMP);
-    pwm_set_wrap(slice_r, 1u << PWM_BITS_PER_SAMP);
+    pwm_set_wrap(AUDIO_L_PWM_SLICE, 1u << PWM_BITS_PER_SAMP);
+    pwm_set_wrap(AUDIO_R_PWM_SLICE, 1u << PWM_BITS_PER_SAMP);
 
-    pwm_set_chan_level(slice_l, chan_l, 0);
-    pwm_set_chan_level(slice_r, chan_r, 0);
+    pwm_set_chan_level(AUDIO_L_PWM_SLICE, AUDIO_L_PWM_CHAN, 0);
+    pwm_set_chan_level(AUDIO_R_PWM_SLICE, AUDIO_R_PWM_CHAN, 0);
 
-    pwm_set_enabled(slice_l, true);
-    pwm_set_enabled(slice_r, true);
+    pwm_set_enabled(AUDIO_L_PWM_SLICE, true);
+    pwm_set_enabled(AUDIO_L_PWM_SLICE, true);
 
-    pwm_clear_irq(slice_l);
-    pwm_clear_irq(slice_r);
-    pwm_set_irq_enabled(slice_l, true);
-    pwm_set_irq_enabled(slice_r, true);
+    pwm_clear_irq(AUDIO_L_PWM_SLICE);
+    pwm_clear_irq(AUDIO_R_PWM_SLICE);
+    pwm_set_irq_enabled(AUDIO_L_PWM_SLICE, true);
+    pwm_set_irq_enabled(AUDIO_R_PWM_SLICE, true);
     irq_set_exclusive_handler(PWM_IRQ_WRAP, audio_irq_handler);
     irq_set_enabled(PWM_IRQ_WRAP, true);
 }
 
 int deInitAudio() {
-    uint8_t slice_l = pwm_gpio_to_slice_num(AUDIO_L_PIN);
-    uint8_t slice_r = pwm_gpio_to_slice_num(AUDIO_R_PIN);
-
-    pwm_set_enabled(slice_l, false);
-    pwm_set_enabled(slice_r, false);
+    pwm_set_enabled(AUDIO_L_PWM_SLICE, false);
+    pwm_set_enabled(AUDIO_R_PWM_SLICE, false);
 
     irq_set_enabled(PWM_IRQ_WRAP, false);
 }

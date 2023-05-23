@@ -10,16 +10,9 @@
 #include "hardware/clocks.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
-#include "hardware/structs/syscfg.h"
 #include "pico/multicore.h"
 
 #include "color.pio.h"
-#include "vsync_640x480.pio.h"
-#include "hsync_640x480.pio.h"
-#include "vsync_800x600.pio.h"
-#include "hsync_800x600.pio.h"
-#include "vsync_1024x768.pio.h"
-#include "hsync_1024x768.pio.h"
 
 //Unified Pico-VGA memory buffer
 extern uint8_t buffer[PICO_VGA_MAX_MEMORY_BYTES];
@@ -55,7 +48,7 @@ extern struct repeating_timer garbageCollectorTimer;
 
 extern volatile uint8_t interpolatedLine; //The interpolated line currently being written to
 extern volatile uint8_t interpolationIncomplete; //Number of uncompleted interpolated lines (not enough time to finish before needing to be pushed)
-extern volatile uint8_t lineInterpolationIRQ = 0;
+extern volatile uint8_t lineInterpolationIRQ;
 
 
 //Configuration Options

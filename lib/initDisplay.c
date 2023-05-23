@@ -1,5 +1,7 @@
 #include "lib-internal.h"
 
+#include "hardware/pwm.h"
+
 static void initSecondCore();
 static irq_handler_t updateFramePtr();
 
@@ -39,6 +41,8 @@ uint8_t frameCtrlDMA = 0;
 uint8_t frameDataDMA = 0;
 uint8_t blankDataDMA = 0;
 
+static uint8_t color_pio_sm = 0;
+
 static DisplayConfigBaseResolution_t lastResolution = 7; //Random unused enum value
 
 int initDisplay() {
@@ -52,41 +56,80 @@ int initDisplay() {
     if(displayConfig->numInterpolatedLines < 2) displayConfig->numInterpolatedLines = 2;
 
     if(displayConfig->disconnectDisplay || (!displayConfig->disconnectDisplay && lastResolution != displayConfig->baseResolution)) {
-        if((displayConfig->baseResolution == RES_800x600 && displayConfig->disconnectDisplay) || 
-        (!displayConfig->disconnectDisplay && lastResolution != displayConfig->baseResolution)) {
+        color_pio_sm = pio_claim_unused_sm(displayConfig->pio, true);
+
+        // Add PIO program to PIO instruction memory. SDK will find location and
+        // return with the memory offset of the program.
+        uint offset = pio_add_program(displayConfig->pio, &color_program);
+
+        gpio_set_function(HSYNC_PIN, GPIO_FUNC_PWM);
+        gpio_set_function(VSYNC_PIN, GPIO_FUNC_PWM);
+        pwm_config default_pwm_conf = pwm_get_default_config();
+        pwm_init(HSYNC_PWM_SLICE, &default_pwm_conf, false); //reset to known state
+        pwm_init(VSYNC_PWM_SLICE, &default_pwm_conf, false);
+
+        if(!displayConfig->disconnectDisplay && lastResolution != displayConfig->baseResolution) {
+            displayConfig->baseResolution = lastResolution;
+        }
+
+        if(displayConfig->baseResolution == RES_800x600 && displayConfig->disconnectDisplay) {
             //120MHz system clock frequency (multiple of 40MHz pixel clock)
             set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
-            // Add PIO program to PIO instruction memory. SDK will find location and
-            // return with the memory offset of the program.
-            uint offset = pio_add_program(pio0, &color_program);
-
             // Initialize color pio program, but DON'T enable PIO state machine
             //CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock
-            color_program_init(pio0, 0, offset, 0, 3*displayConfig->resolutionScale);
+            color_program_init(displayConfig->pio, color_pio_sm, offset, COLOR_LSB_PIN, 3*displayConfig->resolutionScale);
 
-            offset = pio_add_program(pio0, &hsync_800x600_program);
-            hsync_800x600_program_init(pio0, 1, offset, HSYNC_PIN);
+            pwm_set_clkdiv(HSYNC_PWM_SLICE, 3.0); //pixel clock
+            pwm_set_wrap(HSYNC_PWM_SLICE, 1056 - 1); //full line width - 1
+            pwm_set_counter(HSYNC_PWM_SLICE, 128 + 88); //sync pulse + back porch
+            pwm_set_chan_level(HSYNC_PWM_SLICE, HSYNC_PWM_CHAN, 128); //sync pulse
 
-            offset = pio_add_program(pio0, &vsync_800x600_program);
-            vsync_800x600_program_init(pio0, 2, offset, VSYNC_PIN);
-
-            pio_claim_sm_mask(pio0, 0b0111);
+            pwm_set_clkdiv(VSYNC_PWM_SLICE, 198.0); //clkdiv maxes out at /256, so this (pixel clock * full line width)/16 = (3*1056)/16, dividing by 16 to compensate
+            pwm_set_wrap(VSYNC_PWM_SLICE, (628*16) - 1); //full frame height, adjusted for clkdiv fix
+            pwm_set_counter(VSYNC_PWM_SLICE, (4 + 23)*16); //sync pulse + back porch
+            pwm_set_chan_level(VSYNC_PWM_SLICE, VSYNC_PWM_CHAN, 4*16); //back porch
         }
         else if(displayConfig->baseResolution == RES_640x480) {
-            //configure clocks for 640x480 resolution
+            //125MHz system clock frequency -- possibly bump to 150MHz later
+            set_sys_clock_pll(1500000000, 6, 2);
+
+            color_program_init(displayConfig->pio, color_pio_sm, offset, COLOR_LSB_PIN, 5*displayConfig->resolutionScale);
+
+            //Sources for these timings, because they are slightly different (for a 25MHz pixel clock, not 25.175MHz)
+            //https://www.eevblog.com/forum/microcontrollers/implementing-a-vga-controller-on-spartan-3-board-with-25-0-mhz-clock/
+            //pg 24: https://docs.xilinx.com/v/u/en-US/ug130
+
+            pwm_set_output_polarity(HSYNC_PWM_SLICE, !HSYNC_PWM_CHAN ? true : false, HSYNC_PWM_CHAN ? true : false);
+            pwm_set_clkdiv(HSYNC_PWM_SLICE, 5.0);
+            pwm_set_wrap(HSYNC_PWM_SLICE, 800 - 1);
+            pwm_set_counter(HSYNC_PWM_SLICE, 96 + 48);
+            pwm_set_chan_level(HSYNC_PWM_SLICE, HSYNC_PWM_CHAN, 96);
+
+            pwm_set_output_polarity(VSYNC_PWM_SLICE, !VSYNC_PWM_CHAN ? true : false, VSYNC_PWM_CHAN ? true : false);
+            pwm_set_clkdiv(VSYNC_PWM_SLICE, 250.0); //see above for reasoning behind this -- (5*800)/16
+            pwm_set_wrap(VSYNC_PWM_SLICE, (521*16) - 1);
+            pwm_set_counter(VSYNC_PWM_SLICE, (2 + 29)*16);
+            pwm_set_chan_level(VSYNC_PWM_SLICE, VSYNC_PWM_CHAN, 2*16);
         }
         else if(displayConfig->baseResolution == RES_1024x768) {
-            //130MHz system clock frequency (multiple of 65MHz pixel clock)
-        }
+            //150MHz system clock frequency
+            set_sys_clock_pll(1500000000, 5, 2);
 
-        //Shift the frame left or right on the screen, configurable at runtime.
-        pio_sm_put_blocking(pio0, 0, (uint32_t)(displayConfig->colorDelayCycles/32));
-        pio_sm_exec_wait_blocking(pio0, 0, pio_encode_pull(false, false));
-        pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_x, 32));
-        pio_sm_put_blocking(pio0, 0, (uint32_t)(displayConfig->colorDelayCycles % 32));
-        pio_sm_exec_wait_blocking(pio0, 0, pio_encode_pull(false, false));
-        pio_sm_exec_wait_blocking(pio0, 0, pio_encode_out(pio_y, 32));
+            color_program_init(displayConfig->pio, color_pio_sm, offset, COLOR_LSB_PIN, 2*displayConfig->resolutionScale);
+
+            pwm_set_output_polarity(HSYNC_PWM_SLICE, !HSYNC_PWM_CHAN ? true : false, HSYNC_PWM_CHAN ? true : false);
+            pwm_set_clkdiv(HSYNC_PWM_SLICE, 2.0);
+            pwm_set_wrap(HSYNC_PWM_SLICE, 1328 - 1);
+            pwm_set_counter(HSYNC_PWM_SLICE, 136 + 144);
+            pwm_set_chan_level(HSYNC_PWM_SLICE, HSYNC_PWM_CHAN, 136);
+
+            pwm_set_output_polarity(VSYNC_PWM_SLICE, !VSYNC_PWM_CHAN ? true : false, VSYNC_PWM_CHAN ? true : false);
+            pwm_set_clkdiv(VSYNC_PWM_SLICE, 166.0); //see above for reasoning behind this -- (2*800)/16
+            pwm_set_wrap(VSYNC_PWM_SLICE, (806*16) - 1);
+            pwm_set_counter(VSYNC_PWM_SLICE, (6 + 29)*16);
+            pwm_set_chan_level(VSYNC_PWM_SLICE, VSYNC_PWM_CHAN, 6*16);
+        }
     }
 
     lastResolution = displayConfig->baseResolution;
@@ -213,11 +256,13 @@ int deInitDisplay() {
     dma_unclaim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA));
     irq_set_enabled(DMA_IRQ_0, false);
 
-    pio_set_sm_mask_enabled(pio0, 0b0111, false);
-    pio_sm_clear_fifos(pio0, 0);
-    pio_sm_clear_fifos(pio0, 1);
-    pio_sm_clear_fifos(pio0, 2);
-    pio_clear_instruction_memory(pio0);
+    pio_sm_set_enabled(displayConfig->pio, color_pio_sm, false);
+    pio_sm_clear_fifos(displayConfig->pio, color_pio_sm);
+
+    if(displayConfig->disconnectDisplay) {
+        pwm_set_enabled(HSYNC_PWM_SLICE, false);
+        pwm_set_enabled(VSYNC_PWM_SLICE, false);
+    }
 
     if(displayConfig->clearRenderQueueOnDeInit) {
         renderQueueStart = NULL;
@@ -280,7 +325,9 @@ static void initSecondCore() {
     if(displayConfig->interpolatedRenderingMode) {
         initLineInterpolation();
     }
-    pio_enable_sm_mask_in_sync(pio0, 0b0111); //start all 3 state machines
+    pio_enable_sm_mask_in_sync(displayConfig->pio, 1u << color_pio_sm); //start color state machine
+    pwm_set_enabled(HSYNC_PWM_SLICE, true); //start hsync and vsync signals
+    pwm_set_enabled(VSYNC_PWM_SLICE, true);
 
     if(displayConfig->antiAliasing) renderAA();
     else render();

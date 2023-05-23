@@ -25,25 +25,7 @@ target_include_directories(PICO_VGA_LIB PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 # Create C header file with the name <pio program>.pio.h
 # All 3 calls are REQUIRED, otherwise it doesn't build for some reason.
 pico_generate_pio_header(PICO_VGA_LIB 
-        ${CMAKE_CURRENT_SOURCE_DIR}/pio/color.pio
-)
-pico_generate_pio_header(PICO_VGA_LIB  
-        ${CMAKE_CURRENT_SOURCE_DIR}/pio/hsync_640x480.pio
-)
-pico_generate_pio_header(PICO_VGA_LIB  
-        ${CMAKE_CURRENT_SOURCE_DIR}/pio/vsync_640x480.pio
-)
-pico_generate_pio_header(PICO_VGA_LIB  
-        ${CMAKE_CURRENT_SOURCE_DIR}/pio/hsync_800x600.pio
-)
-pico_generate_pio_header(PICO_VGA_LIB  
-        ${CMAKE_CURRENT_SOURCE_DIR}/pio/vsync_800x600.pio
-)
-pico_generate_pio_header(PICO_VGA_LIB  
-        ${CMAKE_CURRENT_SOURCE_DIR}/pio/hsync_1024x768.pio
-)
-pico_generate_pio_header(PICO_VGA_LIB  
-        ${CMAKE_CURRENT_SOURCE_DIR}/pio/vsync_1024x768.pio
+        ${CMAKE_CURRENT_SOURCE_DIR}/color.pio
 )
 
 target_link_libraries(PICO_VGA_LIB 

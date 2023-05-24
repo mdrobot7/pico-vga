@@ -1,8 +1,6 @@
 #include "lib-internal.h"
 #include "font.h"
 
-#include "pico/malloc.h"
-
 RenderQueueUID_t drawPixel(uint16_t x, uint16_t y, uint8_t color) {
     if(renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
     clearRenderQueueItemData(lastItem);

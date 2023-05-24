@@ -1,6 +1,5 @@
 #include "lib-internal.h"
 
-#include "hardware/clocks.h"
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
 

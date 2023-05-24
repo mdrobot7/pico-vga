@@ -1,5 +1,10 @@
 #include "render.h"
 
+#include "hardware/dma.h"
+#include "hardware/irq.h"
+#include "pico/multicore.h"
+#include "pico/time.h"
+
 static volatile uint8_t update = 0;
 volatile uint8_t interpolatedLine = 0;
 volatile uint8_t interpolationIncomplete = 0;

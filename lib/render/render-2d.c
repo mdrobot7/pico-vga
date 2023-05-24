@@ -1,5 +1,6 @@
 #include "render.h"
 
+#include "hardware/dma.h"
 #include "pico/float.h"
 
 /**

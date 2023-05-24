@@ -11,8 +11,8 @@ add_library(PICO_VGA_LIB STATIC
     draw-2d.c
     draw-3d.c
     init.c
-    initDisplay.c
-    peripheralMode.c
+    init-display.c
+    peripheral-mode.c
     render/render.c
     render/render-2d.c
     sd.c
@@ -30,12 +30,13 @@ pico_generate_pio_header(PICO_VGA_LIB
 
 target_link_libraries(PICO_VGA_LIB 
     pico_stdlib
+    hardware_gpio
     hardware_pio
     hardware_dma
     hardware_irq
-    hardware_gpio
-    hardware_i2c
     hardware_pwm
+    hardware_i2c
+    hardware_spi
     pico_multicore
-    pico_malloc
+    pico_time
 )

@@ -1,6 +1,14 @@
 #include "lib-internal.h"
 
+#include "hardware/gpio.h"
+#include "hardware/pio.h"
+#include "hardware/clocks.h"
+#include "hardware/dma.h"
 #include "hardware/pwm.h"
+#include "hardware/irq.h"
+#include "pico/multicore.h"
+
+#include "color.pio.h"
 
 static void initSecondCore();
 static irq_handler_t updateFramePtr();

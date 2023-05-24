@@ -1,5 +1,9 @@
 #include "lib-internal.h"
+
+#include "hardware/gpio.h"
 #include "hardware/pwm.h"
+#include "hardware/clocks.h"
+#include "hardware/irq.h"
 
 #define BASE_SAMPLE_FREQ_HZ 11025
 #define MAX_SAMPLE_FREQ_HZ 44100

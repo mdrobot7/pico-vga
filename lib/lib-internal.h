@@ -6,14 +6,6 @@
 #include "pico-vga.h"
 #include "pinout.h"
 
-#include "hardware/pio.h"
-#include "hardware/clocks.h"
-#include "hardware/dma.h"
-#include "hardware/irq.h"
-#include "pico/multicore.h"
-
-#include "color.pio.h"
-
 //Unified Pico-VGA memory buffer
 extern uint8_t buffer[PICO_VGA_MAX_MEMORY_BYTES];
 

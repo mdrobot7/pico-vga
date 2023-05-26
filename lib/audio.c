@@ -34,6 +34,33 @@ static uint32_t sound_i_r[SOUND_QUEUE_LEN];
 static uint8_t volume = 1;
 
 /**
+ * @brief Finds an empty index in a sound queue
+ * 
+ * @param sound_queue The sound queue to look in
+ * @return uint32_t The first NULL index, or 0xFFFF if none found.
+ */
+static uint32_t find_empty_sound_queue_index(sound_t * sound_queue[]) {
+    for(int i = 0; i < SOUND_QUEUE_LEN; i++) {
+        if(sound_queue[i] == NULL) return i;
+    }
+    return 0xFFFF;
+}
+
+/**
+ * @brief Get the number of empty indices in a sound queue
+ * 
+ * @param sound_queue The sound queue to look in
+ * @return uint32_t The number of empty indices in the sound queue
+ */
+static uint32_t num_empty_sound_queue_indices(sound_t * sound_queue[]) {
+    uint32_t num = 0;
+    for(int i = 0; i < SOUND_QUEUE_LEN; i++) {
+        if(sound_queue[i] == NULL) num++;
+    }
+    return num;
+}
+
+/**
  * @brief Helper method to do the math on a particular audio sample (16 bit ONLY)
  * 
  * @param s 
@@ -63,6 +90,19 @@ static inline uint32_t parse_audio_data_32(sound_t * s, uint32_t data_i) {
     temp += 1u << (PWM_BITS_PER_SAMP - 1); //get rid of the sign, now it's 0-255 instead of -128 - 127
     temp = temp >> s->vol;
     return temp;
+}
+
+/**
+ * @brief Remove a song from the sound queue. Handles deallocating the sound_t.data[] memory space,
+ *        if applicable (NOT IMPLEMENTED YET).
+ * 
+ * @param sound_queue 
+ * @param sound_i 
+ * @param index 
+ */
+static inline void remove_song(sound_t * sound_queue[], uint32_t sound_i[], uint32_t index) {
+    sound_queue[index] = NULL;
+    sound_i[index] = 0;
 }
 
 /**
@@ -165,7 +205,7 @@ int initAudio() {
     pwm_clear_irq(AUDIO_R_PWM_SLICE);
     pwm_set_irq_enabled(AUDIO_L_PWM_SLICE, true);
     pwm_set_irq_enabled(AUDIO_R_PWM_SLICE, true);
-    irq_set_exclusive_handler(PWM_IRQ_WRAP, audio_irq_handler);
+    irq_set_exclusive_handler(PWM_IRQ_WRAP, (irq_handler_t)audio_irq_handler);
     irq_set_enabled(PWM_IRQ_WRAP, true);
 }
 
@@ -267,9 +307,11 @@ void audio_set_data(sound_t * sound, void * data, uint32_t len_data_bytes) {
 }
 
 typedef enum {
-    SOUND_CHANNEL_MONO_L,
-    SOUND_CHANNEL_MONO_R,
-    SOUND_CHANNEL_MONO_BOTH,
+    SOUND_CHANNEL_MONO_L,    //play the one channel through the left output only
+    SOUND_CHANNEL_MONO_R,    //play the one channel through the right output only
+    SOUND_CHANNEL_MONO_BOTH, //play the one channel through both the left and right outputs
+    SOUND_CHANNEL_STEREO_L,  //play both channels through the left channel output ONLY
+    SOUND_CHANNEL_STEREO_R,  //play both channels through the right channel output ONLY
     SOUND_CHANNEL_STEREO,
 } sound_channel_type_t;
 
@@ -277,32 +319,40 @@ typedef enum {
  * @brief Play the sound using a specific channel configuration
  * 
  * @param sound 
- * @param channel_type See sound_channel_type_t enum. Stereo audio data (2 channels) can ONLY be played
- *                     stereo, using both channels.
+ * @param channel_type What output channel(s) to use to play the sound. See sound_channel_type_t enum.
  * @return int Returns a nonzero value if the function fails.
  */
 int play_sound(sound_t * sound, sound_channel_type_t channel_type) {
-    int l = -1, r = -1;
-    for(int i = 0; i < SOUND_QUEUE_LEN; i++) {
-        if(sound_queue_l[i] == NULL) {
-            l = i;
-        }
-        if(sound_queue_r[i] == NULL) {
-            r = i;
-        }
-    }
-    if(channel_type != SOUND_CHANNEL_MONO_R && l == -1) return 1; //no space in sound queue, fail
-    if(channel_type != SOUND_CHANNEL_MONO_L && r == -1) return 1;
-
     if(channel_type == SOUND_CHANNEL_MONO_L) {
-        sound_queue_l[l] = sound;
+        if(num_empty_sound_queue_indices(sound_queue_l) < 1) return 1;
+        sound_queue_l[find_empty_sound_queue_index(sound_queue_l)] = sound;
     }
     else if(channel_type == SOUND_CHANNEL_MONO_R) {
-        sound_queue_r[r] = sound;
+        if(num_empty_sound_queue_indices(sound_queue_r) < 1) return 1;
+        sound_queue_r[find_empty_sound_queue_index(sound_queue_r)] = sound;
+    }
+    else if(channel_type == SOUND_CHANNEL_STEREO_L) {
+        if(num_empty_sound_queue_indices(sound_queue_l) < 2) return 1;
+        sound_queue_l[find_empty_sound_queue_index(sound_queue_l)] = sound; //one sound queue index used per channel.
+        uint32_t l2 = find_empty_sound_queue_index(sound_queue_l);          //need to start one counter at 1 otherwise
+        sound_queue_l[l2] = sound;                                          //both sounds will be the same channel
+        sound_i_l[l2] = 1;
+    }
+    else if(channel_type == SOUND_CHANNEL_STEREO_R) {
+        if(num_empty_sound_queue_indices(sound_queue_r) < 2) return 1;
+        sound_queue_r[find_empty_sound_queue_index(sound_queue_r)] = sound;
+        uint32_t r2 = find_empty_sound_queue_index(sound_queue_r);
+        sound_queue_r[r2] = sound;
+        sound_i_r[r2] = 1;
     }
     else if(channel_type == SOUND_CHANNEL_MONO_BOTH || channel_type == SOUND_CHANNEL_STEREO) {
-        sound_queue_l[l] = sound;
+        if(num_empty_sound_queue_indices(sound_queue_l) < 1 || num_empty_sound_queue_indices(sound_queue_r) < 1) return 1;
+        sound_queue_l[find_empty_sound_queue_index(sound_queue_l)] = sound;
+        uint32_t r = find_empty_sound_queue_index(sound_queue_r);
         sound_queue_r[r] = sound;
+        if(channel_type == SOUND_CHANNEL_STEREO) {
+            sound_i_r[r] = 1;
+        }
     }
     return 0;
 }

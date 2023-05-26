@@ -320,7 +320,7 @@ static void initDMA() {
     irq_set_priority(DMA_IRQ_0, 0); //Set the DMA interrupt to the highest priority
 
     // Configure the processor to update the line count when DMA IRQ 0 is asserted
-    irq_set_exclusive_handler(DMA_IRQ_0, updateFramePtr);
+    irq_set_exclusive_handler(DMA_IRQ_0, (irq_handler_t)updateFramePtr);
     irq_set_enabled(DMA_IRQ_0, true);
 
     dma_hw->multi_channel_trigger = (1 << frameCtrlDMA); //Start!

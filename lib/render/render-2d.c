@@ -341,16 +341,13 @@ void renderFillScreen(uint8_t color) {
         frameBufferStart[i] = color; //treating the frame buffer as a large 1D array
     }
 
-    dma_hw->ch[dmaChan].al1_ctrl = 0; //Make sure the CTRL reg is in a known state
+    dma_channel_config config = dma_channel_get_default_config(dmaChan);
+    channel_config_set_high_priority(&config, true); //channels are round-robin arbitrated, this is probably fine
+    channel_config_set_read_increment(&config, false);
+    channel_config_set_write_increment(&config, true);
+    dma_channel_configure(dmaChan, &config, &color32, &frameBufferStart[spareBytes], (frameWidth*frameHeight)/4, true);
 
-    dma_hw->ch[dmaChan].read_addr = (io_rw_32)&color32;
-    dma_hw->ch[dmaChan].write_addr = (io_rw_32)&frameBufferStart[spareBytes];
-    dma_hw->ch[dmaChan].transfer_count = (io_rw_32)((frameWidth*frameHeight)/4);
-    dma_hw->ch[dmaChan].ctrl_trig = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                    (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_WRITE) |
-                                    (dmaChan << SDK_DMA_CTRL_CHAIN_TO)      | (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
-    
-    while(dma_hw->ch[dmaChan].al1_ctrl & SDK_DMA_CTRL_BUSY); //Busy loop while the DMA completes
+    dma_channel_wait_for_finish_blocking(dmaChan);
     
     dma_channel_unclaim(dmaChan);
 }

@@ -253,16 +253,13 @@ int deInitDisplay() {
     //deInitGarbageCollector();
 
     deInitLineInterpolation();
-    
-    dma_hw->abort = (1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA);
-    while(dma_hw->abort); //Wait until all channels are stopped
 
-    dma_hw->ch[frameCtrlDMA].al1_ctrl = 0; //clears the CTRL.EN bit (along with the rest of the reg)
-    dma_hw->ch[frameDataDMA].al1_ctrl = 0;
-    dma_hw->ch[blankDataDMA].al1_ctrl = 0;
+    irq_set_enabled(DMA_IRQ_0, false); //Disable IRQ first, see pg 93 of C SDK docs
+    dma_channel_abort(frameCtrlDMA);
+    dma_channel_abort(frameDataDMA);
+    dma_channel_abort(blankDataDMA);
     
     dma_unclaim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA));
-    irq_set_enabled(DMA_IRQ_0, false);
 
     pio_sm_set_enabled(displayConfig->pio, color_pio_sm, false);
     pio_sm_clear_fifos(displayConfig->pio, color_pio_sm);
@@ -294,36 +291,49 @@ static void initDMA() {
     frameDataDMA = dma_claim_unused_channel(true);
     blankDataDMA = dma_claim_unused_channel(true);
 
-    dma_hw->ch[frameCtrlDMA].read_addr = (io_rw_32) frameReadAddrStart;
-    dma_hw->ch[frameCtrlDMA].write_addr = (io_rw_32) &dma_hw->ch[frameDataDMA].al3_read_addr_trig;
-    dma_hw->ch[frameCtrlDMA].transfer_count = 1;
-    dma_hw->ch[frameCtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
-                                        (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
+    //Default channel config is **NOT** the same as the register reset values. See pg 106 of C SDK docs for info.
+    dma_channel_config frame_ctrl_config = dma_channel_get_default_config(frameCtrlDMA);
+    channel_config_set_high_priority(&frame_ctrl_config, true);
+    channel_config_set_transfer_data_size(&frame_ctrl_config, DMA_SIZE_32);
+    channel_config_set_chain_to(&frame_ctrl_config, frameDataDMA);
+    dma_channel_configure(frameCtrlDMA, &frame_ctrl_config, &dma_hw->ch[frameDataDMA].al3_read_addr_trig,
+                          frameReadAddrStart, 1, false);
+    
+    dma_channel_config frame_data_config = dma_channel_get_default_config(frameDataDMA);
+    channel_config_set_high_priority(&frame_data_config, true);
+    channel_config_set_transfer_data_size(&frame_data_config, DMA_SIZE_32);
+    channel_config_set_chain_to(&frame_data_config, blankDataDMA);
+    channel_config_set_dreq(&frame_data_config, pio_get_dreq(displayConfig->pio, color_pio_sm, true));
+    channel_config_set_irq_quiet(&frame_data_config, true);
+    dma_channel_configure(frameDataDMA, &frame_data_config, NULL, NULL, frameWidth/4, false);
+    if(displayConfig->pio == pio0) {
+        dma_channel_set_write_addr(frameDataDMA, &pio0_hw->txf[color_pio_sm], false);
+    }
+    else {
+        dma_channel_set_write_addr(frameDataDMA, &pio1_hw->txf[color_pio_sm], false);
+    }
 
-    dma_hw->ch[frameDataDMA].read_addr = (io_rw_32) NULL;
-    dma_hw->ch[frameDataDMA].write_addr = (io_rw_32) &pio0_hw->txf[0];
-    dma_hw->ch[frameDataDMA].transfer_count = frameWidth/4;
-    dma_hw->ch[frameDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
-                                        (blankDataDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL) |
-                                        (1 << SDK_DMA_CTRL_IRQ_QUIET);
+    dma_channel_config blank_data_config = dma_channel_get_default_config(blankDataDMA);
+    channel_config_set_high_priority(&blank_data_config, true);
+    channel_config_set_transfer_data_size(&blank_data_config, DMA_SIZE_32);
+    channel_config_set_chain_to(&blank_data_config, frameCtrlDMA);
+    channel_config_set_dreq(&blank_data_config, pio_get_dreq(displayConfig->pio, color_pio_sm, true));
+    channel_config_set_irq_quiet(&blank_data_config, true);
+    dma_channel_configure(blankDataDMA, &blank_data_config, NULL, blankLineStart, (frameFullWidth - frameWidth)/4, false);
+    if(displayConfig->pio == pio0) {
+        dma_channel_set_write_addr(blankDataDMA, &pio0_hw->txf[color_pio_sm], false);
+    }
+    else {
+        dma_channel_set_write_addr(blankDataDMA, &pio1_hw->txf[color_pio_sm], false);
+    }
 
-    dma_hw->ch[blankDataDMA].read_addr = (io_rw_32) blankLineStart;
-    dma_hw->ch[blankDataDMA].write_addr = (io_rw_32) &pio0_hw->txf[0];
-    dma_hw->ch[blankDataDMA].transfer_count = (frameFullWidth - frameWidth)/4;
-    dma_hw->ch[blankDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
-                                        (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL)| (1 << SDK_DMA_CTRL_IRQ_QUIET);
-
-    dma_hw->inte0 = (1 << frameCtrlDMA);
+    dma_channel_set_irq0_enabled(frameCtrlDMA, true);
     irq_set_priority(DMA_IRQ_0, 0); //Set the DMA interrupt to the highest priority
 
-    // Configure the processor to update the line count when DMA IRQ 0 is asserted
     irq_set_exclusive_handler(DMA_IRQ_0, (irq_handler_t)updateFramePtr);
     irq_set_enabled(DMA_IRQ_0, true);
 
-    dma_hw->multi_channel_trigger = (1 << frameCtrlDMA); //Start!
+    dma_channel_start(frameCtrlDMA); //Start!
 }
 
 static void initSecondCore() {
@@ -343,7 +353,7 @@ static void initSecondCore() {
 
 //DMA Interrupt Callback
 static irq_handler_t updateFramePtr() {
-    dma_hw->ints0 = 1u << frameCtrlDMA; //Clear interrupt
+    dma_channel_acknowledge_irq0(frameCtrlDMA);
 
     //Grab the element in frameReadAddr that frameCtrlDMA just wrote (hence the -1) and see if it was an
     //interpolated line. If so, incrememt the interpolated line counter and flag the renderer so it can start
@@ -355,6 +365,7 @@ static irq_handler_t updateFramePtr() {
         irq_set_pending(lineInterpolationIRQ);
     }
 
+    //If the DMA read "cursor" is past the end of the frame data, reset it to the beginning
     if(dma_hw->ch[frameCtrlDMA].read_addr >= (io_rw_32) &frameReadAddrStart[frameFullHeight*displayConfig->resolutionScale]) {
         dma_hw->ch[frameCtrlDMA].read_addr = (io_rw_32) frameReadAddrStart;
     }

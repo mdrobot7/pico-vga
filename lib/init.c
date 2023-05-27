@@ -16,7 +16,7 @@ int initPicoVGA(DisplayConfig_t * displayConf, ControllerConfig_t * controllerCo
                 SDConfig_t * sdConf) {
     if(displayConf != NULL) {
         displayConfig = displayConf;
-        if(initDisplay()) return 1; //initDisplay.c
+        if(initDisplay()) return 1; //init-display.c
     }
     if(controllerConf != NULL) {
         controllerConfig = controllerConf;

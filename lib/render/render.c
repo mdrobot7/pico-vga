@@ -160,7 +160,7 @@ static irq_handler_t lineInterpolationHandler() {
 void initLineInterpolation() {
     lineInterpolationIRQ = user_irq_claim_unused(true);
     irq_set_priority(lineInterpolationIRQ, 255); //set to lowest priority, might change later based on testing
-    irq_set_exclusive_handler(lineInterpolationIRQ, lineInterpolationHandler);
+    irq_set_exclusive_handler(lineInterpolationIRQ, (irq_handler_t)lineInterpolationHandler);
     irq_set_enabled(31, true);
 }
 
@@ -179,17 +179,17 @@ static uint8_t garbageCollectorDMA = 0;
 struct repeating_timer garbageCollectorTimer;
 
 static irq_handler_t garbageCollectorHandler() {
-    dma_hw->ints1 = 1 << garbageCollectorDMA; //Clear interrupt
+    dma_channel_acknowledge_irq1(garbageCollectorDMA);
 
     RenderQueueItem_t * item = findRenderQueueItem(RQI_UID_REMOVED);
     if(item >= lastItem) {
         garbageCollectorActive = false;
-        return; //No garbage collecting needs to be done
+        return NULL; //No garbage collecting needs to be done
     }
 
-    dma_hw->ch[garbageCollectorDMA].read_addr = (io_rw_32)(item + item->numPointsOrTriangles + 1);
-    dma_hw->ch[garbageCollectorDMA].write_addr = (io_rw_32)item;
-    dma_hw->ch[garbageCollectorDMA].al1_transfer_count_trig = ((uint32_t)lastItem - (uint32_t)(dma_hw->ch[garbageCollectorDMA].read_addr))/4;
+    dma_channel_set_read_addr(garbageCollectorDMA, (item + item->numPointsOrTriangles + 1), false);
+    dma_channel_set_write_addr(garbageCollectorDMA, item, false);
+    dma_channel_set_trans_count(garbageCollectorDMA, ((uint32_t)lastItem - (uint32_t)(dma_hw->ch[garbageCollectorDMA].read_addr))/4, true);
 }
 
 bool garbageCollector(struct repeating_timer *t) {
@@ -201,12 +201,15 @@ bool garbageCollector(struct repeating_timer *t) {
 
 void initGarbageCollector() {
     garbageCollectorDMA = dma_claim_unused_channel(true);
-    dma_hw->ch[garbageCollectorDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN) | (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) |
-                                               (1 << SDK_DMA_CTRL_INCR_READ) | (1 << SDK_DMA_CTRL_INCR_WRITE) |
-                                               (garbageCollectorDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
-    dma_hw->inte1 = (1 << garbageCollectorDMA);
+    
+    //Default channel config is **NOT** the same as the register reset values. See pg 106 of C SDK docs for info.
+    dma_channel_config garbage_collector_config = dma_channel_get_default_config(garbageCollectorDMA);
+    channel_config_set_write_increment(&garbage_collector_config, true);
+    dma_channel_set_config(garbageCollectorDMA, &garbage_collector_config, false);
 
-    irq_set_exclusive_handler(DMA_IRQ_1, garbageCollectorHandler);
+    dma_channel_set_irq1_enabled(garbageCollectorDMA, true);
+    irq_set_exclusive_handler(DMA_IRQ_1, (irq_handler_t)garbageCollectorHandler);
+    irq_set_priority(DMA_IRQ_1, 32);
     irq_set_enabled(DMA_IRQ_1, true);
 
     //Set the garbage collector to run every n ms
@@ -216,10 +219,8 @@ void initGarbageCollector() {
 void deInitGarbageCollector() {
     cancel_repeating_timer(&garbageCollectorTimer);
 
-    dma_hw->abort = (1 << garbageCollectorDMA);
-    while(dma_hw->abort); //wait until stopped
+    irq_set_enabled(DMA_IRQ_1, false); //Disable IRQ first, see pg 93 of C SDK docs
+    dma_channel_abort(garbageCollectorDMA);
 
-    dma_hw->ch[garbageCollectorDMA].al1_ctrl = 0;
     dma_channel_unclaim(garbageCollectorDMA);
-    irq_set_enabled(DMA_IRQ_1, false);
 }

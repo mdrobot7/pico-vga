@@ -104,16 +104,16 @@
         "allow_microvias": false,
         "max_error": 0.005,
         "min_clearance": 0.127,
-        "min_copper_edge_clearance": 0.0,
+        "min_copper_edge_clearance": 0.508,
         "min_hole_clearance": 0.25,
         "min_hole_to_hole": 0.25,
         "min_microvia_diameter": 0.19999999999999998,
         "min_microvia_drill": 0.09999999999999999,
         "min_silk_clearance": 0.0,
         "min_through_hole_diameter": 0.3,
-        "min_track_width": 0.127,
-        "min_via_annular_width": 0.049999999999999996,
-        "min_via_diameter": 0.39999999999999997,
+        "min_track_width": 0.254,
+        "min_via_annular_width": 0.1397,
+        "min_via_diameter": 0.635,
         "solder_mask_clearance": 0.0,
         "solder_mask_min_width": 0.0,
         "use_height_for_length_calcs": true
@@ -137,7 +137,10 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      "power_pin_not_driven|2400300|596900|7cf85042-fd24-4c24-8979-9f9b65272838|00000000-0000-0000-0000-000000000000",
+      "power_pin_not_driven|812800|279400|298cc2e8-ebc3-497d-8845-7013b963add8|00000000-0000-0000-0000-000000000000"
+    ],
     "meta": {
       "version": 0
     },
@@ -363,9 +366,9 @@
         "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.25,
-        "via_diameter": 0.8,
-        "via_drill": 0.4,
+        "track_width": 0.254,
+        "via_diameter": 0.635,
+        "via_drill": 0.3556,
         "wire_width": 6.0
       }
     ],
@@ -427,10 +430,6 @@
     [
       "63da5f0b-ebba-4db6-8888-4b7c10552696",
       ""
-    ],
-    [
-      "ab8419ee-c340-452a-b70f-1668d864373f",
-      "ControllerInterface"
     ]
   ],
   "text_variables": {}

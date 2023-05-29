@@ -26,13 +26,18 @@ GPIO7  - Color MSB (RED 1)
 GPIO8  - HSync (PWM 4A)
 GPIO13 - VSync (PWM 6B)
 
+GPIO14 - Audio L (PWM 7A)
+GPIO15 - Audio R (PWM 7B)
+
 GPIO12 - SD Card MISO (RX) (SPI1)
 GPIO11 - SD Card MOSI (TX)
 GPIO10 - SD Card CLK
 GPIO9  - SD Card Chip Select
 
-GPIO14 - Audio L (PWM 7A)
-GPIO15 - Audio R (PWM 7B)
+GPIO16 - Peripheral Mode MISO (RX) (SPI0)
+GPIO19 - Peripheral Mode MOSI (TX)
+GPIO18 - Peripheral Mode CLK
+GPIO17 - Peripheral Mode Chip Select
 
 GPIO20 - Controller SDA (I2C0)
 GPIO21 - Controller SCL
@@ -57,5 +62,13 @@ GPIO21 - Controller SCL
 #define SD_MOSI_PIN 11
 #define SD_CLK_PIN 10
 #define SD_CS_PIN 9
+
+#define PERIPHERAL_MISO_PIN 16
+#define PERIPHERAL_MOSI_PIN 19
+#define PERIPHERAL_CLK_PIN 18
+#define PERIPHERAL_CS_PIN 17
+
+#define CONTROLLER_SDA_PIN 20
+#define CONTROLLER_SCL_PIN 21
 
 #endif

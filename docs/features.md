@@ -3,12 +3,12 @@
 - [x] Render a 400x300 frame @60Hz with 8 bit color over VGA with no artifacts, and be able to modify it.
 
 ## Renderer
-- [ ] Make the DMA callback for the renderer the NMI for core 1
-- [ ] Be able to reset the resolution on the fly with dynamic allocation for the frame and other arrays
+- [x] Make the DMA callback for the renderer the NMI for core 1
+- [x] Be able to reset the resolution on the fly with dynamic allocation for the frame and other arrays
 - [ ] Add line interpolation for higher resolutions (640x480, 800x600, 1024x768) by setting a memory usage cap (add #define'd recommended memory values)
 - [ ] Make the color state machine initial delay a parameter
-- [ ] Add alternative hsync and vsync PIO files for 640x480 resolution, and sys_clk reconfiguration
-- [ ] Add 1024x768 OC mode
+- [x] Add alternative hsync and vsync PIO files for 640x480 resolution, and sys_clk reconfiguration
+- [x] Add 1024x768 OC mode
 
 ## Renderer v2
 - [ ] Make a renderer that doesn't waste cycles overwriting data in the frame array (i.e. filling a rectangle in, then putting something else in the middle of it, making a lot of the filling operation wasted) -- see https://en.wikipedia.org/wiki/Scanline_rendering
@@ -20,7 +20,7 @@
 - [x] Draw individual pixels
 - [ ] Draw lines
   - [x] Draw basic lines using floating point math
-  - [ ] Draw lines using only integer math (Bresenham's algorithm)
+  - [x] Draw lines using only integer math (Bresenham's algorithm)
   - [ ] Draw anti-aliased lines
   - [ ] Draw lines with different thicknesses
 - [ ] Draw rectangles
@@ -31,11 +31,11 @@
   - [ ] Be able to fill the screen with a sprite/vector drawing
 - [x] Draw filled rectangles
 - [ ] Draw triangles
-  - [ ] Draw basic triangles
-  - [ ] Draw triangles using only integer math
+  - [x] Draw basic triangles
+  - [x] Draw triangles using only integer math
   - [ ] Draw antialiased triangles
   - [ ] Draw with different thicknesses
-- [ ] Draw filled triangles
+- [ ] Draw filled triangles with only integer math
 - [ ] Draw circles
   - [x] Draw basic circles using floating point math
   - [ ] Draw circles using only integer math (Midpoint circle algorithm)
@@ -71,14 +71,14 @@
 - [ ] Add rotation, scaling values
 
 ## Audio SDK
-- [ ] Make a struct to hold audio data for a particular song (name, pointer to array of notes/lengths, array length)
-- [ ] Make an RTTTL parser to output song data in the struct form
-- [ ] Make audio play through PWM peripheral, make interrupts on core 1 change frequencies/note lengths
-- [ ] playX() functions
-  - [ ] playNote(), which plays an individual note for a certain length
-  - [ ] Beep/Boop noises
-  - [ ] Static
-  - [ ] Snare hit, hi hat, kick drum (all the noises supported on NES, SNES)
+- [x] Make a struct to hold audio data for a particular song (name, pointer to array of notes/lengths, array length)
+- [x] Make an RTTTL parser to output song data in the struct form
+- [x] Make audio play through PWM peripheral, make interrupts on core 1 change frequencies/note lengths
+- [x] playX() functions
+  - [x] playNote(), which plays an individual note for a certain length
+  - [x] Beep/Boop noises
+  - [x] Static
+  - [x] Snare hit, hi hat, kick drum (all the noises supported on NES, SNES)
 
 ## SD Card
 - [ ] Read text files from the SD card
@@ -95,19 +95,24 @@
 - [ ] Be able to play audio with a SPI command
 
 ## Misc
-- [ ] USB host mode for keyboard support (either using on-chip USB host or external USB->Serial FTDI)
-- [ ] Organized SDK file structure, with one master include header file
-- [ ] Persistent saves on-chip (is this possible?)
+- [x] USB host mode for keyboard support (either using on-chip USB host or external USB->Serial FTDI)
+  - Not part of the library, the user can use TinyUSB by themselves.
+- [x] Organized SDK file structure, with one master include header file
+- [x] Persistent saves on-chip (is this possible?)
+  - Just save to the SD card. It's easier in software and easier for the user.
 - [ ] Simple menu-making functions
 - [ ] Good documentation
 
 ## PCB (Rev 2)
-- [ ] Add pads to pico pin holes so it can be either mounted with header pins, female header sockets, or surface mounted with the castellated pads
-  - [ ] Add alternate pads for the resistor DAC on the back (used when the pico is surface mounted)
-- [ ] External SPI EEPROM chip for save states and persistent memory (option to socket OR solder, so save states can be moved between boards)
-- [ ] Replace controller connectors with I2C leads (see Controller Rev 2 below for more details)
-  - [ ] Add controller programming headers on PCB, but leave headers unsoldered by default
+- [x] Add pads to pico pin holes so it can be either mounted with header pins, female header sockets, or surface mounted with the castellated pads
+  - [x] Add alternate pads for the resistor DAC on the back (used when the pico is surface mounted)
+- [x] External SPI EEPROM chip for save states and persistent memory (option to socket OR solder, so save states can be moved between boards)
+  - This is dumb, just save to the SD card. Not doing it.
+- [x] Replace controller connectors with I2C leads (see Controller Rev 2 below for more details)
+  - [x] Add controller programming headers on PCB, but leave headers unsoldered by default
+    - Not doing it, at least right now. This is going to be a nightmare for software development, just grab an arduino and program it that way.
 - [ ] Audio chip upgrade -- digital audio?
+  - PWM audio sounds surprisingly good, so I'm keeping it for now. It's also way cheaper -- the audio DAC I would use is more expensive, needs a lot of other components (filtering caps), and is more expensive in CPU time.
 
 ## PCB - Pico-VGA Mini
 - [ ] Simplified board, containing everything but the controller ports. Made to be used in "peripheral mode" via the 4-pin SPI header and another microcontroller rather than the controllers
@@ -125,4 +130,4 @@
 # Ideas
 - Teensy-VGA, running a Teensy 4.x? Would support higher resolutions, more complex rendering, possibly higher color depth (16 bit)
 - Bluetooth chip for Xbox or Playstation controllers? Is this even possible?
-- External DRAM chip as a dedicated frame buffer
+  - I think this is possible with pico W -- I think I would leave this up to users, they can get their own inputs and this lib will focus on audio/video output only.

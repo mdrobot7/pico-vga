@@ -1,4 +1,4 @@
-20522117673306564
+20525488333970800
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -86296,12 +86296,26 @@ Logo
 0
 0
 pico-vga
+MEM2061-01-188-00-A_GCT
+
+MEM2061-01-188-00-A 
+0
+12
+11
+pico-vga
 Raspberry_Pi_Pico
 
 
 0
 43
 43
+pico-vga
+STX-3000_KYC
+
+STX-3000 
+0
+3
+3
 pico-vga
 USB_C_Receptacle_Molex_2171830001
 USB TYPE C, RA RCPT PCB, Hybrid, https://www.amphenolcanada.com/StockAvailabilityPrice.aspx?From=&PartNum=12401548E4%7e2A

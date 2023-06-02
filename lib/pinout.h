@@ -70,5 +70,6 @@ GPIO21 - Controller SCL
 
 #define CONTROLLER_SDA_PIN 20
 #define CONTROLLER_SCL_PIN 21
+#define CONTROLLER_I2C i2c0
 
 #endif

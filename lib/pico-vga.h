@@ -71,9 +71,9 @@ typedef struct {
     uint16_t colorDelayCycles;
 } DisplayConfig_t;
 
+#define MAX_NUM_CONTROLLERS 4
 typedef struct __packed {
-    uint8_t numControllers; //Max controllers: 8 [edit once v2 pcb is finalized]
-    uint8_t controllerData[8]; //*DO NOT INITIALIZE*
+    uint8_t numControllers; //Max controllers: see MAX_NUM_CONTROLLERS
 } ControllerConfig_t;
 
 typedef struct {

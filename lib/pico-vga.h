@@ -73,7 +73,7 @@ typedef struct {
 
 #define MAX_NUM_CONTROLLERS 4
 typedef struct __packed {
-    uint8_t numControllers; //Max controllers: see MAX_NUM_CONTROLLERS
+    uint8_t a;
 } ControllerConfig_t;
 
 typedef struct {
@@ -135,18 +135,23 @@ void removeItem(RenderQueueUID_t itemUID);
         Controllers
 ===========================
 */
-typedef enum {
-    CONTROLLER_UP,
-    CONTROLLER_DOWN,
-    CONTROLLER_LEFT,
-    CONTROLLER_RIGHT,
-    CONTROLLER_A,
-    CONTROLLER_B,
-    CONTROLLER_X,
-    CONTROLLER_Y,
-} ControllerBits_t;
+bool controller_pair();
+void controller_unpair(uint8_t controller);
+void controller_unpair_all();
+uint8_t controller_get_num_paired_controllers();
 
-bool getControllerButton(uint8_t controllerNum, uint8_t button);
+typedef enum {
+    CONTROLLER_BUTTON_UP,
+    CONTROLLER_BUTTON_DOWN,
+    CONTROLLER_BUTTON_LEFT,
+    CONTROLLER_BUTTON_RIGHT,
+    CONTROLLER_BUTTON_A,
+    CONTROLLER_BUTTON_B,
+    CONTROLLER_BUTTON_X,
+    CONTROLLER_BUTTON_Y,
+} controller_button_t;
+
+bool controller_get_button_state(uint8_t controller, controller_button_t button);
 
 
 /*
@@ -236,7 +241,7 @@ uint8_t invertColor(uint8_t color);
 
 //Default configuration for ControllerConfig_t
 #define CONTROLLER_CONFIG_DEFAULT {\
-    .numControllers = 8,\
+    .a = 0,\
 }
 
 //Default configuration for AudioConfig_t

@@ -5,6 +5,8 @@ include(../../pico-sdk/tools/CMakeLists.txt)
 # Creates a pico-sdk subdirectory in our project for the libraries
 pico_sdk_init()
 
+add_compile_options(-O3 -DNDEBUG) # compiler optimization, disable sdk function parameter checking
+
 add_library(PICO_VGA_LIB STATIC
     audio.c
     controller.c

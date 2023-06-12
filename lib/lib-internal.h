@@ -34,7 +34,6 @@ extern uint8_t * frameBufferEnd;
 extern uint8_t frameCtrlDMA;
 extern uint8_t frameDataDMA;
 extern uint8_t blankDataDMA;
-extern uint8_t controllerDataDMA;
 
 extern struct repeating_timer garbageCollectorTimer;
 

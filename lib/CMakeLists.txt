@@ -1,6 +1,6 @@
-# Include build functions from Pico SDK
-include(../../pico-sdk/external/pico_sdk_import.cmake)
-include(../../pico-sdk/tools/CMakeLists.txt)
+# initialize the SDK based on PICO_SDK_PATH
+# note: this must happen before project()
+include(../pico_sdk_import.cmake)
 
 # Creates a pico-sdk subdirectory in our project for the libraries
 pico_sdk_init()

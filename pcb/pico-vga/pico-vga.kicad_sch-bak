@@ -9,22 +9,20 @@
 		(rev "2")
 	)
 	(lib_symbols
-		(symbol "Connector:Conn_01x06_Pin"
-			(pin_names
-				(offset 1.016) hide)
+		(symbol "Connector:AudioJack3"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
 			(property "Reference" "J"
-				(at 0 7.62 0)
+				(at 0 8.89 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Value" "Conn_01x06_Pin"
-				(at 0 -10.16 0)
+			(property "Value" "AudioJack3"
+				(at 0 6.35 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -49,7 +47,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "Generic connector, single row, 01x06, script generated"
+			(property "Description" "Audio Jack, 3 Poles (Stereo / TRS)"
 				(at 0 0 0)
 				(effects
 					(font
@@ -58,12 +56,188 @@
 					(hide yes)
 				)
 			)
-			(property "ki_locked" ""
+			(property "ki_keywords" "audio jack receptacle stereo headphones phones TRS connector"
 				(at 0 0 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Jack*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "AudioJack3_0_1"
+				(rectangle
+					(start -5.08 -5.08)
+					(end -6.35 -2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -2.54) (xy 0.635 -3.175) (xy 1.27 -2.54) (xy 2.54 -2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.905 -2.54) (xy -1.27 -3.175) (xy -0.635 -2.54) (xy -0.635 0) (xy 2.54 0)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 2.54 2.54) (xy -2.54 2.54) (xy -2.54 -2.54) (xy -3.175 -3.175) (xy -3.81 -2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 2.54 3.81)
+					(end -5.08 -5.08)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "AudioJack3_1_1"
+				(pin passive line
+					(at 5.08 0 180)
+					(length 2.54)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "R"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 2.54 180)
+					(length 2.54)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "S"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 2.54)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "T"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
+		(symbol "Connector:Conn_01x02_Male"
+			(pin_names
+				(offset 1.016) hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02_Male"
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
 				)
 			)
 			(property "ki_keywords" "connector"
@@ -84,10 +258,10 @@
 					(hide yes)
 				)
 			)
-			(symbol "Conn_01x06_Pin_1_1"
+			(symbol "Conn_01x02_Male_1_1"
 				(polyline
 					(pts
-						(xy 1.27 -7.62) (xy 0.8636 -7.62)
+						(xy 1.27 -2.54) (xy 0.8636 -2.54)
 					)
 					(stroke
 						(width 0.1524)
@@ -97,6 +271,146 @@
 						(type none)
 					)
 				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 0.8636 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
+		(symbol "Connector:Conn_01x04_Male"
+			(pin_names
+				(offset 1.016) hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J"
+				(at 0 5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x04_Male"
+				(at 0 -7.62 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Conn_01x04_Male_1_1"
 				(polyline
 					(pts
 						(xy 1.27 -5.08) (xy 0.8636 -5.08)
@@ -145,29 +459,6 @@
 						(type none)
 					)
 				)
-				(polyline
-					(pts
-						(xy 1.27 5.08) (xy 0.8636 5.08)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(rectangle
-					(start 0.8636 -7.493)
-					(end 0 -7.747)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
 				(rectangle
 					(start 0.8636 -4.953)
 					(end 0 -5.207)
@@ -212,19 +503,8 @@
 						(type outline)
 					)
 				)
-				(rectangle
-					(start 0.8636 5.207)
-					(end 0 4.953)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
 				(pin passive line
-					(at 5.08 5.08 180)
+					(at 5.08 2.54 180)
 					(length 3.81)
 					(name "Pin_1"
 						(effects
@@ -242,7 +522,7 @@
 					)
 				)
 				(pin passive line
-					(at 5.08 2.54 180)
+					(at 5.08 0 180)
 					(length 3.81)
 					(name "Pin_2"
 						(effects
@@ -260,7 +540,7 @@
 					)
 				)
 				(pin passive line
-					(at 5.08 0 180)
+					(at 5.08 -2.54 180)
 					(length 3.81)
 					(name "Pin_3"
 						(effects
@@ -278,7 +558,7 @@
 					)
 				)
 				(pin passive line
-					(at 5.08 -2.54 180)
+					(at 5.08 -5.08 180)
 					(length 3.81)
 					(name "Pin_4"
 						(effects
@@ -295,45 +575,9 @@
 						)
 					)
 				)
-				(pin passive line
-					(at 5.08 -5.08 180)
-					(length 3.81)
-					(name "Pin_5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 -7.62 180)
-					(length 3.81)
-					(name "Pin_6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
 			)
 		)
-		(symbol "Connector:DE15_Receptacle_HighDensity"
+		(symbol "Connector:DB15_Female_HighDensity"
 			(pin_names
 				(offset 1.016) hide)
 			(exclude_from_sim no)
@@ -347,7 +591,7 @@
 					)
 				)
 			)
-			(property "Value" "DE15_Receptacle_HighDensity"
+			(property "Value" "DB15_Female_HighDensity"
 				(at 0 19.05 0)
 				(effects
 					(font
@@ -373,7 +617,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "15-pin female receptacle socket D-SUB connector, High density (3 columns), Triple Row, Generic, VGA-connector"
+			(property "Description" "15-pin female D-SUB connector, High density (3 columns), Triple Row, Generic, VGA-connector"
 				(at 0 0 0)
 				(effects
 					(font
@@ -382,7 +626,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "connector  receptacle de15 VGA female D-SUB"
+			(property "ki_keywords" "connector db15 VGA female D-SUB"
 				(at 0 0 0)
 				(effects
 					(font
@@ -400,7 +644,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "DE15_Receptacle_HighDensity_0_1"
+			(symbol "DB15_Female_HighDensity_0_1"
 				(circle
 					(center -1.905 -10.16)
 					(radius 0.635)
@@ -639,7 +883,7 @@
 					)
 				)
 			)
-			(symbol "DE15_Receptacle_HighDensity_1_1"
+			(symbol "DB15_Female_HighDensity_1_1"
 				(pin passive line
 					(at -7.62 10.16 0)
 					(length 5.08)
@@ -912,7 +1156,10 @@
 				)
 			)
 		)
-		(symbol "Connector:Micro_SD_Card_Det2"
+		(symbol "Connector:Micro_SD_Card_Det"
+			(pin_names
+				(offset 1.016)
+			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -924,7 +1171,7 @@
 					)
 				)
 			)
-			(property "Value" "Micro_SD_Card_Det2"
+			(property "Value" "Micro_SD_Card_Det"
 				(at 16.51 17.78 0)
 				(effects
 					(font
@@ -942,8 +1189,8 @@
 					(hide yes)
 				)
 			)
-			(property "Datasheet" "https://www.hirose.com/en/product/document?clcode=&productname=&series=DM3&documenttype=Catalog&lang=en&documentid=D49662_en"
-				(at 2.54 2.54 0)
+			(property "Datasheet" "https://www.hirose.com/product/en/download_file/key_name/DM3/category/Catalog/doc_file_id/49662/?file_category_id=4&item_id=195&is_series=1"
+				(at 0 2.54 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -951,7 +1198,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "Micro SD Card Socket with two card detection pins"
+			(property "Description" "Micro SD Card Socket with card detection pins"
 				(at 0 0 0)
 				(effects
 					(font
@@ -978,12 +1225,12 @@
 					(hide yes)
 				)
 			)
-			(symbol "Micro_SD_Card_Det2_0_1"
+			(symbol "Micro_SD_Card_Det_0_1"
 				(rectangle
 					(start -7.62 -6.985)
 					(end -5.08 -8.255)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -994,7 +1241,7 @@
 					(start -7.62 -4.445)
 					(end -5.08 -5.715)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -1005,7 +1252,7 @@
 					(start -7.62 -1.905)
 					(end -5.08 -3.175)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -1016,7 +1263,7 @@
 					(start -7.62 0.635)
 					(end -5.08 -0.635)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -1027,7 +1274,7 @@
 					(start -7.62 3.175)
 					(end -5.08 1.905)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -1038,7 +1285,7 @@
 					(start -7.62 5.715)
 					(end -5.08 4.445)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -1049,7 +1296,7 @@
 					(start -7.62 8.255)
 					(end -5.08 6.985)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -1060,7 +1307,7 @@
 					(start -7.62 10.795)
 					(end -5.08 9.525)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -1093,7 +1340,7 @@
 					)
 				)
 			)
-			(symbol "Micro_SD_Card_Det2_1_1"
+			(symbol "Micro_SD_Card_Det_1_1"
 				(pin bidirectional line
 					(at -22.86 10.16 0)
 					(length 3.81)
@@ -1608,188 +1855,6 @@
 						)
 					)
 					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "Connector_Audio:AudioJack3"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "J"
-				(at 0 8.89 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "AudioJack3"
-				(at 0 6.35 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "~"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Audio Jack, 3 Poles (Stereo / TRS)"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "audio jack receptacle stereo headphones phones TRS connector"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "Jack*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "AudioJack3_0_1"
-				(rectangle
-					(start -5.08 -5.08)
-					(end -6.35 -2.54)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -2.54) (xy 0.635 -3.175) (xy 1.27 -2.54) (xy 2.54 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.905 -2.54) (xy -1.27 -3.175) (xy -0.635 -2.54) (xy -0.635 0) (xy 2.54 0)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.54 2.54) (xy -2.54 2.54) (xy -2.54 -2.54) (xy -3.175 -3.175) (xy -3.81 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(rectangle
-					(start 2.54 3.81)
-					(end -5.08 -5.08)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "AudioJack3_1_1"
-				(pin passive line
-					(at 5.08 0 180)
-					(length 2.54)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "R"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 2.54 180)
-					(length 2.54)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "S"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 -2.54 180)
-					(length 2.54)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "T"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2645,294 +2710,6 @@
 						)
 					)
 					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "GND_1"
-			(power)
-			(pin_numbers hide)
-			(pin_names
-				(offset 0) hide)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "#PWR"
-				(at 0 -6.35 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Value" "GND"
-				(at 0 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "global power"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "GND_1_0_1"
-				(polyline
-					(pts
-						(xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "GND_1_1_1"
-				(pin power_in line
-					(at 0 0 270)
-					(length 0)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "GND_2"
-			(power)
-			(pin_numbers hide)
-			(pin_names
-				(offset 0) hide)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "#PWR"
-				(at 0 -6.35 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Value" "GND"
-				(at 0 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "global power"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "GND_2_0_1"
-				(polyline
-					(pts
-						(xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "GND_2_1_1"
-				(pin power_in line
-					(at 0 0 270)
-					(length 0)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "GND_3"
-			(power)
-			(pin_numbers hide)
-			(pin_names
-				(offset 0) hide)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "#PWR"
-				(at 0 -6.35 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Value" "GND"
-				(at 0 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "global power"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "GND_3_0_1"
-				(polyline
-					(pts
-						(xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "GND_3_1_1"
-				(pin power_in line
-					(at 0 0 270)
-					(length 0)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -3929,9 +3706,9 @@
 		)
 		(symbol "power:+3V3"
 			(power)
-			(pin_numbers hide)
 			(pin_names
-				(offset 0) hide)
+				(offset 0)
+			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -3979,7 +3756,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "global power"
+			(property "ki_keywords" "power-flag"
 				(at 0 0 0)
 				(effects
 					(font
@@ -4029,8 +3806,8 @@
 			(symbol "+3V3_1_1"
 				(pin power_in line
 					(at 0 0 90)
-					(length 0)
-					(name "~"
+					(length 0) hide
+					(name "+3V3"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4049,9 +3826,9 @@
 		)
 		(symbol "power:+5V"
 			(power)
-			(pin_numbers hide)
 			(pin_names
-				(offset 0) hide)
+				(offset 0)
+			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -4099,7 +3876,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "global power"
+			(property "ki_keywords" "power-flag"
 				(at 0 0 0)
 				(effects
 					(font
@@ -4149,8 +3926,8 @@
 			(symbol "+5V_1_1"
 				(pin power_in line
 					(at 0 0 90)
-					(length 0)
-					(name "~"
+					(length 0) hide
+					(name "+5V"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4169,9 +3946,9 @@
 		)
 		(symbol "power:GND"
 			(power)
-			(pin_numbers hide)
 			(pin_names
-				(offset 0) hide)
+				(offset 0)
+			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -4219,7 +3996,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "global power"
+			(property "ki_keywords" "power-flag"
 				(at 0 0 0)
 				(effects
 					(font
@@ -4245,8 +4022,8 @@
 			(symbol "GND_1_1"
 				(pin power_in line
 					(at 0 0 270)
-					(length 0)
-					(name "~"
+					(length 0) hide
+					(name "GND"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4265,16 +4042,16 @@
 		)
 	)
 	(junction
-		(at 22.86 68.58)
+		(at 30.48 43.18)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "0294cba2-cd76-4366-bae3-a24691daa0e3")
+		(uuid "0c275b07-ac1a-4ecd-ac9e-2a9f5227e05d")
 	)
 	(junction
-		(at 121.92 58.42)
+		(at 30.48 55.88)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "1d525f2a-d995-479b-b64d-ced6669edd20")
+		(uuid "0e89013e-718b-4706-9328-cf45bb6b7237")
 	)
 	(junction
 		(at 104.14 43.18)
@@ -4301,13 +4078,13 @@
 		(uuid "2ae7ffc2-0b10-4d18-959a-e5022aedb19a")
 	)
 	(junction
-		(at 180.34 66.04)
+		(at 175.26 66.04)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "2ec73897-d7d5-4569-a2f6-cbe1a974f2f4")
 	)
 	(junction
-		(at 251.46 115.57)
+		(at 238.76 144.78)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "33467fac-8cba-42a6-b7b0-1728042b006a")
@@ -4319,22 +4096,22 @@
 		(uuid "35cf8dde-07c7-4eee-84f7-07e7b145ce2c")
 	)
 	(junction
-		(at 22.86 43.18)
+		(at 229.87 144.78)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "3e334e48-79e0-4514-a2db-010e854a14b2")
+		(uuid "42517d7f-acc3-405f-8a97-a705c9e8312e")
+	)
+	(junction
+		(at 30.48 68.58)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "510ca3a9-bfa9-4a17-9575-24ee238fee94")
 	)
 	(junction
 		(at 173.99 134.62)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "55d2d56a-c276-49ab-a7ab-c7fc5faebd9d")
-	)
-	(junction
-		(at 21.59 160.02)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "5a1e9f6b-5c6e-45f5-9e2c-c5fe0776852d")
 	)
 	(junction
 		(at 163.83 125.73)
@@ -4349,24 +4126,6 @@
 		(uuid "60bdf95e-b62b-4eec-a56f-482839771699")
 	)
 	(junction
-		(at 242.57 115.57)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "677c630a-5355-4e38-aafb-4ba3467a9c24")
-	)
-	(junction
-		(at 77.47 118.11)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "67d8e629-f32e-4f83-88a5-d2e37eb0ba5d")
-	)
-	(junction
-		(at 77.47 160.02)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "70b80dee-3d84-4131-8ca4-0bd644f6d2bc")
-	)
-	(junction
 		(at 173.99 105.41)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4379,10 +4138,10 @@
 		(uuid "8ea7e425-8e5e-4ea0-882b-c5e2602ec59c")
 	)
 	(junction
-		(at 233.68 115.57)
+		(at 21.59 166.37)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "91342f58-7978-4b9e-9cb5-cd0249fbdc36")
+		(uuid "8f3664cd-a799-4a23-beb4-5bd876fda1c1")
 	)
 	(junction
 		(at 92.71 35.56)
@@ -4391,16 +4150,16 @@
 		(uuid "9edd6e95-f712-4a29-b707-762433aa8fcf")
 	)
 	(junction
-		(at 22.86 55.88)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "a074e91b-9276-4c29-9874-a4a14ac9ae07")
-	)
-	(junction
 		(at 193.04 52.07)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "a38ef60f-2af9-4a01-81ea-7bbaaeaca0f3")
+	)
+	(junction
+		(at 21.59 124.46)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b030ca58-7c18-4344-a0a3-698c24e32d8c")
 	)
 	(junction
 		(at 168.91 134.62)
@@ -4421,16 +4180,16 @@
 		(uuid "bd3db5ff-a2d7-41cb-8c7b-972d3791fe63")
 	)
 	(junction
+		(at 77.47 166.37)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "cbc71925-4e43-470e-9c14-cdef9e2c02e0")
+	)
+	(junction
 		(at 168.91 114.3)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "d40fcb89-fdc8-427a-9c10-c4b3666708f1")
-	)
-	(junction
-		(at 21.59 118.11)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "eedc4f31-f212-40fc-ad68-17fff8a62ac6")
 	)
 	(junction
 		(at 180.34 39.37)
@@ -4443,6 +4202,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "f7de6493-f7b3-4fdf-b59d-8d716fa9bfcd")
+	)
+	(junction
+		(at 77.47 124.46)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "fbabfdd6-baf6-41d9-9dc1-674a6bc7a91e")
 	)
 	(junction
 		(at 193.04 46.99)
@@ -4534,16 +4299,6 @@
 	)
 	(wire
 		(pts
-			(xy 238.76 143.51) (xy 275.59 143.51)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0139205e-19df-456c-902f-4b19120e112d")
-	)
-	(wire
-		(pts
 			(xy 173.99 125.73) (xy 176.53 125.73)
 		)
 		(stroke
@@ -4554,7 +4309,7 @@
 	)
 	(wire
 		(pts
-			(xy 180.34 66.04) (xy 180.34 67.31)
+			(xy 175.26 66.04) (xy 175.26 67.31)
 		)
 		(stroke
 			(width 0)
@@ -4584,7 +4339,7 @@
 	)
 	(wire
 		(pts
-			(xy 22.86 43.18) (xy 22.86 55.88)
+			(xy 30.48 43.18) (xy 30.48 55.88)
 		)
 		(stroke
 			(width 0)
@@ -4634,16 +4389,6 @@
 	)
 	(wire
 		(pts
-			(xy 26.67 53.34) (xy 44.45 53.34)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0b74bceb-95ca-4392-a19f-01a097d61826")
-	)
-	(wire
-		(pts
 			(xy 160.02 105.41) (xy 163.83 105.41)
 		)
 		(stroke
@@ -4654,7 +4399,7 @@
 	)
 	(wire
 		(pts
-			(xy 81.28 58.42) (xy 111.76 58.42)
+			(xy 81.28 58.42) (xy 99.06 58.42)
 		)
 		(stroke
 			(width 0)
@@ -4664,7 +4409,7 @@
 	)
 	(wire
 		(pts
-			(xy 163.83 67.31) (xy 180.34 67.31)
+			(xy 160.02 67.31) (xy 175.26 67.31)
 		)
 		(stroke
 			(width 0)
@@ -4674,7 +4419,7 @@
 	)
 	(wire
 		(pts
-			(xy 77.47 158.75) (xy 77.47 160.02)
+			(xy 77.47 158.75) (xy 77.47 166.37)
 		)
 		(stroke
 			(width 0)
@@ -4744,13 +4489,13 @@
 	)
 	(wire
 		(pts
-			(xy 13.97 63.5) (xy 13.97 60.96)
+			(xy 74.93 124.46) (xy 77.47 124.46)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "1d470ba1-6e0b-4227-abf8-10a0ec07caa4")
+		(uuid "1b58590e-8f6d-4e76-b87b-489bb2ab6669")
 	)
 	(polyline
 		(pts
@@ -4764,7 +4509,7 @@
 	)
 	(wire
 		(pts
-			(xy 85.09 109.22) (xy 116.84 109.22)
+			(xy 85.09 109.22) (xy 101.6 109.22)
 		)
 		(stroke
 			(width 0)
@@ -4794,6 +4539,26 @@
 	)
 	(wire
 		(pts
+			(xy 243.84 104.14) (xy 261.62 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1ff84c9d-8b9b-4e4b-96f7-b2799805e8a4")
+	)
+	(wire
+		(pts
+			(xy 229.87 144.78) (xy 238.76 144.78)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "215c553c-d701-42dc-b790-78d214928b08")
+	)
+	(wire
+		(pts
 			(xy 193.04 46.99) (xy 193.04 52.07)
 		)
 		(stroke
@@ -4804,23 +4569,13 @@
 	)
 	(wire
 		(pts
-			(xy 119.38 60.96) (xy 121.92 60.96)
+			(xy 81.28 63.5) (xy 99.06 63.5)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "23ef2a5a-e4d8-417c-8b6b-562f58f9de67")
-	)
-	(wire
-		(pts
-			(xy 233.68 142.24) (xy 233.68 140.97)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2748eca7-a698-4b73-9e37-91f446f27c0e")
+		(uuid "241bfb40-447d-472d-8ec5-e18eae2d2b54")
 	)
 	(wire
 		(pts
@@ -4874,7 +4629,7 @@
 	)
 	(wire
 		(pts
-			(xy 129.54 35.56) (xy 130.81 35.56)
+			(xy 121.92 35.56) (xy 123.19 35.56)
 		)
 		(stroke
 			(width 0)
@@ -4891,6 +4646,16 @@
 			(type default)
 		)
 		(uuid "2e9c3860-68a5-4444-9f5f-5661c12101ca")
+	)
+	(wire
+		(pts
+			(xy 77.47 166.37) (xy 77.47 167.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2f5fa853-74da-4f57-9b0d-c9d0eeab28ba")
 	)
 	(wire
 		(pts
@@ -4914,33 +4679,23 @@
 	)
 	(wire
 		(pts
-			(xy 142.24 64.77) (xy 161.29 64.77)
+			(xy 34.29 63.5) (xy 44.45 63.5)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "352cce1e-9bb5-477b-94f3-1bb1aa1c1356")
+	)
+	(wire
+		(pts
+			(xy 142.24 64.77) (xy 157.48 64.77)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "357b99dd-9839-4177-86c4-602e90016401")
-	)
-	(wire
-		(pts
-			(xy 26.67 60.96) (xy 44.45 60.96)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "365eb627-ad48-460b-82ec-09776198434e")
-	)
-	(wire
-		(pts
-			(xy 121.92 58.42) (xy 121.92 57.15)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3689663b-7a78-431b-87de-90e8b7dae227")
 	)
 	(wire
 		(pts
@@ -4971,6 +4726,16 @@
 			(type default)
 		)
 		(uuid "37fd52f3-d99e-409d-95b8-127d6dc36a3c")
+	)
+	(wire
+		(pts
+			(xy 81.28 71.12) (xy 97.79 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3a6c0108-1aa9-40de-9242-47b54e2a5944")
 	)
 	(wire
 		(pts
@@ -5014,16 +4779,6 @@
 	)
 	(wire
 		(pts
-			(xy 22.86 68.58) (xy 44.45 68.58)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3f536974-fe15-4f04-b3c6-523490c24c16")
-	)
-	(wire
-		(pts
 			(xy 104.14 55.88) (xy 104.14 68.58)
 		)
 		(stroke
@@ -5064,7 +4819,7 @@
 	)
 	(wire
 		(pts
-			(xy 142.24 67.31) (xy 156.21 67.31)
+			(xy 142.24 67.31) (xy 152.4 67.31)
 		)
 		(stroke
 			(width 0)
@@ -5094,7 +4849,7 @@
 	)
 	(wire
 		(pts
-			(xy 233.68 111.76) (xy 233.68 115.57)
+			(xy 228.6 140.97) (xy 228.6 144.78)
 		)
 		(stroke
 			(width 0)
@@ -5144,47 +4899,27 @@
 	)
 	(wire
 		(pts
-			(xy 121.92 60.96) (xy 121.92 58.42)
+			(xy 34.29 60.96) (xy 44.45 60.96)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "4e53712b-cced-418c-a389-acf8c7332414")
+		(uuid "4f199ecd-3c42-4807-9f7d-3e8513daf912")
 	)
 	(wire
 		(pts
-			(xy 81.28 66.04) (xy 91.44 66.04)
+			(xy 255.27 147.32) (xy 255.27 148.59)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "4e7bd72b-4480-4fba-9210-2d0379d82aaa")
+		(uuid "4ff3678c-d9d8-4147-b970-c799e2e1b138")
 	)
 	(wire
 		(pts
-			(xy 81.28 73.66) (xy 111.76 73.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4fa75551-ea79-4d25-878a-d81e87f60def")
-	)
-	(wire
-		(pts
-			(xy 77.47 118.11) (xy 77.47 120.65)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5070ed2b-98b2-4965-b3a6-8c259a6a9655")
-	)
-	(wire
-		(pts
-			(xy 81.28 60.96) (xy 111.76 60.96)
+			(xy 81.28 60.96) (xy 99.06 60.96)
 		)
 		(stroke
 			(width 0)
@@ -5194,17 +4929,7 @@
 	)
 	(wire
 		(pts
-			(xy 22.86 43.18) (xy 44.45 43.18)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "509ff85d-b05b-444b-a248-ffb1409341f1")
-	)
-	(wire
-		(pts
-			(xy 257.81 151.13) (xy 275.59 151.13)
+			(xy 243.84 111.76) (xy 261.62 111.76)
 		)
 		(stroke
 			(width 0)
@@ -5214,7 +4939,17 @@
 	)
 	(wire
 		(pts
-			(xy 184.15 66.04) (xy 180.34 66.04)
+			(xy 21.59 116.84) (xy 21.59 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "548282ed-dc38-4148-9b1b-ca629ae5b99f")
+	)
+	(wire
+		(pts
+			(xy 184.15 66.04) (xy 175.26 66.04)
 		)
 		(stroke
 			(width 0)
@@ -5224,23 +4959,13 @@
 	)
 	(wire
 		(pts
-			(xy 22.86 55.88) (xy 22.86 68.58)
+			(xy 30.48 55.88) (xy 30.48 68.58)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "56cee995-8996-4e3d-b745-192297490812")
-	)
-	(wire
-		(pts
-			(xy 77.47 160.02) (xy 77.47 162.56)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "589192e1-ddb2-437c-ab06-2a472b0d162f")
 	)
 	(wire
 		(pts
@@ -5284,6 +5009,16 @@
 	)
 	(wire
 		(pts
+			(xy 30.48 43.18) (xy 44.45 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5b0ec2c1-90eb-4e1f-b54c-5efde24be0c3")
+	)
+	(wire
+		(pts
 			(xy 180.34 52.07) (xy 180.34 55.88)
 		)
 		(stroke
@@ -5304,13 +5039,13 @@
 	)
 	(wire
 		(pts
-			(xy 19.05 118.11) (xy 21.59 118.11)
+			(xy 19.05 166.37) (xy 21.59 166.37)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "5e0c874d-7fe9-4376-b1d1-cbcb74c815e7")
+		(uuid "5eaf166d-2d63-4d76-9037-ed141855cad8")
 	)
 	(wire
 		(pts
@@ -5324,7 +5059,7 @@
 	)
 	(wire
 		(pts
-			(xy 21.59 158.75) (xy 21.59 160.02)
+			(xy 21.59 158.75) (xy 21.59 166.37)
 		)
 		(stroke
 			(width 0)
@@ -5364,16 +5099,6 @@
 	)
 	(wire
 		(pts
-			(xy 22.86 55.88) (xy 44.45 55.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "63737329-9168-4215-8695-72a3d033f521")
-	)
-	(wire
-		(pts
 			(xy 92.71 34.29) (xy 92.71 35.56)
 		)
 		(stroke
@@ -5394,33 +5119,13 @@
 	)
 	(wire
 		(pts
-			(xy 180.34 64.77) (xy 180.34 66.04)
+			(xy 175.26 64.77) (xy 175.26 66.04)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "6adce58d-4dd7-4501-998e-587ade04631b")
-	)
-	(wire
-		(pts
-			(xy 19.05 158.75) (xy 19.05 160.02)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6b0b6f77-c852-41df-a2e1-bc88eafbd61e")
-	)
-	(wire
-		(pts
-			(xy 21.59 118.11) (xy 21.59 120.65)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6b71f45a-9538-4cb5-b78d-5f25d6d92d1c")
 	)
 	(wire
 		(pts
@@ -5434,27 +5139,7 @@
 	)
 	(wire
 		(pts
-			(xy 74.93 160.02) (xy 77.47 160.02)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6c92ce33-935c-47f5-a4af-3a5c9dc45305")
-	)
-	(wire
-		(pts
-			(xy 81.28 63.5) (xy 91.44 63.5)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6cc4be13-6b06-4d85-ba36-f6455af4c289")
-	)
-	(wire
-		(pts
-			(xy 22.86 30.48) (xy 22.86 43.18)
+			(xy 30.48 30.48) (xy 30.48 43.18)
 		)
 		(stroke
 			(width 0)
@@ -5471,16 +5156,6 @@
 			(type default)
 		)
 		(uuid "7134ee5b-8eec-4696-b4d9-24a5daac9b20")
-	)
-	(wire
-		(pts
-			(xy 26.67 58.42) (xy 44.45 58.42)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "716fda14-d77a-4cc3-a86f-7b554bcfe421")
 	)
 	(wire
 		(pts
@@ -5521,6 +5196,16 @@
 			(type default)
 		)
 		(uuid "72c61b5c-cc1d-4cc1-98c9-5602bf1aac09")
+	)
+	(wire
+		(pts
+			(xy 260.35 147.32) (xy 255.27 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "75726250-a052-4f66-af79-e7e35b0af270")
 	)
 	(wire
 		(pts
@@ -5584,7 +5269,7 @@
 	)
 	(wire
 		(pts
-			(xy 264.16 115.57) (xy 274.32 115.57)
+			(xy 251.46 144.78) (xy 260.35 144.78)
 		)
 		(stroke
 			(width 0)
@@ -5624,7 +5309,7 @@
 	)
 	(wire
 		(pts
-			(xy 129.54 50.8) (xy 130.81 50.8)
+			(xy 121.92 50.8) (xy 123.19 50.8)
 		)
 		(stroke
 			(width 0)
@@ -5694,6 +5379,16 @@
 	)
 	(wire
 		(pts
+			(xy 243.84 109.22) (xy 261.62 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8862a6e0-5e42-48c1-a826-17f762560d6c")
+	)
+	(wire
+		(pts
 			(xy 193.04 52.07) (xy 196.85 52.07)
 		)
 		(stroke
@@ -5701,6 +5396,16 @@
 			(type default)
 		)
 		(uuid "8baac0ed-4c75-4ec4-84ac-e57ad4d4df38")
+	)
+	(wire
+		(pts
+			(xy 81.28 66.04) (xy 99.06 66.04)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8c2cd39b-ae4b-4244-8da3-9161fd3878a9")
 	)
 	(wire
 		(pts
@@ -5734,6 +5439,16 @@
 	)
 	(wire
 		(pts
+			(xy 30.48 55.88) (xy 44.45 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8e3bb1b7-d483-4039-a055-1dda64a8e3b8")
+	)
+	(wire
+		(pts
 			(xy 281.94 71.12) (xy 281.94 67.31)
 		)
 		(stroke
@@ -5744,7 +5459,7 @@
 	)
 	(wire
 		(pts
-			(xy 85.09 106.68) (xy 106.68 106.68)
+			(xy 85.09 106.68) (xy 101.6 106.68)
 		)
 		(stroke
 			(width 0)
@@ -5754,7 +5469,7 @@
 	)
 	(wire
 		(pts
-			(xy 22.86 68.58) (xy 22.86 77.47)
+			(xy 30.48 68.58) (xy 30.48 77.47)
 		)
 		(stroke
 			(width 0)
@@ -5764,23 +5479,13 @@
 	)
 	(wire
 		(pts
-			(xy 119.38 58.42) (xy 121.92 58.42)
+			(xy 77.47 116.84) (xy 77.47 124.46)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "950a96ec-96df-47e9-806e-7c468a72d20b")
-	)
-	(wire
-		(pts
-			(xy 21.59 63.5) (xy 44.45 63.5)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "955fe976-e598-4f3b-84b0-7723d9f961f7")
+		(uuid "96eb6e75-de0d-4bfd-8b5a-20b00ecf7945")
 	)
 	(polyline
 		(pts
@@ -5794,6 +5499,26 @@
 	)
 	(wire
 		(pts
+			(xy 81.28 73.66) (xy 99.06 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9a4a5ef7-07ee-491c-87f6-916b21baba93")
+	)
+	(wire
+		(pts
+			(xy 30.48 68.58) (xy 44.45 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9b2c3139-de6b-4f5f-8e73-d119052f636c")
+	)
+	(wire
+		(pts
 			(xy 180.34 39.37) (xy 184.15 39.37)
 		)
 		(stroke
@@ -5804,17 +5529,7 @@
 	)
 	(wire
 		(pts
-			(xy 74.93 116.84) (xy 74.93 118.11)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9e7290c5-6b52-495a-9485-c253de67e259")
-	)
-	(wire
-		(pts
-			(xy 130.81 50.8) (xy 130.81 52.07)
+			(xy 123.19 50.8) (xy 123.19 52.07)
 		)
 		(stroke
 			(width 0)
@@ -5844,13 +5559,23 @@
 	)
 	(wire
 		(pts
-			(xy 81.28 50.8) (xy 119.38 50.8)
+			(xy 81.28 50.8) (xy 111.76 50.8)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "a8cef223-38c8-4635-9473-71127472ffdd")
+	)
+	(wire
+		(pts
+			(xy 34.29 58.42) (xy 44.45 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "aa8a8e65-f243-4950-ad1d-2186cbed112d")
 	)
 	(wire
 		(pts
@@ -5914,17 +5639,7 @@
 	)
 	(wire
 		(pts
-			(xy 119.38 73.66) (xy 121.92 73.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "afda0ae5-c25c-4cc2-814a-94678a6492d0")
-	)
-	(wire
-		(pts
-			(xy 130.81 35.56) (xy 130.81 36.83)
+			(xy 123.19 35.56) (xy 123.19 36.83)
 		)
 		(stroke
 			(width 0)
@@ -5964,13 +5679,23 @@
 	)
 	(wire
 		(pts
-			(xy 74.93 118.11) (xy 77.47 118.11)
+			(xy 243.84 106.68) (xy 261.62 106.68)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "b5827eda-021b-486c-94bf-3c40173b1786")
+		(uuid "b7f8527c-776f-4808-9ff2-969006268918")
+	)
+	(wire
+		(pts
+			(xy 34.29 53.34) (xy 44.45 53.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bc7548a8-9b3e-4c9b-bb53-cd78ca61153a")
 	)
 	(wire
 		(pts
@@ -5994,7 +5719,7 @@
 	)
 	(wire
 		(pts
-			(xy 92.71 35.56) (xy 114.3 35.56)
+			(xy 92.71 35.56) (xy 106.68 35.56)
 		)
 		(stroke
 			(width 0)
@@ -6004,13 +5729,13 @@
 	)
 	(wire
 		(pts
-			(xy 274.32 138.43) (xy 274.32 115.57)
+			(xy 21.59 166.37) (xy 21.59 167.64)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "c822ee07-4b48-461e-a668-0ed134056830")
+		(uuid "c165874d-471a-4df0-aca4-c1e177c7f344")
 	)
 	(wire
 		(pts
@@ -6042,16 +5767,6 @@
 		)
 		(uuid "cd5f3168-a304-4499-be78-67037325fba7")
 	)
-	(wire
-		(pts
-			(xy 81.28 71.12) (xy 91.44 71.12)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cddd441c-4714-44f2-9ef7-a37dfc995393")
-	)
 	(polyline
 		(pts
 			(xy 220.98 12.7) (xy 220.98 88.9)
@@ -6071,6 +5786,16 @@
 			(type default)
 		)
 		(uuid "d0afc9e6-8b98-4c1e-8c41-36a331d515ed")
+	)
+	(wire
+		(pts
+			(xy 74.93 166.37) (xy 77.47 166.37)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d2414f90-94e9-4c5d-9929-a3c44c443748")
 	)
 	(wire
 		(pts
@@ -6094,7 +5819,7 @@
 	)
 	(wire
 		(pts
-			(xy 251.46 115.57) (xy 254 115.57)
+			(xy 238.76 144.78) (xy 241.3 144.78)
 		)
 		(stroke
 			(width 0)
@@ -6104,23 +5829,13 @@
 	)
 	(wire
 		(pts
-			(xy 21.59 116.84) (xy 21.59 118.11)
+			(xy 21.59 124.46) (xy 21.59 125.73)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "d86cd6a2-8075-411b-b615-16c7b697fbd3")
-	)
-	(wire
-		(pts
-			(xy 106.68 106.68) (xy 106.68 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "db34fe13-68e5-4cdd-8d93-2ea293e3f04d")
 	)
 	(wire
 		(pts
@@ -6134,16 +5849,6 @@
 	)
 	(wire
 		(pts
-			(xy 245.11 146.05) (xy 275.59 146.05)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ddc243b2-888c-4791-ba9f-d8ac4019107d")
-	)
-	(wire
-		(pts
 			(xy 173.99 105.41) (xy 176.53 105.41)
 		)
 		(stroke
@@ -6151,16 +5856,6 @@
 			(type default)
 		)
 		(uuid "debe80b0-18e1-411d-9a52-b9100b2457f0")
-	)
-	(wire
-		(pts
-			(xy 242.57 115.57) (xy 251.46 115.57)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e05f1e41-b86e-4f00-8839-2273e47c27d7")
 	)
 	(wire
 		(pts
@@ -6174,33 +5869,13 @@
 	)
 	(wire
 		(pts
-			(xy 19.05 160.02) (xy 21.59 160.02)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e1475028-d200-4ca9-b263-12daba3a4a7f")
-	)
-	(wire
-		(pts
-			(xy 176.53 64.77) (xy 180.34 64.77)
+			(xy 172.72 64.77) (xy 175.26 64.77)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "e16ad431-f0f6-44f0-a54c-e84feae31437")
-	)
-	(wire
-		(pts
-			(xy 251.46 148.59) (xy 275.59 148.59)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e1a170ad-022e-47a5-94ff-b40373a93225")
 	)
 	(wire
 		(pts
@@ -6214,33 +5889,13 @@
 	)
 	(wire
 		(pts
-			(xy 21.59 160.02) (xy 21.59 162.56)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e33db90c-af72-4740-bdc2-cb5af2912206")
-	)
-	(wire
-		(pts
-			(xy 233.68 115.57) (xy 242.57 115.57)
+			(xy 228.6 144.78) (xy 229.87 144.78)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "e38286b9-8317-4b94-82e3-2ce43951daea")
-	)
-	(wire
-		(pts
-			(xy 74.93 158.75) (xy 74.93 160.02)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e3cabe42-0edb-420d-b3f5-4ecc7efa41c1")
 	)
 	(wire
 		(pts
@@ -6284,7 +5939,7 @@
 	)
 	(wire
 		(pts
-			(xy 22.86 30.48) (xy 44.45 30.48)
+			(xy 30.48 30.48) (xy 44.45 30.48)
 		)
 		(stroke
 			(width 0)
@@ -6344,13 +5999,13 @@
 	)
 	(wire
 		(pts
-			(xy 19.05 116.84) (xy 19.05 118.11)
+			(xy 19.05 124.46) (xy 21.59 124.46)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "f1ce8646-9fc3-47c3-8721-44b4a2171a02")
+		(uuid "f0a399eb-598d-4f04-ae08-fb42081a407f")
 	)
 	(wire
 		(pts
@@ -6371,16 +6026,6 @@
 			(type default)
 		)
 		(uuid "f4b6ebfe-41bd-4c83-a487-f23027c82bb9")
-	)
-	(wire
-		(pts
-			(xy 121.92 73.66) (xy 121.92 71.12)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f6a28492-1ec2-4bb0-a6a2-a7b8cbdce0bc")
 	)
 	(polyline
 		(pts
@@ -6404,17 +6049,7 @@
 	)
 	(wire
 		(pts
-			(xy 233.68 140.97) (xy 275.59 140.97)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fb10deba-f56c-408f-9f80-7a0065e03e87")
-	)
-	(wire
-		(pts
-			(xy 77.47 116.84) (xy 77.47 118.11)
+			(xy 77.47 124.46) (xy 77.47 125.73)
 		)
 		(stroke
 			(width 0)
@@ -6442,19 +6077,9 @@
 		)
 		(uuid "ff03a1e5-6d03-42c5-a340-af5d9ec88888")
 	)
-	(wire
-		(pts
-			(xy 275.59 138.43) (xy 274.32 138.43)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ff0e7c27-5b4c-49dd-931d-694f6b8fb6c1")
-	)
 	(text "Auxiliary Power Header"
 		(exclude_from_sim no)
-		(at 257.81 102.87 0)
+		(at 252.73 135.89 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6463,9 +6088,9 @@
 		)
 		(uuid "4a332612-d5c5-42a4-8dc8-5d0aea9ef795")
 	)
-	(text "Peripheral Mode\nSPI Header"
+	(text "Peripheral Mode SPI Header"
 		(exclude_from_sim no)
-		(at 266.7 161.29 0)
+		(at 241.3 100.33 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6487,7 +6112,7 @@
 	)
 	(text "Power Indicator LED"
 		(exclude_from_sim no)
-		(at 115.57 29.21 0)
+		(at 107.95 29.21 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6496,9 +6121,9 @@
 		)
 		(uuid "ba265ddc-642f-415c-96b2-c7204627b655")
 	)
-	(text "1.8-5VDC"
+	(text "1.8-5.5VDC"
 		(exclude_from_sim no)
-		(at 264.16 105.41 0)
+		(at 267.97 144.78 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6506,6 +6131,17 @@
 			(justify left bottom)
 		)
 		(uuid "d34edd77-a161-45ee-973c-fce129e95e85")
+	)
+	(text "6V"
+		(exclude_from_sim no)
+		(at 224.79 153.67 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "e42c722d-cc7c-41ec-b5f5-c80642832659")
 	)
 	(label "GREEN_2"
 		(at 34.29 35.56 0)
@@ -6551,8 +6187,8 @@
 		)
 		(uuid "0a003387-3858-4304-ba5f-8544e3249052")
 	)
-	(label "PERIPHERAL_CLK"
-		(at 257.81 146.05 0)
+	(label "PERIPHERAL_MOSI"
+		(at 82.55 63.5 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6560,10 +6196,21 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "18751520-5b53-4785-9461-ef6fd7cc021f")
+		(uuid "0b767268-866a-475d-8f7d-22a5e2acb7cc")
+	)
+	(label "PERIPHERAL_CLK"
+		(at 82.55 66.04 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "0dc4da81-2aff-46e5-872a-1bb07780eef5")
 	)
 	(label "PERIPHERAL_MOSI"
-		(at 26.67 60.96 0)
+		(at 243.84 104.14 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6571,7 +6218,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "1a9b9b2b-650f-4a3d-b287-60753fa0827a")
+		(uuid "1638651b-1a3a-41f1-9dbf-b895b65ab682")
 	)
 	(label "BLUE_2"
 		(at 34.29 25.4 0)
@@ -6584,17 +6231,6 @@
 		)
 		(uuid "1d470439-03ff-407c-9d7c-291e769e3324")
 	)
-	(label "CONTROLLER_SDA"
-		(at 82.55 60.96 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "223ec603-ecb7-46ca-add3-ff5d5fc18574")
-	)
 	(label "SD_CS"
 		(at 229.87 46.99 0)
 		(fields_autoplaced yes)
@@ -6605,6 +6241,17 @@
 			(justify left bottom)
 		)
 		(uuid "24fc54b9-8acf-4769-85d3-47aa46dd8866")
+	)
+	(label "SD_MOSI"
+		(at 34.29 60.96 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "2e561f73-a85c-4ead-bbeb-33a5a0854183")
 	)
 	(label "CONTROLLER_SCL"
 		(at 85.09 151.13 0)
@@ -6639,8 +6286,8 @@
 		)
 		(uuid "3778df62-06b7-458b-a1c5-aff226294c8f")
 	)
-	(label "PERIPHERAL_CS"
-		(at 257.81 143.51 0)
+	(label "SD_CS"
+		(at 34.29 53.34 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6648,18 +6295,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "3a2f0cab-fb29-4bd0-9dcc-4ba09491f7d4")
-	)
-	(label "PERIPHERAL_MISO"
-		(at 26.67 63.5 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "407ae397-3c51-4348-9923-1968678dd17d")
+		(uuid "3da39c1b-8814-4e44-b283-a3646e2d3852")
 	)
 	(label "RED_3"
 		(at 143.51 43.18 0)
@@ -6672,8 +6308,8 @@
 		)
 		(uuid "492090cb-072f-44b6-bfd4-d4cb3baec27f")
 	)
-	(label "SD_MOSI"
-		(at 82.55 63.5 0)
+	(label "PERIPHERAL_MISO"
+		(at 82.55 73.66 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6681,18 +6317,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "50662b22-dc71-4929-b97b-b6f0f657621f")
-	)
-	(label "PERIPHERAL_MOSI"
-		(at 257.81 148.59 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "511b8c22-35d0-44e4-960a-8dbbbff42424")
+		(uuid "549ca97d-efe7-4800-a242-ca3d61f73544")
 	)
 	(label "CONTROLLER_SDA"
 		(at 29.21 106.68 0)
@@ -6716,17 +6341,6 @@
 		)
 		(uuid "60cc23df-fa10-4ece-a7d9-51d5d1fb1ad9")
 	)
-	(label "PERIPHERAL_CLK"
-		(at 26.67 58.42 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "614a4b32-85d7-4cf5-b9f4-e92b7ed44d0c")
-	)
 	(label "GREEN_3"
 		(at 140.97 55.88 0)
 		(fields_autoplaced yes)
@@ -6737,6 +6351,17 @@
 			(justify left bottom)
 		)
 		(uuid "6ec188d6-831d-4ba6-b657-3fb0cbea7808")
+	)
+	(label "CONTROLLER_SDA"
+		(at 82.55 60.96 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "7133dc6f-51c1-4813-a353-2b0d80e57544")
 	)
 	(label "RED_2"
 		(at 34.29 45.72 0)
@@ -6793,8 +6418,8 @@
 		)
 		(uuid "83849389-b199-45a9-8c84-ff46df413061")
 	)
-	(label "SD_MISO"
-		(at 82.55 73.66 0)
+	(label "PERIPHERAL_CLK"
+		(at 243.84 109.22 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6802,7 +6427,18 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "8794db50-4489-4be9-bf6e-91ae8fa5d110")
+		(uuid "8cfebba2-55c9-4bec-806b-6a6827148dfe")
+	)
+	(label "PERIPHERAL_CS"
+		(at 82.55 71.12 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "8f9888c2-6c8d-4353-bcd2-8bba04e3a81c")
 	)
 	(label "AUDIO_R"
 		(at 34.29 73.66 0)
@@ -6815,6 +6451,17 @@
 		)
 		(uuid "907e7d06-528f-4c8c-a3ac-c5aaa8922a32")
 	)
+	(label "SD_MISO"
+		(at 34.29 63.5 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "926a8331-50cc-456c-8312-224f532e3aa7")
+	)
 	(label "AUDIO_L"
 		(at 142.24 105.41 0)
 		(fields_autoplaced yes)
@@ -6826,17 +6473,6 @@
 		)
 		(uuid "9915d4d5-5f94-44f9-9013-3b5e0bdcae18")
 	)
-	(label "PERIPHERAL_MISO"
-		(at 257.81 151.13 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "9c311525-530d-43b3-8931-f7ca8b0237c6")
-	)
 	(label "BLUE_2"
 		(at 142.24 67.31 0)
 		(fields_autoplaced yes)
@@ -6847,17 +6483,6 @@
 			(justify left bottom)
 		)
 		(uuid "9e5ff9c6-a22e-4198-8463-f9d3bfc3f7d0")
-	)
-	(label "PERIPHERAL_CS"
-		(at 26.67 53.34 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "9ed613e6-3a5e-4095-8a84-10d2dddf2d03")
 	)
 	(label "CONTROLLER_SCL"
 		(at 29.21 109.22 0)
@@ -6892,17 +6517,6 @@
 		)
 		(uuid "b17b7355-ac8b-4467-86d9-29c59a7693c6")
 	)
-	(label "SD_CLK"
-		(at 82.55 66.04 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "b526661e-976f-4bbb-9cbc-113982d9747a")
-	)
 	(label "AUDIO_R"
 		(at 142.24 125.73 0)
 		(fields_autoplaced yes)
@@ -6924,6 +6538,17 @@
 			(justify left bottom)
 		)
 		(uuid "cf84a39a-e897-49c7-9522-01fb874808d0")
+	)
+	(label "PERIPHERAL_CS"
+		(at 243.84 111.76 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "dcf7d825-2e44-4932-9836-c396ad1abd63")
 	)
 	(label "VSYNC"
 		(at 212.09 59.69 0)
@@ -6969,8 +6594,8 @@
 		)
 		(uuid "e91182e7-287e-4d82-a4e3-3b875131a7e3")
 	)
-	(label "SD_CS"
-		(at 82.55 71.12 0)
+	(label "PERIPHERAL_MISO"
+		(at 243.84 106.68 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6978,7 +6603,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "e9d8fcf1-1327-4ec6-8e59-255fc3802f0f")
+		(uuid "eb0d209f-7030-4359-9bf3-f37a4733e3aa")
 	)
 	(label "RED_2"
 		(at 143.51 39.37 0)
@@ -7012,6 +6637,17 @@
 			(justify left bottom)
 		)
 		(uuid "f13b135b-bcd9-4886-b2bf-65430feb8be4")
+	)
+	(label "SD_CLK"
+		(at 34.29 58.42 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f2134b9a-60ff-430e-bace-a184fefb6cbf")
 	)
 	(label "GREEN_2"
 		(at 140.97 52.07 0)
@@ -7059,7 +6695,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 130.81 36.83 0)
+		(at 123.19 36.83 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7067,8 +6703,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "025d20c1-c26e-497d-80d8-46d39b6321dd")
-		(property "Reference" "#PWR018"
-			(at 130.81 43.18 0)
+		(property "Reference" "#PWR03"
+			(at 123.19 43.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7077,7 +6713,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 130.81 41.91 0)
+			(at 123.19 41.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7085,7 +6721,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 130.81 36.83 0)
+			(at 123.19 36.83 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7094,7 +6730,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 130.81 36.83 0)
+			(at 123.19 36.83 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7102,8 +6738,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 130.81 36.83 0)
+		(property "Description" ""
+			(at 123.19 36.83 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7117,7 +6753,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR018")
+					(reference "#PWR03")
 					(unit 1)
 				)
 			)
@@ -7125,15 +6761,15 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 172.72 64.77 90)
+		(at 168.91 64.77 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "03c6dcec-c7a0-47e5-9c49-8805532fc97f")
-		(property "Reference" "R18"
-			(at 172.72 62.23 90)
+		(property "Reference" "R11"
+			(at 168.91 62.23 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7141,7 +6777,7 @@
 			)
 		)
 		(property "Value" "47"
-			(at 172.72 64.77 90)
+			(at 168.91 64.77 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7149,7 +6785,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 172.72 66.548 90)
+			(at 168.91 66.548 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7158,7 +6794,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 172.72 64.77 0)
+			(at 168.91 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7167,7 +6803,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 172.72 64.77 0)
+			(at 168.91 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7184,24 +6820,43 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R18")
+					(reference "R11")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 242.57 123.19 0)
+		(lib_id "Device:R")
+		(at 74.93 162.56 0)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "04d565f8-d5ab-44ce-ab56-4d93fbcb4e9e")
-		(property "Reference" "#PWR030"
-			(at 242.57 129.54 0)
+		(uuid "0b146ee1-4186-4a0b-b61b-90441fc60a78")
+		(property "Reference" "R23"
+			(at 72.39 161.2899 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "1M"
+			(at 72.39 163.8299 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 73.152 162.56 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7209,16 +6864,8 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "GND"
-			(at 242.57 128.27 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 242.57 123.19 0)
+		(property "Datasheet" "~"
+			(at 74.93 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7226,17 +6873,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 242.57 123.19 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 242.57 123.19 0)
+		(property "Description" ""
+			(at 74.93 162.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7245,12 +6883,15 @@
 			)
 		)
 		(pin "1"
-			(uuid "071f6948-408e-4e40-a2e9-56c3424645d1")
+			(uuid "501a87d9-4e64-4918-b646-aeb30ef1729c")
+		)
+		(pin "2"
+			(uuid "8fa6d98b-d4c9-4754-8e9b-898142c7eade")
 		)
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR030")
+					(reference "R23")
 					(unit 1)
 				)
 			)
@@ -7266,7 +6907,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "0bfb1bd1-afe1-4258-b0a8-412a1b0a7097")
-		(property "Reference" "J3"
+		(property "Reference" "J4"
 			(at 77.47 93.98 0)
 			(effects
 				(font
@@ -7336,159 +6977,14 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "J3")
+					(reference "J4")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Device:D_Zener")
-		(at 106.68 111.76 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "0c5741fb-5bca-44cb-a0ce-7caf1649a049")
-		(property "Reference" "D1"
-			(at 109.22 110.4899 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "3.6V"
-			(at 108.966 114.554 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
-			(at 106.68 111.76 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 106.68 111.76 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 106.68 111.76 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Part Number" "MMSZ5227B-7-F"
-			(at 106.68 111.76 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "104d2f73-8a74-4a7f-835a-cbfff6a2be9b")
-		)
-		(pin "2"
-			(uuid "33b67a6c-ef0e-4160-a45f-b9c2c8752b97")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "D1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_name "GND_2")
-		(lib_id "power:GND")
-		(at 238.76 151.13 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "0ec27b7f-21f6-4749-ae6d-531ece631203")
-		(property "Reference" "#PWR029"
-			(at 238.76 157.48 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 238.76 156.21 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 238.76 151.13 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 238.76 151.13 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 238.76 151.13 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "a05b0695-9b9e-4ed3-96b2-7220600bc14c")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR029")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Micro_SD_Card_Det2")
+		(lib_id "Connector:Micro_SD_Card_Det")
 		(at 261.62 54.61 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -7497,7 +6993,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "11c102cc-2b5a-4a1f-ae2e-d10f5c59a33a")
-		(property "Reference" "J7"
+		(property "Reference" "J2"
 			(at 262.255 33.02 0)
 			(effects
 				(font
@@ -7522,8 +7018,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.hirose.com/en/product/document?clcode=&productname=&series=DM3&documenttype=Catalog&lang=en&documentid=D49662_en"
-			(at 264.16 52.07 0)
+		(property "Datasheet" "https://www.hirose.com/product/en/download_file/key_name/DM3/category/Catalog/doc_file_id/49662/?file_category_id=4&item_id=195&is_series=1"
+			(at 261.62 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7531,16 +7027,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Micro SD Card Socket with two card detection pins"
-			(at 261.62 54.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Part Number" "MEM2061-01-188-00-A"
+		(property "Description" ""
 			(at 261.62 54.61 0)
 			(effects
 				(font
@@ -7585,85 +7072,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "J7")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:D_Zener")
-		(at 245.11 149.86 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "18b2afdd-b1ad-4643-b7b1-e51c88782b53")
-		(property "Reference" "D6"
-			(at 247.65 148.5899 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "3.6V"
-			(at 245.364 152.4 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
-			(at 245.11 149.86 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 245.11 149.86 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 245.11 149.86 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Part Number" "MMSZ5227B-7-F"
-			(at 245.11 149.86 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "84db32ac-9540-4d8c-a8b5-5b3da1de7823")
-		)
-		(pin "2"
-			(uuid "0e1e4c6c-62ab-40f7-ae42-55079f90d459")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "D6")
+					(reference "J2")
 					(unit 1)
 				)
 			)
@@ -7679,7 +7088,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "18ef59fc-fbd6-4935-8913-8cc6bba5d126")
-		(property "Reference" "J1"
+		(property "Reference" "J3"
 			(at 21.59 93.98 0)
 			(effects
 				(font
@@ -7749,208 +7158,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "J1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+3V3")
-		(at 13.97 60.96 0)
-		(mirror y)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "1b561994-4112-4dfe-a7bd-31aec7eab7ff")
-		(property "Reference" "#PWR01"
-			(at 13.97 64.77 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3"
-			(at 14.478 57.404 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 13.97 60.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 13.97 60.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 13.97 60.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "cdd36725-9514-4458-944e-903ed01de0a7")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR01")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 115.57 58.42 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "1e58ab60-0a4d-4566-a311-fcb5aaaa6aed")
-		(property "Reference" "R2"
-			(at 115.57 55.88 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "4.7K"
-			(at 113.284 58.42 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 115.57 56.642 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 115.57 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 115.57 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "567481f6-906f-42fe-9610-d6916036e703")
-		)
-		(pin "1"
-			(uuid "7a51f7f9-caeb-438d-b5ce-ca0d5ab9a8bf")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_name "GND_1")
-		(lib_id "power:GND")
-		(at 106.68 115.57 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "234a6bf4-914a-4495-b425-6294aa18ebf0")
-		(property "Reference" "#PWR014"
-			(at 106.68 121.92 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 106.68 120.65 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 106.68 115.57 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 106.68 115.57 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 106.68 115.57 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "2b0f7aca-3045-42ce-923c-979f94274719")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR014")
+					(reference "J3")
 					(unit 1)
 				)
 			)
@@ -7965,7 +7173,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "2739ca2e-3425-4053-8bf5-d40b9f3f2db1")
-		(property "Reference" "R8"
+		(property "Reference" "R14"
 			(at 156.21 102.87 90)
 			(effects
 				(font
@@ -8017,7 +7225,78 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R8")
+					(reference "R14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 74.93 120.65 0)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "30cbfc9e-d8d7-402a-977f-ec8a827f44cb")
+		(property "Reference" "R18"
+			(at 72.39 119.3799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "1M"
+			(at 72.39 121.9199 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 73.152 120.65 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 74.93 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 74.93 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "33d0ba1e-704f-4b03-b70a-726af4537ce7")
+		)
+		(pin "2"
+			(uuid "b83dafdf-0985-46c5-93b9-e082fbeded03")
+		)
+		(instances
+			(project "pico-vga"
+				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
+					(reference "R18")
 					(unit 1)
 				)
 			)
@@ -8032,7 +7311,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "34d76e9c-c0d1-469a-b9f0-141aa59e98f5")
-		(property "Reference" "R17"
+		(property "Reference" "R7"
 			(at 172.72 46.99 90)
 			(effects
 				(font
@@ -8084,7 +7363,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R17")
+					(reference "R7")
 					(unit 1)
 				)
 			)
@@ -8100,7 +7379,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "37cef56d-c0d9-4b93-a02b-35daa056cd6e")
-		(property "Reference" "R6"
+		(property "Reference" "R5"
 			(at 154.94 45.72 90)
 			(effects
 				(font
@@ -8152,7 +7431,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R6")
+					(reference "R5")
 					(unit 1)
 				)
 			)
@@ -8167,7 +7446,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "38130b58-5500-418c-8762-1b007deaf629")
-		(property "Reference" "R9"
+		(property "Reference" "R19"
 			(at 156.21 123.19 90)
 			(effects
 				(font
@@ -8219,7 +7498,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R9")
+					(reference "R19")
 					(unit 1)
 				)
 			)
@@ -8235,7 +7514,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3c0fbdb0-10dd-4549-9146-91d3de24e409")
-		(property "Reference" "#PWR024"
+		(property "Reference" "#PWR04"
 			(at 224.79 44.45 0)
 			(effects
 				(font
@@ -8270,7 +7549,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+		(property "Description" ""
 			(at 224.79 40.64 0)
 			(effects
 				(font
@@ -8285,7 +7564,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR024")
+					(reference "#PWR04")
 					(unit 1)
 				)
 			)
@@ -8301,7 +7580,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3ed68938-0a13-4526-b971-ad6257959206")
-		(property "Reference" "#PWR013"
+		(property "Reference" "#PWR09"
 			(at 104.14 83.82 0)
 			(effects
 				(font
@@ -8336,7 +7615,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+		(property "Description" ""
 			(at 104.14 77.47 0)
 			(effects
 				(font
@@ -8351,7 +7630,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR013")
+					(reference "#PWR09")
 					(unit 1)
 				)
 			)
@@ -8366,7 +7645,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "48c1e629-258c-4dad-9138-20a098edb087")
-		(property "Reference" "#PWR011"
+		(property "Reference" "#PWR020"
 			(at 87.63 146.05 0)
 			(effects
 				(font
@@ -8401,7 +7680,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+		(property "Description" ""
 			(at 87.63 142.24 0)
 			(effects
 				(font
@@ -8416,7 +7695,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR011")
+					(reference "#PWR020")
 					(unit 1)
 				)
 			)
@@ -8432,7 +7711,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4906de3e-15e4-4ec6-ae68-a0c2aa6c8817")
-		(property "Reference" "#PWR020"
+		(property "Reference" "#PWR013"
 			(at 168.91 123.19 0)
 			(effects
 				(font
@@ -8467,7 +7746,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+		(property "Description" ""
 			(at 168.91 116.84 0)
 			(effects
 				(font
@@ -8482,7 +7761,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR020")
+					(reference "#PWR013")
 					(unit 1)
 				)
 			)
@@ -8559,363 +7838,16 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 115.57 60.96 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "4aff58dd-809e-41c5-9b07-9f4480015e1a")
-		(property "Reference" "R3"
-			(at 115.57 63.5 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "4.7K"
-			(at 115.57 60.96 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 115.57 62.738 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 115.57 60.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 115.57 60.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "50a011f4-5df5-4ac5-9305-e1f6b4f08881")
-		)
-		(pin "2"
-			(uuid "1321bcf4-bd15-40ea-a7e8-cdf6c9ae5175")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+3V3")
-		(at 121.92 57.15 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "4f2d0ab5-2ce2-4547-b907-211107cb1c8b")
-		(property "Reference" "#PWR016"
-			(at 121.92 60.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3"
-			(at 121.412 53.594 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 121.92 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 121.92 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 121.92 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "3c91a091-f38c-42dc-b3e6-bce58ede8693")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR016")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 242.57 119.38 0)
-		(mirror y)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "5364d1ed-37a1-41da-9a7b-47f59d7b6673")
-		(property "Reference" "C5"
-			(at 240.03 118.11 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "100n"
-			(at 241.3 121.92 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder"
-			(at 241.6048 123.19 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 242.57 119.38 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 242.57 119.38 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "2d7a3b6d-da98-41e5-b12e-d0bd73667a83")
-		)
-		(pin "1"
-			(uuid "861e86a8-6861-4eb4-bd9d-c5575cc75da2")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "C5")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_name "GND_2")
-		(lib_id "power:GND")
-		(at 245.11 153.67 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "57d2cff7-0ae1-4c7a-bbf3-a08555202d6a")
-		(property "Reference" "#PWR031"
-			(at 245.11 160.02 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 245.11 158.75 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 245.11 153.67 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 245.11 153.67 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 245.11 153.67 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "17ca311e-b1f3-4567-8e69-9ebdbcef3fd4")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR031")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:D_Zener")
-		(at 257.81 154.94 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "58855459-0339-4a38-bd5a-d5ffd789b013")
-		(property "Reference" "D8"
-			(at 260.35 153.6699 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "3.6V"
-			(at 258.064 157.48 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
-			(at 257.81 154.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 257.81 154.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 257.81 154.94 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Part Number" "MMSZ5227B-7-F"
-			(at 257.81 154.94 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "e8ee3746-210a-4a62-9d62-a74ec571ac00")
-		)
-		(pin "2"
-			(uuid "c4791dc9-e341-4a79-84c7-efdc898d8119")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "D8")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:LED")
-		(at 125.73 35.56 180)
+		(at 118.11 35.56 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "5e898be8-9ced-4e22-9449-60b4d0a68379")
-		(property "Reference" "D3"
-			(at 125.73 30.48 0)
+		(property "Reference" "D1"
+			(at 118.11 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8923,7 +7855,7 @@
 			)
 		)
 		(property "Value" "LED"
-			(at 125.73 33.02 0)
+			(at 118.11 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8931,7 +7863,7 @@
 			)
 		)
 		(property "Footprint" "LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder"
-			(at 125.73 35.56 0)
+			(at 118.11 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8940,7 +7872,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 125.73 35.56 0)
+			(at 118.11 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8949,7 +7881,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 125.73 35.56 0)
+			(at 118.11 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8966,7 +7898,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "D3")
+					(reference "D1")
 					(unit 1)
 				)
 			)
@@ -8981,7 +7913,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "5eb3cabb-b195-4ef4-b998-ea6af814c3b4")
-		(property "Reference" "C1"
+		(property "Reference" "C2"
 			(at 166.37 109.22 0)
 			(effects
 				(font
@@ -9017,7 +7949,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "100nF, 25V"
+		(property "Description" ""
 			(at 163.83 110.49 0)
 			(effects
 				(font
@@ -9035,7 +7967,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "C1")
+					(reference "C2")
 					(unit 1)
 				)
 			)
@@ -9050,7 +7982,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "62f7fb08-0c28-4b87-a676-0081a7d9e782")
-		(property "Reference" "R14"
+		(property "Reference" "R6"
 			(at 165.1 46.99 90)
 			(effects
 				(font
@@ -9102,7 +8034,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R14")
+					(reference "R6")
 					(unit 1)
 				)
 			)
@@ -9118,7 +8050,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "69e998fd-9106-41de-af20-ac18a9932add")
-		(property "Reference" "J2"
+		(property "Reference" "J8"
 			(at 21.59 135.89 0)
 			(effects
 				(font
@@ -9188,7 +8120,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "J2")
+					(reference "J8")
 					(unit 1)
 				)
 			)
@@ -9204,7 +8136,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6a3ddc95-017c-4cf6-9ebc-754d76a14818")
-		(property "Reference" "R10"
+		(property "Reference" "R4"
 			(at 160.02 41.91 90)
 			(effects
 				(font
@@ -9256,7 +8188,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R10")
+					(reference "R4")
 					(unit 1)
 				)
 			)
@@ -9272,7 +8204,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6a790fcf-e1eb-4fa2-97b8-4b803515fd98")
-		(property "Reference" "#PWR025"
+		(property "Reference" "#PWR07"
 			(at 224.79 77.47 0)
 			(effects
 				(font
@@ -9307,7 +8239,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+		(property "Description" ""
 			(at 224.79 71.12 0)
 			(effects
 				(font
@@ -9322,74 +8254,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR025")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_name "GND_2")
-		(lib_id "power:GND")
-		(at 116.84 116.84 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "6ad5d4f9-503e-4d9b-ab55-e18f41dad454")
-		(property "Reference" "#PWR015"
-			(at 116.84 123.19 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 116.84 121.92 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 116.84 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 116.84 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 116.84 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "144f3a44-25b2-4987-8738-1da02ecfd841")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR015")
+					(reference "#PWR07")
 					(unit 1)
 				)
 			)
@@ -9397,7 +8262,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 21.59 162.56 0)
+		(at 21.59 167.64 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9405,8 +8270,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6b0cd414-d3af-450e-a9d8-fc78f6ada7f5")
-		(property "Reference" "#PWR03"
-			(at 21.59 168.91 0)
+		(property "Reference" "#PWR025"
+			(at 21.59 173.99 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9415,7 +8280,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 21.59 167.64 0)
+			(at 21.59 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9423,7 +8288,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 21.59 162.56 0)
+			(at 21.59 167.64 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9432,7 +8297,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 21.59 162.56 0)
+			(at 21.59 167.64 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9440,8 +8305,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 21.59 162.56 0)
+		(property "Description" ""
+			(at 21.59 167.64 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9455,7 +8320,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR03")
+					(reference "#PWR025")
 					(unit 1)
 				)
 			)
@@ -9463,7 +8328,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 233.68 123.19 0)
+		(at 229.87 152.4 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9471,8 +8336,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6cb84f8a-91e3-46f0-80ec-d0d3d98c8b9b")
-		(property "Reference" "#PWR027"
-			(at 233.68 129.54 0)
+		(property "Reference" "#PWR022"
+			(at 229.87 158.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9481,7 +8346,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 233.68 128.27 0)
+			(at 229.87 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9489,7 +8354,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 233.68 123.19 0)
+			(at 229.87 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9498,7 +8363,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 233.68 123.19 0)
+			(at 229.87 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9506,8 +8371,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 233.68 123.19 0)
+		(property "Description" ""
+			(at 229.87 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9521,7 +8386,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR027")
+					(reference "#PWR022")
 					(unit 1)
 				)
 			)
@@ -9537,7 +8402,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6d3adc80-30ef-41be-ab4e-7e4ad62498f2")
-		(property "Reference" "R19"
+		(property "Reference" "R15"
 			(at 176.53 109.2199 0)
 			(effects
 				(font
@@ -9591,7 +8456,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R19")
+					(reference "R15")
 					(unit 1)
 				)
 			)
@@ -9599,7 +8464,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 77.47 120.65 0)
+		(at 77.47 125.73 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9607,8 +8472,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6e2a4410-c26d-4d08-b122-8258609e7c50")
-		(property "Reference" "#PWR07"
-			(at 77.47 127 0)
+		(property "Reference" "#PWR015"
+			(at 77.47 132.08 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9617,7 +8482,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 77.47 125.73 0)
+			(at 77.47 130.81 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9625,7 +8490,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 77.47 120.65 0)
+			(at 77.47 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9634,7 +8499,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 77.47 120.65 0)
+			(at 77.47 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9642,8 +8507,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 77.47 120.65 0)
+		(property "Description" ""
+			(at 77.47 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9657,7 +8522,78 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR07")
+					(reference "#PWR015")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 19.05 162.56 0)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "70012d4e-4e46-4592-85dd-c771fe941419")
+		(property "Reference" "R22"
+			(at 16.51 161.2899 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "1M"
+			(at 16.51 163.8299 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 17.272 162.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 19.05 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 19.05 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b4386f84-f32a-44a9-aff9-8ea33364e14d")
+		)
+		(pin "2"
+			(uuid "3a3d05a5-7338-48c2-b6c1-8003d29e0116")
+		)
+		(instances
+			(project "pico-vga"
+				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
+					(reference "R22")
 					(unit 1)
 				)
 			)
@@ -9673,7 +8609,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "71ecf517-9d44-4ea4-ac1c-63e602d6396b")
-		(property "Reference" "R7"
+		(property "Reference" "R9"
 			(at 154.94 58.42 90)
 			(effects
 				(font
@@ -9725,7 +8661,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R7")
+					(reference "R9")
 					(unit 1)
 				)
 			)
@@ -9733,7 +8669,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 21.59 120.65 0)
+		(at 21.59 125.73 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9741,8 +8677,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7277c56a-0b6f-4edc-b8d4-c5c873257b0b")
-		(property "Reference" "#PWR02"
-			(at 21.59 127 0)
+		(property "Reference" "#PWR014"
+			(at 21.59 132.08 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9751,7 +8687,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 21.59 125.73 0)
+			(at 21.59 130.81 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9759,7 +8695,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 21.59 120.65 0)
+			(at 21.59 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9768,7 +8704,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 21.59 120.65 0)
+			(at 21.59 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9776,8 +8712,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 21.59 120.65 0)
+		(property "Description" ""
+			(at 21.59 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9791,7 +8727,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR02")
+					(reference "#PWR014")
 					(unit 1)
 				)
 			)
@@ -9806,7 +8742,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "77e66fb3-a49a-4e87-8692-044c9620fe65")
-		(property "Reference" "#PWR010"
+		(property "Reference" "#PWR012"
 			(at 87.63 104.14 0)
 			(effects
 				(font
@@ -9841,7 +8777,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+		(property "Description" ""
 			(at 87.63 100.33 0)
 			(effects
 				(font
@@ -9856,85 +8792,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR010")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:D_Zener")
-		(at 238.76 147.32 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "785f9b59-7e6a-4593-8804-4d1475f5c9a9")
-		(property "Reference" "D5"
-			(at 241.3 146.0499 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "3.6V"
-			(at 239.014 149.86 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
-			(at 238.76 147.32 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 238.76 147.32 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 238.76 147.32 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Part Number" "MMSZ5227B-7-F"
-			(at 238.76 147.32 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "97f5e414-ee1a-47e1-af4c-57bb3cafa721")
-		)
-		(pin "2"
-			(uuid "216e22e1-57d0-4139-9346-7704ed4d2081")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "D5")
+					(reference "#PWR012")
 					(unit 1)
 				)
 			)
@@ -9950,7 +8808,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7ff8b373-de2b-4091-a299-e4c8d4868dce")
-		(property "Reference" "#PWR022"
+		(property "Reference" "#PWR06"
 			(at 193.04 72.39 0)
 			(effects
 				(font
@@ -9985,7 +8843,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+		(property "Description" ""
 			(at 193.04 66.04 0)
 			(effects
 				(font
@@ -10000,7 +8858,78 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR022")
+					(reference "#PWR06")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 19.05 120.65 0)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "821059ef-e3dd-443c-ae28-80849c6a68d8")
+		(property "Reference" "R17"
+			(at 16.51 119.3799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "1M"
+			(at 16.51 121.9199 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 17.272 120.65 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 19.05 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 19.05 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d4076dfb-0c33-4def-84b8-0aedcd8980ac")
+		)
+		(pin "2"
+			(uuid "b36e5229-8891-43ec-bfe0-9d5afd17df87")
+		)
+		(instances
+			(project "pico-vga"
+				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
+					(reference "R17")
 					(unit 1)
 				)
 			)
@@ -10015,7 +8944,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "8577f523-e2d7-4e57-b933-22692ca54395")
-		(property "Reference" "C2"
+		(property "Reference" "C4"
 			(at 166.37 129.54 0)
 			(effects
 				(font
@@ -10051,7 +8980,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "100nF, 25V"
+		(property "Description" ""
 			(at 163.83 130.81 0)
 			(effects
 				(font
@@ -10069,7 +8998,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "C2")
+					(reference "C4")
 					(unit 1)
 				)
 			)
@@ -10085,7 +9014,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8bc501b2-a098-4241-9764-5b87193688d9")
-		(property "Reference" "R22"
+		(property "Reference" "R21"
 			(at 189.23 129.5399 0)
 			(effects
 				(font
@@ -10139,85 +9068,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R22")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:D_Zener")
-		(at 116.84 113.03 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "94be2954-0508-4c4d-9e99-9b7e47debb21")
-		(property "Reference" "D2"
-			(at 119.38 111.7599 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "3.6V"
-			(at 119.126 115.824 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
-			(at 116.84 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 116.84 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 116.84 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Part Number" "MMSZ5227B-7-F"
-			(at 116.84 113.03 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "890a2cd8-688e-4c16-9289-7e3cb51d4a98")
-		)
-		(pin "2"
-			(uuid "bc0fc84f-b5e2-40c9-b668-e8fcfd9f47e2")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "D2")
+					(reference "R21")
 					(unit 1)
 				)
 			)
@@ -10233,7 +9084,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "95dacd92-5833-44d5-99c5-e59abe287786")
-		(property "Reference" "#PWR021"
+		(property "Reference" "#PWR017"
 			(at 168.91 143.51 0)
 			(effects
 				(font
@@ -10268,7 +9119,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+		(property "Description" ""
 			(at 168.91 137.16 0)
 			(effects
 				(font
@@ -10283,7 +9134,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR021")
+					(reference "#PWR017")
 					(unit 1)
 				)
 			)
@@ -10291,15 +9142,15 @@
 	)
 	(symbol
 		(lib_id "Device:D_Zener")
-		(at 233.68 119.38 270)
+		(at 229.87 148.59 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "95f625d6-99cb-49e9-abf4-1d9c03242fdd")
-		(property "Reference" "D4"
-			(at 228.6 118.11 90)
+		(property "Reference" "D2"
+			(at 224.79 147.32 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10307,8 +9158,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "5.1V"
-			(at 228.6 121.92 90)
+		(property "Value" "MMSZ5233BT1G"
+			(at 213.36 149.86 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10317,7 +9168,7 @@
 			)
 		)
 		(property "Footprint" "Diode_SMD:D_SOD-123"
-			(at 233.68 119.38 0)
+			(at 229.87 148.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10326,7 +9177,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 233.68 119.38 0)
+			(at 229.87 148.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10335,7 +9186,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 233.68 119.38 0)
+			(at 229.87 148.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10343,8 +9194,8 @@
 				(hide yes)
 			)
 		)
-		(property "Part Number" "MMSZ5231B-7-F"
-			(at 233.68 119.38 0)
+		(property "Part Number" "MMSZ5233BT1G"
+			(at 229.87 148.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10361,7 +9212,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "D4")
+					(reference "D2")
 					(unit 1)
 				)
 			)
@@ -10377,7 +9228,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9862beea-030e-490d-9ade-b5463804ae8b")
-		(property "Reference" "#PWR09"
+		(property "Reference" "#PWR01"
 			(at 87.63 26.67 0)
 			(effects
 				(font
@@ -10412,7 +9263,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
+		(property "Description" ""
 			(at 87.63 22.86 0)
 			(effects
 				(font
@@ -10427,74 +9278,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR09")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_name "GND_2")
-		(lib_id "power:GND")
-		(at 251.46 156.21 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "9cb1a253-c7f6-4c3f-ba07-5cf6041a70c7")
-		(property "Reference" "#PWR033"
-			(at 251.46 162.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 251.46 161.29 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 251.46 156.21 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 251.46 156.21 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 251.46 156.21 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "550d9a9d-2b59-4965-a340-c5a682c5734a")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR033")
+					(reference "#PWR01")
 					(unit 1)
 				)
 			)
@@ -10509,7 +9293,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a48be936-7cd3-4ec2-bbc7-f5e3432e12a3")
-		(property "Reference" "#PWR012"
+		(property "Reference" "#PWR02"
 			(at 92.71 38.1 0)
 			(effects
 				(font
@@ -10544,7 +9328,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+		(property "Description" ""
 			(at 92.71 34.29 0)
 			(effects
 				(font
@@ -10559,7 +9343,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR012")
+					(reference "#PWR02")
 					(unit 1)
 				)
 			)
@@ -10757,140 +9541,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 17.78 63.5 90)
-		(mirror x)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "a57e9c6c-50a7-423d-b5f2-c25a7afc93be")
-		(property "Reference" "R1"
-			(at 17.78 60.96 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "4.7K"
-			(at 20.066 63.5 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 17.78 61.722 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 17.78 63.5 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 17.78 63.5 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "4a192561-876d-44c4-9cc7-63b72d4a9d4e")
-		)
-		(pin "1"
-			(uuid "5fc126db-71e4-425b-9dfd-95965483e5d4")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+3V3")
-		(at 121.92 71.12 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "a9c7b348-61e9-490c-a5a6-766fe0e0507f")
-		(property "Reference" "#PWR017"
-			(at 121.92 74.93 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3"
-			(at 121.412 67.564 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 121.92 71.12 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 121.92 71.12 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 121.92 71.12 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "8ddbcbb9-2a11-4df3-980a-1216ffbad76b")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR017")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+3V3")
 		(at 31.75 100.33 0)
 		(unit 1)
@@ -10899,7 +9549,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "aaba875c-fff8-4977-9265-f064bd70e036")
-		(property "Reference" "#PWR05"
+		(property "Reference" "#PWR011"
 			(at 31.75 104.14 0)
 			(effects
 				(font
@@ -10934,7 +9584,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+		(property "Description" ""
 			(at 31.75 100.33 0)
 			(effects
 				(font
@@ -10949,14 +9599,14 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR05")
+					(reference "#PWR011")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Connector_Audio:AudioJack3")
+		(lib_id "Connector:AudioJack3")
 		(at 207.01 111.76 180)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11000,7 +9650,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Audio Jack, 3 Poles (Stereo / TRS)"
+		(property "Description" ""
 			(at 207.01 111.76 0)
 			(effects
 				(font
@@ -11009,7 +9659,7 @@
 				(hide yes)
 			)
 		)
-		(property "Part Number" "STX-3000"
+		(property "Part Number" "SJ1-3533NG"
 			(at 207.01 111.76 0)
 			(effects
 				(font
@@ -11037,9 +9687,77 @@
 		)
 	)
 	(symbol
-		(lib_name "GND_3")
+		(lib_id "Connector:Conn_01x02_Male")
+		(at 265.43 147.32 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "acc667df-4bed-44df-bb83-c796733b5c2f")
+		(property "Reference" "J7"
+			(at 264.16 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "Conn_01x02_Male"
+			(at 260.35 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Horizontal"
+			(at 265.43 147.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 265.43 147.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 265.43 147.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "67978e69-cdf0-49d6-a0f9-0b0637411be6")
+		)
+		(pin "2"
+			(uuid "26218487-daa9-4396-b937-7a80c17a0710")
+		)
+		(instances
+			(project "pico-vga"
+				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
+					(reference "J7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
-		(at 130.81 52.07 0)
+		(at 123.19 52.07 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11047,8 +9765,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b0bc5f81-143f-4392-858c-7228e373047d")
-		(property "Reference" "#PWR019"
-			(at 130.81 58.42 0)
+		(property "Reference" "#PWR05"
+			(at 123.19 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11057,7 +9775,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 130.81 57.15 0)
+			(at 123.19 57.15 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11065,7 +9783,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 130.81 52.07 0)
+			(at 123.19 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11074,7 +9792,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 130.81 52.07 0)
+			(at 123.19 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11082,8 +9800,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 130.81 52.07 0)
+		(property "Description" ""
+			(at 123.19 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11097,85 +9815,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR019")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:D_Zener")
-		(at 251.46 152.4 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "b3d293ed-6852-471f-8380-2d51dcec5ffd")
-		(property "Reference" "D7"
-			(at 254 151.1299 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "3.6V"
-			(at 251.714 154.94 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
-			(at 251.46 152.4 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 251.46 152.4 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 251.46 152.4 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Part Number" "MMSZ5227B-7-F"
-			(at 251.46 152.4 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "9a88ecef-7520-4917-8d90-cdb3001ff25a")
-		)
-		(pin "2"
-			(uuid "1c67ac60-5316-498d-96f7-d8bfded4a396")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "D7")
+					(reference "#PWR05")
 					(unit 1)
 				)
 			)
@@ -11183,7 +9823,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 22.86 77.47 0)
+		(at 30.48 77.47 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11191,8 +9831,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b3f5f73f-31a1-4729-b043-2e6e58622aa0")
-		(property "Reference" "#PWR04"
-			(at 22.86 83.82 0)
+		(property "Reference" "#PWR08"
+			(at 30.48 83.82 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11201,7 +9841,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 22.86 82.55 0)
+			(at 30.48 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11209,7 +9849,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 22.86 77.47 0)
+			(at 30.48 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11218,7 +9858,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 22.86 77.47 0)
+			(at 30.48 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11226,8 +9866,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 22.86 77.47 0)
+		(property "Description" ""
+			(at 30.48 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11241,7 +9881,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR04")
+					(reference "#PWR08")
 					(unit 1)
 				)
 			)
@@ -11249,7 +9889,7 @@
 	)
 	(symbol
 		(lib_id "Switch:SW_Push")
-		(at 124.46 50.8 0)
+		(at 116.84 50.8 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11258,7 +9898,7 @@
 		(fields_autoplaced yes)
 		(uuid "b4f19957-f76e-4839-9f05-50bcede07dc3")
 		(property "Reference" "SW1"
-			(at 124.46 43.18 0)
+			(at 116.84 43.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11266,7 +9906,7 @@
 			)
 		)
 		(property "Value" "SW_Push"
-			(at 124.46 45.72 0)
+			(at 116.84 45.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11274,7 +9914,7 @@
 			)
 		)
 		(property "Footprint" "Button_Switch_THT:SW_PUSH_6mm_H4.3mm"
-			(at 124.46 45.72 0)
+			(at 116.84 45.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11283,7 +9923,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 124.46 45.72 0)
+			(at 116.84 45.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11292,7 +9932,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 124.46 50.8 0)
+			(at 116.84 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11317,31 +9957,34 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 118.11 35.56 90)
+		(at 281.94 74.93 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b859f1b6-6060-41ab-8a20-3be295a6de12")
-		(property "Reference" "R5"
-			(at 118.11 33.02 90)
+		(fields_autoplaced yes)
+		(uuid "b762e366-a900-4977-b833-a01046d4274b")
+		(property "Reference" "R13"
+			(at 279.4 73.6599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify right)
 			)
 		)
-		(property "Value" "1K"
-			(at 118.11 35.56 90)
+		(property "Value" "1M"
+			(at 279.4 76.1999 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify right)
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 118.11 37.338 90)
+			(at 280.162 74.93 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11350,7 +9993,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 118.11 35.56 0)
+			(at 281.94 74.93 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11359,7 +10002,74 @@
 			)
 		)
 		(property "Description" ""
-			(at 118.11 35.56 0)
+			(at 281.94 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "ede50f88-f36b-463c-87f1-2ecead1eee85")
+		)
+		(pin "2"
+			(uuid "4b221ad0-9d7d-4364-bfbe-d13475c50b90")
+		)
+		(instances
+			(project "pico-vga"
+				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
+					(reference "R13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 110.49 35.56 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b859f1b6-6060-41ab-8a20-3be295a6de12")
+		(property "Reference" "R1"
+			(at 110.49 33.02 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1K"
+			(at 110.49 35.56 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 110.49 37.338 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 110.49 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 110.49 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11376,7 +10086,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R5")
+					(reference "R1")
 					(unit 1)
 				)
 			)
@@ -11391,7 +10101,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bdb6bfce-9cd7-4ecc-a2ef-838b0d91aebe")
-		(property "Reference" "#PWR06"
+		(property "Reference" "#PWR019"
 			(at 31.75 146.05 0)
 			(effects
 				(font
@@ -11426,7 +10136,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+		(property "Description" ""
 			(at 31.75 142.24 0)
 			(effects
 				(font
@@ -11441,7 +10151,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR06")
+					(reference "#PWR019")
 					(unit 1)
 				)
 			)
@@ -11456,7 +10166,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bfcb33f7-85a4-4775-af32-c2f00ecf4ccc")
-		(property "Reference" "R13"
+		(property "Reference" "R2"
 			(at 165.1 34.29 90)
 			(effects
 				(font
@@ -11508,74 +10218,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R13")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_name "GND_2")
-		(lib_id "power:GND")
-		(at 257.81 158.75 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "c0398722-03fa-4cb0-a618-90fd3fceabf0")
-		(property "Reference" "#PWR034"
-			(at 257.81 165.1 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 257.81 163.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 257.81 158.75 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 257.81 158.75 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 257.81 158.75 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "a14f1e4e-7022-42e9-8966-77db5bf13243")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR034")
+					(reference "R2")
 					(unit 1)
 				)
 			)
@@ -11591,7 +10234,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c5062c4c-8d72-4a78-88ad-cc5a690aee7f")
-		(property "Reference" "J4"
+		(property "Reference" "J9"
 			(at 77.47 135.89 0)
 			(effects
 				(font
@@ -11661,7 +10304,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "J4")
+					(reference "J9")
 					(unit 1)
 				)
 			)
@@ -11676,7 +10319,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c77c9952-c7ee-4427-a30e-51e1c7b51b0c")
-		(property "Reference" "C3"
+		(property "Reference" "C1"
 			(at 180.34 99.06 90)
 			(effects
 				(font
@@ -11710,7 +10353,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "47uF, 6.3V"
+		(property "Description" ""
 			(at 180.34 105.41 0)
 			(effects
 				(font
@@ -11728,7 +10371,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "C3")
+					(reference "C1")
 					(unit 1)
 				)
 			)
@@ -11744,7 +10387,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c96d9795-78df-4724-919a-5f4a5bc8ce65")
-		(property "Reference" "R11"
+		(property "Reference" "R8"
 			(at 160.02 54.61 90)
 			(effects
 				(font
@@ -11796,7 +10439,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R11")
+					(reference "R8")
 					(unit 1)
 				)
 			)
@@ -11811,7 +10454,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c9d1f7b2-507b-4bef-887e-e6393dfa6c58")
-		(property "Reference" "R16"
+		(property "Reference" "R3"
 			(at 172.72 34.29 90)
 			(effects
 				(font
@@ -11863,7 +10506,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R16")
+					(reference "R3")
 					(unit 1)
 				)
 			)
@@ -11871,7 +10514,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 77.47 162.56 0)
+		(at 77.47 167.64 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11879,8 +10522,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "cb9b47ce-9284-44a8-8433-619a677b8ec3")
-		(property "Reference" "#PWR08"
-			(at 77.47 168.91 0)
+		(property "Reference" "#PWR026"
+			(at 77.47 173.99 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11889,7 +10532,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 77.47 167.64 0)
+			(at 77.47 172.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11897,7 +10540,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 77.47 162.56 0)
+			(at 77.47 167.64 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11906,7 +10549,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 77.47 162.56 0)
+			(at 77.47 167.64 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11914,8 +10557,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 77.47 162.56 0)
+		(property "Description" ""
+			(at 77.47 167.64 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11929,7 +10572,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR08")
+					(reference "#PWR026")
 					(unit 1)
 				)
 			)
@@ -11937,7 +10580,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 251.46 123.19 0)
+		(at 238.76 152.4 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11945,8 +10588,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "cbc2aa22-8b9c-4ca4-bd70-7d96c6d521b3")
-		(property "Reference" "#PWR032"
-			(at 251.46 129.54 0)
+		(property "Reference" "#PWR023"
+			(at 238.76 158.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11955,7 +10598,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 251.46 128.27 0)
+			(at 238.76 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11963,7 +10606,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 251.46 123.19 0)
+			(at 238.76 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11972,7 +10615,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 251.46 123.19 0)
+			(at 238.76 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11980,8 +10623,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 251.46 123.19 0)
+		(property "Description" ""
+			(at 238.76 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11995,142 +10638,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR032")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_name "GND_2")
-		(lib_id "power:GND")
-		(at 233.68 142.24 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "ccdd76c1-d306-4089-99b0-b9a31f639f65")
-		(property "Reference" "#PWR028"
-			(at 233.68 148.59 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 233.68 147.32 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 233.68 142.24 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 233.68 142.24 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 233.68 142.24 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "aa2929fa-ab28-4a5f-b790-d7b910e8422e")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR028")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 115.57 73.66 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "cd848de8-b373-40d2-ab48-b826ca7d9150")
-		(property "Reference" "R4"
-			(at 115.57 71.12 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "4.7K"
-			(at 113.284 73.66 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 115.57 71.882 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 115.57 73.66 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 115.57 73.66 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "e104b851-5dcd-49d8-b47b-63d06610339f")
-		)
-		(pin "1"
-			(uuid "476c9220-e07a-440b-8a19-849df239bc28")
-		)
-		(instances
-			(project "pico-vga"
-				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R4")
+					(reference "#PWR023")
 					(unit 1)
 				)
 			)
@@ -12138,7 +10646,7 @@
 	)
 	(symbol
 		(lib_id "Device:Q_PMOS_GSD")
-		(at 259.08 118.11 270)
+		(at 246.38 147.32 270)
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12148,7 +10656,7 @@
 		(fields_autoplaced yes)
 		(uuid "df91ecf5-79ae-4b0f-8f67-000a0ed8ec3e")
 		(property "Reference" "Q1"
-			(at 259.08 107.95 90)
+			(at 246.38 137.16 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12156,7 +10664,7 @@
 			)
 		)
 		(property "Value" "DMP3099L-7"
-			(at 259.08 110.49 90)
+			(at 246.38 139.7 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12164,7 +10672,7 @@
 			)
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 261.62 113.03 0)
+			(at 248.92 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12173,7 +10681,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 259.08 118.11 0)
+			(at 246.38 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12182,7 +10690,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 259.08 118.11 0)
+			(at 246.38 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12191,7 +10699,7 @@
 			)
 		)
 		(property "Part Number" "DMP3099L-7"
-			(at 259.08 118.11 0)
+			(at 246.38 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12218,7 +10726,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:DE15_Receptacle_HighDensity")
+		(lib_id "Connector:DB15_Female_HighDensity")
 		(at 204.47 54.61 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12227,7 +10735,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e46a3bb5-8a29-45cb-b6fa-4654bfb60ec8")
-		(property "Reference" "J5"
+		(property "Reference" "J1"
 			(at 204.47 31.75 0)
 			(effects
 				(font
@@ -12261,7 +10769,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "15-pin female receptacle socket D-SUB connector, High density (3 columns), Triple Row, Generic, VGA-connector"
+		(property "Description" ""
 			(at 204.47 54.61 0)
 			(effects
 				(font
@@ -12270,7 +10778,7 @@
 				(hide yes)
 			)
 		)
-		(property "Part Number" "A-HDF15A-KG-TAXB"
+		(property "Part Number" "L77HDE15SD1CH4FVGA"
 			(at 204.47 54.61 0)
 			(effects
 				(font
@@ -12327,7 +10835,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "J5")
+					(reference "J1")
 					(unit 1)
 				)
 			)
@@ -12335,7 +10843,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 281.94 71.12 0)
+		(at 281.94 78.74 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12343,8 +10851,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e6190198-5d04-4a67-8354-359d52a6fddf")
-		(property "Reference" "#PWR036"
-			(at 281.94 77.47 0)
+		(property "Reference" "#PWR010"
+			(at 281.94 85.09 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12353,7 +10861,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 281.94 76.2 0)
+			(at 281.94 83.82 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12361,7 +10869,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 281.94 71.12 0)
+			(at 281.94 78.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12370,7 +10878,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 281.94 71.12 0)
+			(at 281.94 78.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12378,8 +10886,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 281.94 71.12 0)
+		(property "Description" ""
+			(at 281.94 78.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12393,7 +10901,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR036")
+					(reference "#PWR010")
 					(unit 1)
 				)
 			)
@@ -12408,7 +10916,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e8783e7d-a67a-4d0e-bc32-25a001dc8cd9")
-		(property "Reference" "C4"
+		(property "Reference" "C3"
 			(at 180.34 119.38 90)
 			(effects
 				(font
@@ -12442,7 +10950,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "47uF, 6.3V"
+		(property "Description" ""
 			(at 180.34 125.73 0)
 			(effects
 				(font
@@ -12460,40 +10968,24 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "C4")
+					(reference "C3")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 160.02 67.31 90)
-		(mirror x)
+		(lib_id "power:GND")
+		(at 255.27 148.59 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "eac2bb7f-3d45-4f43-a960-fb8ac2175fd3")
-		(property "Reference" "R12"
-			(at 160.02 69.85 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1K"
-			(at 160.02 67.31 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 160.02 65.532 90)
+		(fields_autoplaced yes)
+		(uuid "e87e7533-4a43-4021-bd75-1ea429cff709")
+		(property "Reference" "#PWR021"
+			(at 255.27 154.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12501,8 +10993,25 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
-			(at 160.02 67.31 0)
+		(property "Value" "GND"
+			(at 255.27 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 255.27 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 255.27 148.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12511,7 +11020,72 @@
 			)
 		)
 		(property "Description" ""
-			(at 160.02 67.31 0)
+			(at 255.27 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2a06d5e7-3fa1-4651-99b5-d4099200e2bd")
+		)
+		(instances
+			(project "pico-vga"
+				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
+					(reference "#PWR021")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 156.21 67.31 90)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "eac2bb7f-3d45-4f43-a960-fb8ac2175fd3")
+		(property "Reference" "R12"
+			(at 156.21 69.85 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1K"
+			(at 156.21 67.31 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
+			(at 156.21 65.532 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 156.21 67.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 156.21 67.31 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12536,7 +11110,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 233.68 111.76 0)
+		(at 228.6 140.97 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12544,8 +11118,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "eb69f692-978c-45a3-bf73-640e72c53289")
-		(property "Reference" "#PWR026"
-			(at 233.68 115.57 0)
+		(property "Reference" "#PWR018"
+			(at 228.6 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12554,7 +11128,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 233.68 106.68 0)
+			(at 228.6 135.89 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12562,7 +11136,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 233.68 111.76 0)
+			(at 228.6 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12571,7 +11145,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 233.68 111.76 0)
+			(at 228.6 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12579,8 +11153,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 233.68 111.76 0)
+		(property "Description" ""
+			(at 228.6 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12594,7 +11168,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR026")
+					(reference "#PWR018")
 					(unit 1)
 				)
 			)
@@ -12610,7 +11184,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "eb716401-99ef-44bc-aae6-3166f964c3c0")
-		(property "Reference" "R21"
+		(property "Reference" "R16"
 			(at 189.23 109.2199 0)
 			(effects
 				(font
@@ -12664,7 +11238,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R21")
+					(reference "R16")
 					(unit 1)
 				)
 			)
@@ -12672,15 +11246,15 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 165.1 64.77 90)
+		(at 161.29 64.77 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "ed158513-2de9-49bd-96ca-c09cc19a4e01")
-		(property "Reference" "R15"
-			(at 165.1 62.23 90)
+		(property "Reference" "R10"
+			(at 161.29 62.23 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12688,7 +11262,7 @@
 			)
 		)
 		(property "Value" "390"
-			(at 165.1 64.77 90)
+			(at 161.29 64.77 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12696,7 +11270,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 165.1 66.548 90)
+			(at 161.29 66.548 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12705,7 +11279,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 165.1 64.77 0)
+			(at 161.29 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12714,7 +11288,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 165.1 64.77 0)
+			(at 161.29 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12731,7 +11305,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "R15")
+					(reference "R10")
 					(unit 1)
 				)
 			)
@@ -12747,7 +11321,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ee50c821-931c-46fd-9881-47574e7f7d42")
-		(property "Reference" "#PWR023"
+		(property "Reference" "#PWR016"
 			(at 200.66 137.16 0)
 			(effects
 				(font
@@ -12782,7 +11356,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+		(property "Description" ""
 			(at 200.66 130.81 0)
 			(effects
 				(font
@@ -12797,7 +11371,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR023")
+					(reference "#PWR016")
 					(unit 1)
 				)
 			)
@@ -12805,23 +11379,23 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 251.46 119.38 180)
+		(at 238.76 148.59 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "f0eb99b7-eb33-41fb-9d20-67b6cb1ae877")
-		(property "Reference" "C6"
-			(at 247.65 118.11 0)
+		(property "Reference" "C5"
+			(at 234.95 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "10u"
-			(at 247.65 121.92 0)
+		(property "Value" "47u"
+			(at 234.95 149.86 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12829,7 +11403,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder"
-			(at 250.4948 115.57 0)
+			(at 237.7948 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12838,7 +11412,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 251.46 119.38 0)
+			(at 238.76 148.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12846,8 +11420,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "10uF, 25V"
-			(at 251.46 119.38 0)
+		(property "Description" ""
+			(at 238.76 148.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12864,24 +11438,23 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "C6")
+					(reference "C5")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Connector:Conn_01x06_Pin")
-		(at 280.67 143.51 0)
-		(mirror y)
+		(lib_id "Connector:Conn_01x04_Male")
+		(at 266.7 109.22 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f4ac84b1-ed05-4289-98cb-e81c7170f74e")
-		(property "Reference" "J8"
-			(at 278.13 152.4 0)
+		(uuid "f83e7df2-b777-4d87-8168-0adada2a9909")
+		(property "Reference" "J5"
+			(at 267.97 106.6799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12889,8 +11462,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "Conn_01x06_Pin"
-			(at 266.7 154.94 0)
+		(property "Value" "Conn_01x04_Male"
+			(at 259.08 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12898,8 +11471,8 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "pico-vga:PinHeader_1x06_P2.54mm_Horizontal_SMD"
-			(at 280.67 143.51 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Horizontal"
+			(at 266.7 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12908,7 +11481,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 280.67 143.51 0)
+			(at 266.7 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12916,8 +11489,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x06, script generated"
-			(at 280.67 143.51 0)
+		(property "Description" ""
+			(at 266.7 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12926,27 +11499,21 @@
 			)
 		)
 		(pin "1"
-			(uuid "0e83a302-872a-431e-b7f6-00378639fa71")
-		)
-		(pin "6"
-			(uuid "6313d7c1-9bd8-450b-9f71-373e2fa6427d")
-		)
-		(pin "4"
-			(uuid "c1b70462-a354-4adf-b9a3-e50e8c2b2a36")
-		)
-		(pin "5"
-			(uuid "4197554e-c95a-445e-9e02-158bd46383dd")
-		)
-		(pin "3"
-			(uuid "a42644db-c625-47f7-8b34-b9f5c6b43187")
+			(uuid "6f076301-697a-4b1b-b4fa-3116d5e8e257")
 		)
 		(pin "2"
-			(uuid "91c8275f-c1b5-4db8-a679-3404295dbf70")
+			(uuid "b4606443-7003-49bc-ac46-78fe10dcc6f7")
+		)
+		(pin "3"
+			(uuid "805f0079-b0b7-46a7-9a1a-bf7b11ab5446")
+		)
+		(pin "4"
+			(uuid "cb72e4a0-5915-4bcd-b40d-da5ec7e5176d")
 		)
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "J8")
+					(reference "J5")
 					(unit 1)
 				)
 			)
@@ -12954,7 +11521,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 259.08 123.19 0)
+		(at 246.38 152.4 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12962,8 +11529,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ffef5c5b-3e93-4aea-ba00-b60464e42ea2")
-		(property "Reference" "#PWR035"
-			(at 259.08 129.54 0)
+		(property "Reference" "#PWR024"
+			(at 246.38 158.75 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12972,7 +11539,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 259.08 128.27 0)
+			(at 246.38 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12980,7 +11547,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 259.08 123.19 0)
+			(at 246.38 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12989,7 +11556,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 259.08 123.19 0)
+			(at 246.38 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12997,8 +11564,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 259.08 123.19 0)
+		(property "Description" ""
+			(at 246.38 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13012,7 +11579,7 @@
 		(instances
 			(project "pico-vga"
 				(path "/63da5f0b-ebba-4db6-8888-4b7c10552696"
-					(reference "#PWR035")
+					(reference "#PWR024")
 					(unit 1)
 				)
 			)

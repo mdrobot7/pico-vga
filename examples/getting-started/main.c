@@ -1,5 +1,5 @@
-#include "../lib/pico-vga.h"
-#include "game.h"
+#include "pico/stdlib.h"
+#include "pico-vga.h"
 
 //The name of your program. Used to load/store data from the SD card.
 const char name[] = "Test";
@@ -22,17 +22,16 @@ ControllerConfig_t controllerConf = {
 AudioConfig_t audioConf = {};
 SDConfig_t sdConf = {};
 
-void game()
-{
-    stdio_init_all();
+int main() {
+        stdio_init_all();
     for(uint8_t i = 0; i < 20; i++) { //5 seconds to open serial communication
         //printf("Waiting for user to open serial...\n");
         //sleep_ms(250);
     }
     //printf("\n");
-    
+
     initPicoVGA(&displayConf, &controllerConf, &audioConf, &sdConf);
-    
+
     //Draw lines
     /*for(uint16_t i = 0; i < frameHeight; i += 10) {
         drawLine(frameWidth/2, frameHeight/2, i, 0, COLOR_RED, 0);
@@ -107,5 +106,5 @@ void game()
     sleep_ms(500);
     clearScreen();
     */
-
+   while(true) {}
 }

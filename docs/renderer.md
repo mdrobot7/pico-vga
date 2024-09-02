@@ -6,6 +6,7 @@ VGA is an analog video signal protocol. There are 15 pins on the connector, but 
 
 The hardware description of VGA is in [hardware.md](./hardware.md), but the TL;DR is that the Pico only needs to control those 5 lines to make any VGA display work. The Horizonal and Vertical Sync timings need to match those in the official spec, found on [TinyVGA](http://tinyvga.com/vga-timing). Hardware is responsible for translating the Pico's digital color signals to analog, the Pico just needs to handle outputting [8 bit color](https://en.wikipedia.org/wiki/8-bit_color) through some GPIO pins.
 
+
 ## Making the VGA Signal -- The PIO System
 The Pico's timer system is not very flexible -- it only has a microsecond-based timer and a cycle-accurate PWM system, but starting these in software causes many problems, the main one being that starting clock signals in sync is basically impossible.
 
@@ -29,6 +30,7 @@ System/Memory <-- RX FIFO <-- Input Shift Register <-- Pins
                  (4x32 bit)         (1x32 bit)
 ```
 The color state machine is very simple: All it does is take data from the TX FIFO, pull it to the Output Shift Register automatically (see: Autopull in Pico docs) and, every clock cycle, OUT 8 bits of data from the Output Shift Register to 8 GPIO pins.
+
 
 ## DMA -- Feeding the Color State Machine
 By far, the hardest of this system is feeding the Color state machine. It may seem simple: just tell DMA to constantly copy data from a buffer in memory to the TX FIFO of the Color state machine.
@@ -115,11 +117,22 @@ IRQ:
 
 What this does is make *almost* everything CPU-independent (run from the DMA instead of rely on the CPU to reconfigure stuff). This gives significantly better performance, much better reliability, and a functioning graphics card. The IRQ is also extremely fast and it's based on the actual read address of the DMA channel rather than some counter variable (It tended to break when I was counting lines with a line counter variable).
 
+
 ## The 2D Renderer
 The renderer (comparatively, at least) is very simple. Since the entire frame is buffered in system memory, writing to and modifying the frame is easy -- it's just a 2D array. The renderer is based on the Pico having a second core. The second core, Core 1, is entirely dedicated to running the renderer and handling DMA reconfiguration.
 
 ### The Render Queue
 The render queue is a linked list of RenderQueueItem elements. Each element has parameters, coordinates, a color, and an identifier. In addition to holding the data for each element, the order in which the list is linked is the order in which things are rendered. This means elements can be "under" or "over" others.
+
+There are a few ways to do the render queue, but the most important factor is that it is a contiguous buffer in RAM. Linked lists/lists of pointers to render items don't work well because of cache misses. Here are some ways I've implemented this, and why they stuck or were removed:
+- Linked list
+  - Removed because of the cache misses issue (performance)
+- Standard array, the user gets pointers to each element
+  - Removed because "garbage collection" doesn't work well. You'll want to insert/remove render queue elements at some point, so you'd have to change the user's pointers too.
+- Standard array with UIDs for each element
+  - This works, and is good for hiding the render queue away from the user, but it's slow. If you want to modify an element, you have to go in and linearly search for it in the queue.
+- Standard array in user space (let the user handle everything)
+  - The current implementation. This makes the user handle their own memory, cleanup, and queue order. It's faster, but at the risk of the user doing something dumb. I'm willing to risk it here.
 
 ### Rasterization
 The render function uses standard rasterization functions to draw lines and circles. Since the render queue represents vectors and not pixels, some math needs to be done to convert the two endpoints of a line, for example, into pixels on the frame. That is the rasterization process.
@@ -129,8 +142,10 @@ The renderer has two different modes: Manual mode and AutoRender mode. Manual mo
 
 The AutoRender mode constantly loops over the render queue looking for items that need to be updated. When it finds one, it redraws that item and anything after it. This is because when an item is redrawn, it is drawn on the "top" layer of the frame, which might not be where the programmer wants it. This requires more CPU time on the second core, but is more convenient for the programmer.
 
+
 ## The 3D Renderer
 (Coming soon!)
+
 
 ## The Limits of the Raspberry Pi Pico
 The capabilities of Pico-VGA are limited mainly by three things: The system clock speed, memory usage, and processor execution speed.

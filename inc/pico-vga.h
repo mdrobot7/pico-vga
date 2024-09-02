@@ -7,7 +7,7 @@
 
 #include "audio.h"
 #include "color.h"
-#include "controller.h"
+// #include "controller.h"
 #include "draw.h"
 #include "font.h"
 #include "pinout.h"

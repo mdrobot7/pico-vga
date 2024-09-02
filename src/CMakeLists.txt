@@ -2,18 +2,14 @@ add_library(libpicovga STATIC)
 
 target_sources(libpicovga PUBLIC
     audio.c
-    controller.c
+    # controller.c
     draw-2d.c
     draw-3d.c
     init.c
     init-display.c
-    peripheral-mode.c
     render/render.c
     render/render-2d.c
-    sd.c
-    stats.c
     utils-internal.c
-    utils.c
 )
 
 target_include_directories(libpicovga PUBLIC

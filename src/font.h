@@ -1,5 +1,5 @@
-#ifndef FONT_H
-#define FONT_H
+#ifndef __PV_FONT_H
+#define __PV_FONT_H
 
 /*
 - This file contains constant bit arrays representing the layout of the IBM CP437 character list.
@@ -16,7 +16,11 @@
 
 */
 
-const uint8_t cp437[256][CHAR_HEIGHT] = {
+#define FONT_WIDTH 5
+#define FONT_HEIGHT 8
+extern uint8_t * font; //The current font in use by the system
+
+const uint8_t cp437[256][FONT_HEIGHT] = {
   { 0b00000,
     0b00000,
     0b00000,

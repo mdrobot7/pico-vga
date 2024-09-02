@@ -6,9 +6,6 @@
 #include "pico-vga.h"
 #include "pinout.h"
 
-//Unified Pico-VGA memory buffer
-extern uint8_t buffer[PICO_VGA_MAX_MEMORY_BYTES];
-
 //Constants for the width and height of base resolutions
 extern const uint16_t frameSize[3][4];
 
@@ -41,33 +38,6 @@ extern volatile uint8_t interpolatedLine; //The interpolated line currently bein
 extern volatile uint8_t interpolationIncomplete; //Number of uncompleted interpolated lines (not enough time to finish before needing to be pushed)
 extern volatile uint8_t lineInterpolationIRQ;
 
-
-//Configuration Options
-extern DisplayConfig_t * displayConfig;
-extern ControllerConfig_t * controllerConfig;
-extern AudioConfig_t * audioConfig;
-extern SDConfig_t * sdConfig;
-
-int initDisplay();
-int initController();
-int initAudio();
-int initSD();
-int initStats();
-int initPeripheralMode();
-
-void initGarbageCollector();
-void initLineInterpolation();
-
-int deInitDisplay();
-int deInitController();
-int deInitAudio();
-int deInitSD();
-int deInitStats();
-int deInitPeripheralMode();
-
-void deInitGarbageCollector();
-void deInitLineInterpolation();
-
 /*
         Render Queue
 ============================
@@ -89,7 +59,7 @@ typedef enum {
     RQI_T_STRING,
     RQI_T_SPRITE,
     RQI_T_BITMAP,
-    RQI_T_POLYGON, 
+    RQI_T_POLYGON,
     RQI_T_FILLED_POLYGON,
     RQI_T_LIGHT,
     RQI_T_SVG,
@@ -122,7 +92,7 @@ typedef struct __packed {
 
     //Scaling/stretching in the x, y, and z directions
     int8_t scaleX, scaleY, scaleZ;
-    
+
     //Pointer to an array of points that make up polygons in 2D or triangles that make up the triangle
     //mesh for 3D rendering (Either Points_t or Triangle_t)
     uint16_t numPointsOrTriangles;
@@ -157,7 +127,7 @@ typedef struct __packed {
 
     //Scaling/stretching in the x, y, and z directions
     int8_t scaleX, scaleY, scaleZ;
-    
+
     //Pointer to an array of points that make up polygons in 2D or triangles that make up the triangle
     //mesh for 3D rendering (Either Points_t or Triangle_t)
     uint16_t numPointsOrTriangles;
@@ -191,7 +161,7 @@ typedef struct __packed {
 
     //Scaling/stretching in the x, y, and z directions
     int8_t scaleX, scaleY, scaleZ;
-    
+
     //Pointer to an array of points that make up polygons in 2D or triangles that make up the triangle
     //mesh for 3D rendering (Either Points_t or Triangle_t)
     uint16_t numPointsOrTriangles;
@@ -237,10 +207,6 @@ extern RenderQueueUID_t uid;
 
 void render();
 void renderAA();
-
-#define CHAR_WIDTH 5
-#define CHAR_HEIGHT 8
-extern uint8_t * font; //The current font in use by the system
 
 
 /*

@@ -1,9 +1,6 @@
 #include "pico/stdlib.h"
 #include "pico-vga.h"
 
-//The name of your program. Used to load/store data from the SD card.
-const char name[] = "Test";
-
 DisplayConfig_t displayConf = {
     .baseResolution = RES_800x600,
     .resolutionScale = RES_SCALED_400x300,
@@ -19,8 +16,8 @@ DisplayConfig_t displayConf = {
 ControllerConfig_t controllerConf = {
     .numControllers = 4,
 };
-AudioConfig_t audioConf = {};
-SDConfig_t sdConf = {};
+
+RenderQueueItem_t render_queue[100]; // The render queue
 
 int main() {
         stdio_init_all();

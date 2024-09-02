@@ -1,5 +1,5 @@
-#ifndef PINOUT_H
-#define PINOUT_H
+#ifndef __PV_PINOUT_H
+#define __PV_PINOUT_H
 
 /*
         PINOUT (V1)

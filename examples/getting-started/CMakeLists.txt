@@ -4,6 +4,13 @@ add_executable(${EXECUTABLE}
     main.c
 )
 
+# pico-vga definitions
+# The *total* amount of memory that the entire Pico-VGA library is allowed to use (framebuffer, render elements, etc).
+# Try to maximize this, since the more memory the library is given the better it will perform (recommended: 256kB)
+target_compile_definitions(${EXECUTABLE} PUBLIC PV_FRAMEBUFFER_BYTES=200000)
+# Whether the board should act in peripheral mode
+target_compile_definitions(${EXECUTABLE} PUBLIC PV_PERIPHERAL_MODE=false)
+
 # pull in common dependencies
 target_link_libraries(${EXECUTABLE}
     pico_stdlib

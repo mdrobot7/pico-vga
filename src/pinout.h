@@ -43,33 +43,33 @@ GPIO20 - Controller SDA (I2C0)
 GPIO21 - Controller SCL
 */
 
-#define COLOR_LSB_PIN 0
-#define HSYNC_PIN 8
+#define COLOR_LSB_PIN   0
+#define HSYNC_PIN       8
 #define HSYNC_PWM_SLICE (HSYNC_PIN / 2) % 8
 #define HSYNC_PWM_CHAN  (HSYNC_PIN % 2)
-#define VSYNC_PIN 13
+#define VSYNC_PIN       13
 #define VSYNC_PWM_SLICE (VSYNC_PIN / 2) % 8
 #define VSYNC_PWM_CHAN  (VSYNC_PIN % 2)
 
-#define AUDIO_L_PIN 14
+#define AUDIO_L_PIN       14
 #define AUDIO_L_PWM_SLICE (AUDIO_L_PIN / 2) % 8
 #define AUDIO_L_PWM_CHAN  (AUDIO_L_PIN % 2)
-#define AUDIO_R_PIN 15
+#define AUDIO_R_PIN       15
 #define AUDIO_R_PWM_SLICE (AUDIO_R_PIN / 2) % 8
 #define AUDIO_R_PWM_CHAN  (AUDIO_R_PIN % 2)
 
 #define SD_MISO_PIN 12
 #define SD_MOSI_PIN 11
-#define SD_CLK_PIN 10
-#define SD_CS_PIN 9
+#define SD_CLK_PIN  10
+#define SD_CS_PIN   9
 
 #define PERIPHERAL_MISO_PIN 16
 #define PERIPHERAL_MOSI_PIN 19
-#define PERIPHERAL_CLK_PIN 18
-#define PERIPHERAL_CS_PIN 17
+#define PERIPHERAL_CLK_PIN  18
+#define PERIPHERAL_CS_PIN   17
 
 #define CONTROLLER_SDA_PIN 20
 #define CONTROLLER_SCL_PIN 21
-#define CONTROLLER_I2C i2c0
+#define CONTROLLER_I2C     i2c0
 
 #endif

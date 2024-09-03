@@ -29,8 +29,8 @@ static uint8_t num_controllers_paired = 0;
 /**
  * @brief After all 8 bytes of controller data have been received, this interrupt handler is called.
  * Disables I2C, resets the target device address, and restarts everything.
- * 
- * @return irq_handler_t 
+ *
+ * @return irq_handler_t
  */
 static irq_handler_t set_i2c_read_address() {
     static uint8_t current_addr = 0;
@@ -59,10 +59,10 @@ static irq_handler_t set_i2c_read_address() {
 
 /**
  * @brief Timer callback for polling controllers. Called every 1ms.
- * 
- * @param t 
- * @return true 
- * @return false 
+ *
+ * @param t
+ * @return true
+ * @return false
  */
 static bool poll_controllers(repeating_timer_t * t) {
     if(num_controllers_paired == 0) return true;
@@ -106,9 +106,9 @@ int initController() {
     channel_config_set_write_increment(&rx_conf, true);
     channel_config_set_transfer_data_size(&rx_conf, DMA_SIZE_8);
     channel_config_set_dreq(&rx_conf, i2c_get_dreq(CONTROLLER_I2C, false));
-    dma_channel_configure(rx_dma_chan, &rx_conf, controller_data, &c_i2c_hw->data_cmd, 
+    dma_channel_configure(rx_dma_chan, &rx_conf, controller_data, &c_i2c_hw->data_cmd,
                           num_controllers_paired*8, false);
-    
+
     dma_channel_config tx_conf = dma_channel_get_default_config(tx_dma_chan);
     channel_config_set_read_increment(&tx_conf, true);
     channel_config_set_write_increment(&tx_conf, false);
@@ -138,9 +138,9 @@ int deInitController() {
 }
 
 /**
- * @brief Scan the I2C bus for new controllers for a 10ms. If one is detected, add its address 
+ * @brief Scan the I2C bus for new controllers for a 10ms. If one is detected, add its address
  * to the list of known addresses. Exits immediately after a new controller has been found.
- * 
+ *
  * @return true If a controller was found.
  * @return false If no controller was found or if the maximum number of controllers has already been reached.
  */
@@ -184,8 +184,8 @@ bool controller_pair() {
 /**
  * @brief Unpairs a controller. This does not affect the indices of other controllers -- if controller 1
  * is removed, then controllers 2 and 3 still remain controllers 2 and 3.
- * 
- * @param controller 
+ *
+ * @param controller
  */
 void controller_unpair(uint8_t controller) {
     cancel_repeating_timer(&poll_controllers_timer);
@@ -203,7 +203,7 @@ void controller_unpair(uint8_t controller) {
 
 /**
  * @brief Unpairs all paired controllers.
- * 
+ *
  */
 void controller_unpair_all() {
     cancel_repeating_timer(&poll_controllers_timer);
@@ -223,8 +223,8 @@ void controller_unpair_all() {
 
 /**
  * @brief Returns the number of currently paired controllers.
- * 
- * @return uint8_t 
+ *
+ * @return uint8_t
  */
 uint8_t controller_get_num_paired_controllers() {
     return num_controllers_paired;
@@ -234,7 +234,7 @@ uint8_t controller_get_num_paired_controllers() {
  * @brief Returns the state (pressed/not pressed) of a particular button of a particular controller.
  * Returns false if controller parameter is invalid (i.e. controller = 3, but you only have 1 controller
  * paired) or if the button is invalid.
- * 
+ *
  * @param controller The controller to get data from (0 - number of controllers paired)
  * @param button The button to get the state of
  * @return true If the button is pressed

@@ -16,9 +16,9 @@
 
 */
 
-#define FONT_WIDTH 5
+#define FONT_WIDTH  5
 #define FONT_HEIGHT 8
-extern uint8_t * font; //The current font in use by the system
+extern uint8_t * font; // The current font in use by the system
 
 const uint8_t cp437[256][FONT_HEIGHT] = {
   { 0b00000,
@@ -28,7 +28,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0x00, Null character
+    0b00000 }, // 0x00, Null character
   { 0b01110,
     0b11111,
     0b10101,
@@ -36,7 +36,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11011,
     0b10001,
     0b01110,
-    0b00000 }, //0x01, frowny face
+    0b00000 }, // 0x01, frowny face
   { 0b01110,
     0b11111,
     0b10101,
@@ -44,7 +44,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b11011,
     0b01110,
-    0b00000 }, //0x02, smiley face
+    0b00000 }, // 0x02, smiley face
   { 0b00000,
     0b01010,
     0b11111,
@@ -52,7 +52,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b01110,
     0b00100,
-    0b00000 }, //0x03, heart
+    0b00000 }, // 0x03, heart
   { 0b00000,
     0b00100,
     0b01110,
@@ -60,7 +60,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b01110,
     0b00100,
-    0b00000 }, //0x04, diamond
+    0b00000 }, // 0x04, diamond
   { 0b01110,
     0b01010,
     0b11111,
@@ -68,7 +68,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00100,
     0b01110,
-    0b00000 }, //0x05, club
+    0b00000 }, // 0x05, club
   { 0b00100,
     0b01110,
     0b11111,
@@ -76,7 +76,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00100,
     0b01110,
-    0b00000 }, //0x06, spade
+    0b00000 }, // 0x06, spade
   { 0b00000,
     0b00000,
     0b00100,
@@ -84,7 +84,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01110,
     0b00100,
     0b00000,
-    0b00000 }, //0x07, dot
+    0b00000 }, // 0x07, dot
   { 0b11111,
     0b11111,
     0b11011,
@@ -92,7 +92,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b11011,
     0b11111,
-    0b11111 }, //0x08, inverted dot
+    0b11111 }, // 0x08, inverted dot
   { 0b00000,
     0b00000,
     0b00100,
@@ -100,7 +100,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01010,
     0b00100,
     0b00000,
-    0b00000 }, //0x09, circle
+    0b00000 }, // 0x09, circle
   { 0b11111,
     0b11111,
     0b11011,
@@ -108,7 +108,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b11011,
     0b11111,
-    0b11111 }, //0x0A, inverted circle
+    0b11111 }, // 0x0A, inverted circle
   { 0b00000,
     0b00111,
     0b00011,
@@ -116,7 +116,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10100,
     0b10100,
     0b01000,
-    0b00000 }, //0x0B, male
+    0b00000 }, // 0x0B, male
   { 0b01110,
     0b10001,
     0b10001,
@@ -124,7 +124,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b11111,
     0b00100,
-    0b00000 }, //0x0C, female
+    0b00000 }, // 0x0C, female
   { 0b01111,
     0b01001,
     0b01111,
@@ -132,7 +132,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b01000,
     0b11000,
-    0b00000 }, //0x0D, single eighth note
+    0b00000 }, // 0x0D, single eighth note
   { 0b01111,
     0b01001,
     0b01111,
@@ -140,7 +140,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01001,
     0b01011,
     0b11000,
-    0b00000 }, //0x0E, double eighth note
+    0b00000 }, // 0x0E, double eighth note
   { 0b00100,
     0b10101,
     0b01110,
@@ -148,7 +148,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11011,
     0b01110,
     0b10101,
-    0b00100 }, //0x0F, blast
+    0b00100 }, // 0x0F, blast
   { 0b10000,
     0b11000,
     0b11110,
@@ -156,7 +156,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11110,
     0b11000,
     0b10000,
-    0b00000 }, //0x10, right triangle arrow
+    0b00000 }, // 0x10, right triangle arrow
   { 0b00001,
     0b00011,
     0b01111,
@@ -164,7 +164,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01111,
     0b00011,
     0b00001,
-    0b00000 }, //0x11, left triangle arrow
+    0b00000 }, // 0x11, left triangle arrow
   { 0b00100,
     0b01110,
     0b10101,
@@ -172,7 +172,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b01110,
     0b00100,
-    0b00000 }, //0x12, up and down arrow
+    0b00000 }, // 0x12, up and down arrow
   { 0b11011,
     0b11011,
     0b11011,
@@ -180,7 +180,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11011,
     0b00000,
     0b11011,
-    0b00000 }, //0x13, warning
+    0b00000 }, // 0x13, warning
   { 0b01111,
     0b10101,
     0b10101,
@@ -188,7 +188,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00101,
     0b00101,
     0b00101,
-    0b00000 }, //0x14, new paragraph
+    0b00000 }, // 0x14, new paragraph
   { 0b00110,
     0b01001,
     0b01010,
@@ -196,7 +196,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00010,
     0b01001,
     0b01001,
-    0b00110 }, //0x15, section mark
+    0b00110 }, // 0x15, section mark
   { 0b00000,
     0b00000,
     0b00000,
@@ -204,7 +204,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b11111,
     0b11111,
-    0b00000 }, //0x16, cursor
+    0b00000 }, // 0x16, cursor
   { 0b00100,
     0b01110,
     0b10101,
@@ -212,7 +212,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b01110,
     0b00100,
-    0b11111 }, //0x17, up and down arrow with base
+    0b11111 }, // 0x17, up and down arrow with base
   { 0b00000,
     0b00100,
     0b01110,
@@ -220,7 +220,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00000 }, //0x18, up arrow
+    0b00000 }, // 0x18, up arrow
   { 0b00000,
     0b00100,
     0b00100,
@@ -228,7 +228,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b01110,
     0b00100,
-    0b00000 }, //0x19, down arrow
+    0b00000 }, // 0x19, down arrow
   { 0b00000,
     0b00100,
     0b00010,
@@ -236,7 +236,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00010,
     0b00100,
     0b00000,
-    0b00000 }, //0x1A, right arrow
+    0b00000 }, // 0x1A, right arrow
   { 0b00000,
     0b00100,
     0b01000,
@@ -244,7 +244,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b00100,
     0b00000,
-    0b00000 }, //0x1B, left arrow
+    0b00000 }, // 0x1B, left arrow
   { 0b00000,
     0b10000,
     0b10000,
@@ -252,7 +252,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00000,
     0b00000,
-    0b00000 }, //0x1C, right angle
+    0b00000 }, // 0x1C, right angle
   { 0b00000,
     0b01010,
     0b11111,
@@ -260,7 +260,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01010,
     0b00000,
     0b00000,
-    0b00000 }, //0x1D, left and right arrow
+    0b00000 }, // 0x1D, left and right arrow
   { 0b00000,
     0b00100,
     0b00100,
@@ -268,7 +268,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b11111,
     0b00000,
-    0b00000 }, //0x1E, up triangle arrow
+    0b00000 }, // 0x1E, up triangle arrow
   { 0b00000,
     0b11111,
     0b11111,
@@ -276,7 +276,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00000,
-    0b00000 }, //0x1F, down triangle arrow
+    0b00000 }, // 0x1F, down triangle arrow
   { 0b00000,
     0b00000,
     0b00000,
@@ -284,7 +284,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0x20, space
+    0b00000 }, // 0x20, space
   { 0b00100,
     0b00100,
     0b00100,
@@ -292,7 +292,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00000,
     0b00100,
-    0b00000 }, //0x21, exclamation point
+    0b00000 }, // 0x21, exclamation point
   { 0b01010,
     0b01010,
     0b01010,
@@ -300,7 +300,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0x22, quotation mark
+    0b00000 }, // 0x22, quotation mark
   { 0b01010,
     0b01010,
     0b11111,
@@ -308,7 +308,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b01010,
     0b01010,
-    0b00000 }, //0x23, hashtag, pound, octothorp
+    0b00000 }, // 0x23, hashtag, pound, octothorp
   { 0b00100,
     0b01111,
     0b10100,
@@ -316,7 +316,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00101,
     0b11110,
     0b00100,
-    0b00000 }, //0x24, dollar sign
+    0b00000 }, // 0x24, dollar sign
   { 0b11000,
     0b11001,
     0b00010,
@@ -324,7 +324,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b10011,
     0b00011,
-    0b00000 }, //0x25, percent
+    0b00000 }, // 0x25, percent
   { 0b01000,
     0b10100,
     0b10100,
@@ -332,7 +332,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b10010,
     0b01101,
-    0b00000 }, //0x26, ampersand
+    0b00000 }, // 0x26, ampersand
   { 0b00110,
     0b00110,
     0b00100,
@@ -340,7 +340,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0x27, apostrophe
+    0b00000 }, // 0x27, apostrophe
   { 0b00010,
     0b00100,
     0b01000,
@@ -348,7 +348,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b00100,
     0b00010,
-    0b00000 }, //0x28, open parenthesis
+    0b00000 }, // 0x28, open parenthesis
   { 0b01000,
     0b00100,
     0b00010,
@@ -356,7 +356,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00010,
     0b00100,
     0b01000,
-    0b00000 }, //0x29, close parenthesis
+    0b00000 }, // 0x29, close parenthesis
   { 0b00100,
     0b10101,
     0b01110,
@@ -364,7 +364,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01110,
     0b10101,
     0b00100,
-    0b00000 }, //0x2A, asterisk
+    0b00000 }, // 0x2A, asterisk
   { 0b00000,
     0b00100,
     0b00100,
@@ -372,7 +372,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00000,
-    0b00000 }, //0x2B, plus sign
+    0b00000 }, // 0x2B, plus sign
   { 0b00000,
     0b00000,
     0b00000,
@@ -380,7 +380,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00110,
     0b00110,
     0b00100,
-    0b01000 }, //0x2C, comma
+    0b01000 }, // 0x2C, comma
   { 0b00000,
     0b00000,
     0b11111,
@@ -388,7 +388,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0x2D, minus, dash
+    0b00000 }, // 0x2D, minus, dash
   { 0b00000,
     0b00000,
     0b00000,
@@ -396,7 +396,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00110,
     0b00110,
-    0b00000 }, //0x2E, period
+    0b00000 }, // 0x2E, period
   { 0b00000,
     0b00001,
     0b00010,
@@ -404,7 +404,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b10000,
     0b00000,
-    0b00000 }, //0x2F, forward slash
+    0b00000 }, // 0x2F, forward slash
   { 0b01110,
     0b10001,
     0b10011,
@@ -412,7 +412,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11001,
     0b10001,
     0b01110,
-    0b00000 }, //0x30, 0 (zero)
+    0b00000 }, // 0x30, 0 (zero)
   { 0b00100,
     0b01100,
     0b00100,
@@ -420,7 +420,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01110,
-    0b00000 }, //0x31, 1 (one)
+    0b00000 }, // 0x31, 1 (one)
   { 0b01110,
     0b10001,
     0b00001,
@@ -428,7 +428,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10000,
     0b11111,
-    0b00000 }, //0x32, 2 (two)
+    0b00000 }, // 0x32, 2 (two)
   { 0b11111,
     0b00001,
     0b00010,
@@ -436,7 +436,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00001,
     0b10001,
     0b01110,
-    0b00000 }, //0x33, 3 (three)
+    0b00000 }, // 0x33, 3 (three)
   { 0b00010,
     0b00110,
     0b01010,
@@ -444,7 +444,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00010,
     0b00010,
-    0b00000 }, //0x34, 4 (four)
+    0b00000 }, // 0x34, 4 (four)
   { 0b11111,
     0b10000,
     0b11110,
@@ -452,7 +452,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00001,
     0b10001,
     0b01110,
-    0b00000 }, //0x35, 5 (five)
+    0b00000 }, // 0x35, 5 (five)
   { 0b00111,
     0b01000,
     0b10000,
@@ -460,7 +460,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x36, 6 (six)
+    0b00000 }, // 0x36, 6 (six)
   { 0b11111,
     0b00001,
     0b00001,
@@ -468,7 +468,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b01000,
     0b10000,
-    0b00000 }, //0x37, 7 (seven)
+    0b00000 }, // 0x37, 7 (seven)
   { 0b01110,
     0b10001,
     0b10001,
@@ -476,7 +476,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x38, 8 (eight)
+    0b00000 }, // 0x38, 8 (eight)
   { 0b01110,
     0b10001,
     0b10001,
@@ -484,7 +484,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00001,
     0b00010,
     0b11100,
-    0b00000 }, //0x39, 9 (nine)
+    0b00000 }, // 0x39, 9 (nine)
   { 0b00000,
     0b00000,
     0b00100,
@@ -492,7 +492,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00000,
     0b00000,
-    0b00000 }, //0x3A, colon
+    0b00000 }, // 0x3A, colon
   { 0b00000,
     0b00000,
     0b00100,
@@ -500,7 +500,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01000,
-    0b00000 }, //0x3B, semicolon
+    0b00000 }, // 0x3B, semicolon
   { 0b00001,
     0b00010,
     0b00100,
@@ -508,7 +508,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00010,
     0b00001,
-    0b00000 }, //0x3C, less than
+    0b00000 }, // 0x3C, less than
   { 0b00000,
     0b00000,
     0b11111,
@@ -516,7 +516,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00000,
     0b00000,
-    0b00000 }, //0x3D, equals
+    0b00000 }, // 0x3D, equals
   { 0b01000,
     0b00100,
     0b00010,
@@ -524,7 +524,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00010,
     0b00100,
     0b01000,
-    0b00000 }, //0x3E, greater than
+    0b00000 }, // 0x3E, greater than
   { 0b01110,
     0b10001,
     0b00001,
@@ -532,7 +532,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00000,
     0b00100,
-    0b00000 }, //0x3F, question mark
+    0b00000 }, // 0x3F, question mark
   { 0b01110,
     0b10001,
     0b10101,
@@ -540,7 +540,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10110,
     0b10000,
     0b01111,
-    0b00000 }, //0x40, at
+    0b00000 }, // 0x40, at
   { 0b00100,
     0b01010,
     0b10001,
@@ -548,7 +548,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b10001,
     0b10001,
-    0b00000 }, //0x41, capital A
+    0b00000 }, // 0x41, capital A
   { 0b11110,
     0b10001,
     0b10001,
@@ -556,7 +556,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b11110,
-    0b00000 }, //0x42, capital B
+    0b00000 }, // 0x42, capital B
   { 0b01110,
     0b10001,
     0b10000,
@@ -564,7 +564,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10001,
     0b01110,
-    0b00000 }, //0x43, capital C
+    0b00000 }, // 0x43, capital C
   { 0b11110,
     0b10001,
     0b10001,
@@ -572,7 +572,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b11110,
-    0b00000 }, //0x44, capital D
+    0b00000 }, // 0x44, capital D
   { 0b11111,
     0b10000,
     0b10000,
@@ -580,7 +580,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10000,
     0b11111,
-    0b00000 }, //0x45, capital E
+    0b00000 }, // 0x45, capital E
   { 0b11111,
     0b10000,
     0b10000,
@@ -588,7 +588,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10000,
     0b10000,
-    0b00000 }, //0x46, capital F
+    0b00000 }, // 0x46, capital F
   { 0b01111,
     0b10001,
     0b10000,
@@ -596,7 +596,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10011,
     0b10001,
     0b01111,
-    0b00000 }, //0x47, capital G
+    0b00000 }, // 0x47, capital G
   { 0b10001,
     0b10001,
     0b10001,
@@ -604,7 +604,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b10001,
-    0b00000 }, //0x48, capital H
+    0b00000 }, // 0x48, capital H
   { 0b01110,
     0b00100,
     0b00100,
@@ -612,7 +612,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01110,
-    0b00000 }, //0x49, capital I
+    0b00000 }, // 0x49, capital I
   { 0b00111,
     0b00010,
     0b00010,
@@ -620,7 +620,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00010,
     0b10010,
     0b01100,
-    0b00000 }, //0x4A, capital J
+    0b00000 }, // 0x4A, capital J
   { 0b10001,
     0b10010,
     0b10100,
@@ -628,7 +628,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10100,
     0b10010,
     0b10001,
-    0b00000 }, //0x4B, capital K
+    0b00000 }, // 0x4B, capital K
   { 0b10000,
     0b10000,
     0b10000,
@@ -636,7 +636,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10000,
     0b11111,
-    0b00000 }, //0x4C, capital L
+    0b00000 }, // 0x4C, capital L
   { 0b10001,
     0b11011,
     0b10101,
@@ -644,7 +644,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b10001,
     0b10001,
-    0b00000 }, //0x4D, capital M
+    0b00000 }, // 0x4D, capital M
   { 0b10001,
     0b10001,
     0b11001,
@@ -652,7 +652,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10011,
     0b10001,
     0b10001,
-    0b00000 }, //0x4E, capital N
+    0b00000 }, // 0x4E, capital N
   { 0b01110,
     0b10001,
     0b10001,
@@ -660,7 +660,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x4F, capital O
+    0b00000 }, // 0x4F, capital O
   { 0b11110,
     0b10001,
     0b10001,
@@ -668,7 +668,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10000,
     0b10000,
-    0b00000 }, //0x50, capital P
+    0b00000 }, // 0x50, capital P
   { 0b01110,
     0b10001,
     0b10001,
@@ -676,7 +676,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b10010,
     0b01101,
-    0b00000 }, //0x51, capital Q
+    0b00000 }, // 0x51, capital Q
   { 0b11110,
     0b10001,
     0b10001,
@@ -684,7 +684,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10100,
     0b10010,
     0b10001,
-    0b00000 }, //0x52, capital R
+    0b00000 }, // 0x52, capital R
   { 0b01110,
     0b10001,
     0b10000,
@@ -692,7 +692,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00001,
     0b10001,
     0b01110,
-    0b00000 }, //0x53, capital S
+    0b00000 }, // 0x53, capital S
   { 0b11111,
     0b10101,
     0b00100,
@@ -700,7 +700,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00000 }, //0x54, capital T
+    0b00000 }, // 0x54, capital T
   { 0b10001,
     0b10001,
     0b10001,
@@ -708,7 +708,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x55, capital U
+    0b00000 }, // 0x55, capital U
   { 0b10001,
     0b10001,
     0b10001,
@@ -716,7 +716,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b01010,
     0b00100,
-    0b00000 }, //0x56, capital V
+    0b00000 }, // 0x56, capital V
   { 0b10001,
     0b10001,
     0b10001,
@@ -724,7 +724,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b10101,
     0b01010,
-    0b00000 }, //0x57, capital W
+    0b00000 }, // 0x57, capital W
   { 0b10001,
     0b10001,
     0b01010,
@@ -732,7 +732,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01010,
     0b10001,
     0b10001,
-    0b00000 }, //0x58, capital X
+    0b00000 }, // 0x58, capital X
   { 0b10001,
     0b10001,
     0b01010,
@@ -740,7 +740,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00000 }, //0x59, capital Y
+    0b00000 }, // 0x59, capital Y
   { 0b11111,
     0b00001,
     0b00010,
@@ -748,7 +748,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b10000,
     0b11111,
-    0b00000 }, //0x5A, capital Z
+    0b00000 }, // 0x5A, capital Z
   { 0b01111,
     0b01000,
     0b01000,
@@ -756,7 +756,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b01000,
     0b01111,
-    0b00000 }, //0x5B, open bracket
+    0b00000 }, // 0x5B, open bracket
   { 0b00000,
     0b10000,
     0b01000,
@@ -764,7 +764,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00010,
     0b00001,
     0b00000,
-    0b00000 }, //0x5C, backslash
+    0b00000 }, // 0x5C, backslash
   { 0b11111,
     0b00001,
     0b00001,
@@ -772,7 +772,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00001,
     0b00001,
     0b11111,
-    0b00000 }, //0x5D, close bracket
+    0b00000 }, // 0x5D, close bracket
   { 0b00100,
     0b01010,
     0b10001,
@@ -780,7 +780,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0x5E, caret
+    0b00000 }, // 0x5E, caret
   { 0b00000,
     0b00000,
     0b00000,
@@ -788,7 +788,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b11111,
-    0b00000 }, //0x5F, underscore
+    0b00000 }, // 0x5F, underscore
   { 0b01100,
     0b01100,
     0b00100,
@@ -796,7 +796,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0x60, backtick
+    0b00000 }, // 0x60, backtick
   { 0b00000,
     0b00000,
     0b01100,
@@ -804,7 +804,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01110,
     0b10010,
     0b01111,
-    0b00000 }, //0x61, lowercase a
+    0b00000 }, // 0x61, lowercase a
   { 0b10000,
     0b10000,
     0b10110,
@@ -812,7 +812,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b11001,
     0b10110,
-    0b00000 }, //0x62, lowercase b
+    0b00000 }, // 0x62, lowercase b
   { 0b00000,
     0b00000,
     0b01110,
@@ -820,7 +820,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10001,
     0b01110,
-    0b00000 }, //0x63, lowercase c
+    0b00000 }, // 0x63, lowercase c
   { 0b00001,
     0b00001,
     0b01101,
@@ -828,7 +828,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10011,
     0b01101,
-    0b00000 }, //0x64, lowercase d
+    0b00000 }, // 0x64, lowercase d
   { 0b00000,
     0b00000,
     0b01110,
@@ -836,7 +836,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b10000,
     0b01110,
-    0b00000 }, //0x65, lowercase e
+    0b00000 }, // 0x65, lowercase e
   { 0b00010,
     0b00101,
     0b00100,
@@ -844,7 +844,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00000 }, //0x66, lowercase f
+    0b00000 }, // 0x66, lowercase f
   { 0b00000,
     0b01110,
     0b10011,
@@ -852,7 +852,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01101,
     0b00001,
     0b01110,
-    0b00000 }, //0x67, lowercase g
+    0b00000 }, // 0x67, lowercase g
   { 0b10000,
     0b10000,
     0b10110,
@@ -860,7 +860,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b10001,
-    0b00000 }, //0x68, lowercase h
+    0b00000 }, // 0x68, lowercase h
   { 0b00100,
     0b00000,
     0b01100,
@@ -868,7 +868,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01110,
-    0b00000 }, //0x69, lowercase i
+    0b00000 }, // 0x69, lowercase i
   { 0b00010,
     0b00000,
     0b00010,
@@ -876,7 +876,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00010,
     0b10010,
     0b01100,
-    0b00000 }, //0x6A, lowercase j
+    0b00000 }, // 0x6A, lowercase j
   { 0b10000,
     0b10000,
     0b10010,
@@ -884,7 +884,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11000,
     0b10100,
     0b10010,
-    0b00000 }, //0x6B, lowercase k
+    0b00000 }, // 0x6B, lowercase k
   { 0b01100,
     0b00100,
     0b00100,
@@ -892,7 +892,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01110,
-    0b00000 }, //0x6C, lowercase l
+    0b00000 }, // 0x6C, lowercase l
   { 0b00000,
     0b00000,
     0b11010,
@@ -900,7 +900,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b10101,
     0b10101,
-    0b00000 }, //0x6D, lowercase m
+    0b00000 }, // 0x6D, lowercase m
   { 0b00000,
     0b00000,
     0b10110,
@@ -908,7 +908,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b10001,
-    0b00000 }, //0x6E, lowercase n
+    0b00000 }, // 0x6E, lowercase n
   { 0b00000,
     0b00000,
     0b01110,
@@ -916,7 +916,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x6F, lowercase o
+    0b00000 }, // 0x6F, lowercase o
   { 0b00000,
     0b00000,
     0b10110,
@@ -924,7 +924,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11001,
     0b10110,
     0b10000,
-    0b10000 }, //0x70, lowercase p
+    0b10000 }, // 0x70, lowercase p
   { 0b00000,
     0b00000,
     0b01101,
@@ -932,7 +932,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10011,
     0b01101,
     0b00001,
-    0b00001 }, //0x71, lowercase q
+    0b00001 }, // 0x71, lowercase q
   { 0b00000,
     0b00000,
     0b10110,
@@ -940,7 +940,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10000,
     0b10000,
-    0b00000 }, //0x72, lowercase r
+    0b00000 }, // 0x72, lowercase r
   { 0b00000,
     0b00000,
     0b01111,
@@ -948,7 +948,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01110,
     0b00001,
     0b11110,
-    0b00000 }, //0x73, lowercase s
+    0b00000 }, // 0x73, lowercase s
   { 0b00100,
     0b00100,
     0b11111,
@@ -956,7 +956,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00101,
     0b00010,
-    0b00000 }, //0x74, lowercase t
+    0b00000 }, // 0x74, lowercase t
   { 0b00000,
     0b00000,
     0b10001,
@@ -964,7 +964,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10011,
     0b01101,
-    0b00000 }, //0x75, lowercase u
+    0b00000 }, // 0x75, lowercase u
   { 0b00000,
     0b00000,
     0b10001,
@@ -972,7 +972,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b01010,
     0b00100,
-    0b00000 }, //0x76, lowercase v
+    0b00000 }, // 0x76, lowercase v
   { 0b00000,
     0b00000,
     0b10001,
@@ -980,7 +980,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b10101,
     0b01010,
-    0b00000 }, //0x77, lowercase w
+    0b00000 }, // 0x77, lowercase w
   { 0b00000,
     0b00000,
     0b10001,
@@ -988,7 +988,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b01010,
     0b10001,
-    0b00000 }, //0x78, lowercase x
+    0b00000 }, // 0x78, lowercase x
   { 0b00000,
     0b00000,
     0b10001,
@@ -996,7 +996,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01111,
     0b00001,
     0b10001,
-    0b01110 }, //0x79, lowercase y
+    0b01110 }, // 0x79, lowercase y
   { 0b00000,
     0b00000,
     0b11111,
@@ -1004,7 +1004,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b01000,
     0b11111,
-    0b00000 }, //0x7A, lowercase z
+    0b00000 }, // 0x7A, lowercase z
   { 0b00010,
     0b00100,
     0b00100,
@@ -1012,7 +1012,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00010,
-    0b00000 }, //0x7B, open brace
+    0b00000 }, // 0x7B, open brace
   { 0b00100,
     0b00100,
     0b00100,
@@ -1020,7 +1020,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00000 }, //0x7C, pipe
+    0b00000 }, // 0x7C, pipe
   { 0b01000,
     0b00100,
     0b00100,
@@ -1028,7 +1028,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01000,
-    0b00000 }, //0x7D, close brace
+    0b00000 }, // 0x7D, close brace
   { 0b01000,
     0b10101,
     0b00010,
@@ -1036,7 +1036,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0x7E, tilde
+    0b00000 }, // 0x7E, tilde
   { 0b00100,
     0b01110,
     0b11011,
@@ -1044,7 +1044,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b11111,
     0b00000,
-    0b00000 }, //0x7F, home
+    0b00000 }, // 0x7F, home
   { 0b01110,
     0b10001,
     0b10000,
@@ -1052,7 +1052,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b01110,
     0b00010,
-    0b01100 }, //0x80, capital C with cedilla
+    0b01100 }, // 0x80, capital C with cedilla
   { 0b00000,
     0b10001,
     0b00000,
@@ -1060,7 +1060,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10011,
     0b01101,
-    0b00000 }, //0x81, lowercase u with diaeresis
+    0b00000 }, // 0x81, lowercase u with diaeresis
   { 0b00011,
     0b00000,
     0b01110,
@@ -1068,7 +1068,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b10000,
     0b01111,
-    0b00000 }, //0x82, lowercase e with acute
+    0b00000 }, // 0x82, lowercase e with acute
   { 0b11111,
     0b00000,
     0b01100,
@@ -1076,7 +1076,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01110,
     0b10010,
     0b01111,
-    0b00000 }, //0x83, lowercase a with circumflex
+    0b00000 }, // 0x83, lowercase a with circumflex
   { 0b10001,
     0b00000,
     0b01100,
@@ -1084,7 +1084,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b0111,
     0b10010,
     0b01111,
-    0b00000 }, //0x84, lowercase a with diaeresis
+    0b00000 }, // 0x84, lowercase a with diaeresis
   { 0b11000,
     0b00000,
     0b01100,
@@ -1092,7 +1092,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01110,
     0b10010,
     0b01111,
-    0b00000 }, //0x85, lowercase a with grave
+    0b00000 }, // 0x85, lowercase a with grave
   { 0b01110,
     0b00000,
     0b01100,
@@ -1100,7 +1100,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01110,
     0b10010,
     0b01111,
-    0b00000 }, //0x86, lowercase a with ring above
+    0b00000 }, // 0x86, lowercase a with ring above
   { 0b00000,
     0b01111,
     0b11000,
@@ -1108,7 +1108,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01111,
     0b00010,
     0b00110,
-    0b00000 }, //0x87, lowercase c with cedilla
+    0b00000 }, // 0x87, lowercase c with cedilla
   { 0b11111,
     0b00000,
     0b01110,
@@ -1116,7 +1116,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b10000,
     0b01111,
-    0b00000 }, //0x88, lowercase e with circumflex
+    0b00000 }, // 0x88, lowercase e with circumflex
   { 0b10001,
     0b00000,
     0b01110,
@@ -1124,7 +1124,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b10000,
     0b01111,
-    0b00000 }, //0x89, lowercase e with diaeresis
+    0b00000 }, // 0x89, lowercase e with diaeresis
   { 0b11000,
     0b00000,
     0b01110,
@@ -1132,7 +1132,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b10000,
     0b01111,
-    0b00000 }, //0x8A, lowercase e with grave
+    0b00000 }, // 0x8A, lowercase e with grave
   { 0b01010,
     0b00000,
     0b01100,
@@ -1140,7 +1140,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01110,
-    0b00000 }, //0x8B, lowercase i with diaeresis
+    0b00000 }, // 0x8B, lowercase i with diaeresis
   { 0b11111,
     0b00000,
     0b01100,
@@ -1148,7 +1148,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01110,
-    0b00000 }, //0x8C, lowercase i with circumflex
+    0b00000 }, // 0x8C, lowercase i with circumflex
   { 0b11000,
     0b00000,
     0b01100,
@@ -1156,7 +1156,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01110,
-    0b00000 }, //0x8D, lowercase i with grave
+    0b00000 }, // 0x8D, lowercase i with grave
   { 0b10001,
     0b00100,
     0b0101,
@@ -1164,7 +1164,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b10001,
     0b10001,
-    0b00000 }, //0x8E, capital A with diaeresis
+    0b00000 }, // 0x8E, capital A with diaeresis
   { 0b01110,
     0b00100,
     0b01010,
@@ -1172,7 +1172,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b10001,
     0b10001,
-    0b00000 }, //0x8F, capital A with ring above
+    0b00000 }, // 0x8F, capital A with ring above
   { 0b00011,
     0b00000,
     0b11111,
@@ -1180,7 +1180,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11110,
     0b10000,
     0b11111,
-    0b00000 }, //0x90, capital E with acute
+    0b00000 }, // 0x90, capital E with acute
   { 0b00000,
     0b00000,
     0b01111,
@@ -1188,7 +1188,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01111,
     0b10010,
     0b01111,
-    0b00000 }, //0x91, lowercase ae
+    0b00000 }, // 0x91, lowercase ae
   { 0b00111,
     0b01010,
     0b10010,
@@ -1196,7 +1196,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b10010,
     0b10011,
-    0b00000 }, //0x92, capital AE
+    0b00000 }, // 0x92, capital AE
   { 0b11111,
     0b00000,
     0b01110,
@@ -1204,7 +1204,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x93, lowercase o with circumflex
+    0b00000 }, // 0x93, lowercase o with circumflex
   { 0b10001,
     0b00000,
     0b01110,
@@ -1212,7 +1212,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x94, lowercase o with diaeresis
+    0b00000 }, // 0x94, lowercase o with diaeresis
   { 0b11000,
     0b00000,
     0b01110,
@@ -1220,7 +1220,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x95, lowercase o with grave
+    0b00000 }, // 0x95, lowercase o with grave
   { 0b11111,
     0b00000,
     0b00000,
@@ -1228,7 +1228,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10011,
     0b01101,
-    0b00000 }, //0x96, lowercase u with circumflex
+    0b00000 }, // 0x96, lowercase u with circumflex
   { 0b00000,
     0b11000,
     0b00000,
@@ -1236,7 +1236,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10011,
     0b01101,
-    0b00000 }, //0x97, lowercase u with grave
+    0b00000 }, // 0x97, lowercase u with grave
   { 0b01001,
     0b00000,
     0b01001,
@@ -1244,7 +1244,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01001,
     0b00111,
     0b00001,
-    0b01110 }, //0x98, lowercase y with diaeresis
+    0b01110 }, // 0x98, lowercase y with diaeresis
   { 0b10001,
     0b01110,
     0b10001,
@@ -1252,7 +1252,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x99, capital O with diaeresis
+    0b00000 }, // 0x99, capital O with diaeresis
   { 0b10001,
     0b00000,
     0b10001,
@@ -1260,7 +1260,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0x9A, capital U with diaeresis
+    0b00000 }, // 0x9A, capital U with diaeresis
   { 0b00100,
     0b00100,
     0b11111,
@@ -1268,7 +1268,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10100,
     0b11111,
     0b00100,
-    0b00100 }, //0x9B, cent sign
+    0b00100 }, // 0x9B, cent sign
   { 0b00110,
     0b01011,
     0b01001,
@@ -1276,7 +1276,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b01001,
     0b11111,
-    0b00000 }, //0x9C, pound sign (GBP)
+    0b00000 }, // 0x9C, pound sign (GBP)
   { 0b11011,
     0b11011,
     0b01110,
@@ -1284,7 +1284,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b11111,
     0b00100,
-    0b00100 }, //0x9D, yen sign
+    0b00100 }, // 0x9D, yen sign
   { 0b11100,
     0b10010,
     0b10010,
@@ -1292,7 +1292,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10010,
     0b10111,
     0b10010,
-    0b10010 }, //0x9E, peseta sign
+    0b10010 }, // 0x9E, peseta sign
   { 0b00011,
     0b00101,
     0b00100,
@@ -1300,7 +1300,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b10100,
-    0b11000 }, //0x9F, function symbol
+    0b11000 }, // 0x9F, function symbol
   { 0b00011,
     0b00000,
     0b01100,
@@ -1308,7 +1308,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01110,
     0b10010,
     0b01111,
-    0b00000 }, //0xA0, lowercase a with acute
+    0b00000 }, // 0xA0, lowercase a with acute
   { 0b00011,
     0b00000,
     0b01100,
@@ -1316,7 +1316,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b01110,
-    0b00000 }, //0xA1, lowercase i with acute
+    0b00000 }, // 0xA1, lowercase i with acute
   { 0b00011,
     0b00000,
     0b01110,
@@ -1324,7 +1324,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0xA2, lowercase o with acute
+    0b00000 }, // 0xA2, lowercase o with acute
   { 0b00000,
     0b00011,
     0b00000,
@@ -1332,7 +1332,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10011,
     0b01101,
-    0b00000 }, //0xA3, lowercase u with acute
+    0b00000 }, // 0xA3, lowercase u with acute
   { 0b00000,
     0b01111,
     0b00000,
@@ -1340,7 +1340,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01001,
     0b01001,
     0b01001,
-    0b00000 }, //0xA4, lowercase n with tilde
+    0b00000 }, // 0xA4, lowercase n with tilde
   { 0b11111,
     0b00000,
     0b11001,
@@ -1348,7 +1348,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10111,
     0b10011,
     0b10001,
-    0b00000 }, //0xA5, capital N with tilde
+    0b00000 }, // 0xA5, capital N with tilde
   { 0b01110,
     0b10010,
     0b10010,
@@ -1356,7 +1356,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b11111,
     0b00000,
-    0b00000 }, //0xA6, feminine ordinal indicator
+    0b00000 }, // 0xA6, feminine ordinal indicator
   { 0b01110,
     0b10001,
     0b10001,
@@ -1364,7 +1364,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b11111,
     0b00000,
-    0b00000 }, //0xA7, masculine ordinal indicator
+    0b00000 }, // 0xA7, masculine ordinal indicator
   { 0b00100,
     0b00000,
     0b00100,
@@ -1372,7 +1372,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10001,
     0b01110,
-    0b00000 }, //0xA8, inverted question mark
+    0b00000 }, // 0xA8, inverted question mark
   { 0b00000,
     0b00000,
     0b00000,
@@ -1380,7 +1380,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10000,
     0b00000,
-    0b00000 }, //0xA9, reversed not sign
+    0b00000 }, // 0xA9, reversed not sign
   { 0b00000,
     0b00000,
     0b00000,
@@ -1388,7 +1388,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00001,
     0b00001,
     0b00000,
-    0b00000 }, //0xAA, not sign
+    0b00000 }, // 0xAA, not sign
   { 0b10000,
     0b10001,
     0b10010,
@@ -1396,7 +1396,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01001,
     0b10011,
     0b00100,
-    0b00111 }, //0xAB, fraction 1/2
+    0b00111 }, // 0xAB, fraction 1/2
   { 0b10000,
     0b10001,
     0b10010,
@@ -1404,7 +1404,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01011,
     0b10111,
     0b00001,
-    0b00001 }, //0xAC, fration 1/4
+    0b00001 }, // 0xAC, fration 1/4
   { 0b00100,
     0b00000,
     0b00100,
@@ -1412,7 +1412,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00000 }, //0xAD, inverted exclamation mark
+    0b00000 }, // 0xAD, inverted exclamation mark
   { 0b00000,
     0b00101,
     0b01010,
@@ -1420,7 +1420,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01010,
     0b00101,
     0b00000,
-    0b00000 }, //0xAE, double less than
+    0b00000 }, // 0xAE, double less than
   { 0b00000,
     0b10100,
     0b01010,
@@ -1428,7 +1428,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01010,
     0b10100,
     0b00000,
-    0b00000 }, //0xAF, double greater than
+    0b00000 }, // 0xAF, double greater than
   { 0b10101,
     0b00000,
     0b10101,
@@ -1436,7 +1436,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b00000,
     0b10101,
-    0b00000 }, //0xB0, light shade
+    0b00000 }, // 0xB0, light shade
   { 0b01010,
     0b10101,
     0b01010,
@@ -1444,7 +1444,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01010,
     0b10101,
     0b01010,
-    0b10101 }, //0xB1, medium shade
+    0b10101 }, // 0xB1, medium shade
   { 0b11111,
     0b10101,
     0b11111,
@@ -1452,7 +1452,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b01010,
     0b11111,
-    0b01010 }, //0xB2, dark shade
+    0b01010 }, // 0xB2, dark shade
   { 0b00010,
     0b00010,
     0b00010,
@@ -1460,7 +1460,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00010,
     0b00010,
     0b00010,
-    0b00010 }, //0xB3, box drawing 1
+    0b00010 }, // 0xB3, box drawing 1
   { 0b00010,
     0b00010,
     0b00010,
@@ -1468,7 +1468,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11110,
     0b00010,
     0b00010,
-    0b00010 }, //0xB4, box drawing 2
+    0b00010 }, // 0xB4, box drawing 2
   { 0b00010,
     0b00010,
     0b11110,
@@ -1476,7 +1476,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11110,
     0b00010,
     0b00010,
-    0b00010 }, //0xB5, box drawing 3
+    0b00010 }, // 0xB5, box drawing 3
   { 0b00101,
     0b00101,
     0b00101,
@@ -1484,7 +1484,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11101,
     0b00101,
     0b00101,
-    0b00101 }, //0xB6, box drawing 4
+    0b00101 }, // 0xB6, box drawing 4
   { 0b00000,
     0b00000,
     0b00000,
@@ -1492,7 +1492,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00101,
     0b00101,
-    0b00101 }, //0xB7, box drawing 5
+    0b00101 }, // 0xB7, box drawing 5
   { 0b00000,
     0b00000,
     0b11110,
@@ -1500,119 +1500,15 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11110,
     0b00010,
     0b00010,
-    0b00010 }, //0xB8, box drawing 6
-  { 0b00101,
-    0b00101,
-    0b11101,
-    0b00001,
-    0b11101,
-    0b00101,
-    0b00101,
-    0b00101 }, //0xB9, box drawing 7
-  { 0b00101,
-    0b00101,
-    0b00101,
-    0b00101,
-    0b00101,
-    0b00101,
-    0b00101,
-    0b00101 }, //0xBA, box drawing 8
-  { 0b00000,
-    0b00000,
-    0b11111,
-    0b00001,
-    0b11101,
-    0b00101,
-    0b00101,
-    0b00101 }, //0xBB, box drawing 9
+    0b00010 }, // 0xB8, box drawing 6
   { 0b00101,
     0b00101,
     0b11101,
     0b00001,
-    0b11111,
-    0b00000,
-    0b00000,
-    0b00000 }, //0xBC, box drawing 10
-  { 0b00101,
+    0b11101,
     0b00101,
     0b00101,
-    0b00101,
-    0b11111,
-    0b00000,
-    0b00000,
-    0b00000 }, //0xBD, box drawing 11
-  { 0b00010,
-    0b00010,
-    0b11110,
-    0b00010,
-    0b11110,
-    0b00000,
-    0b00000,
-    0b00000 }, //0xBE, box drawing 12
-  { 0b00000,
-    0b00000,
-    0b00000,
-    0b00000,
-    0b11110,
-    0b00010,
-    0b00010,
-    0b00010 }, //0xBF, box drawing 13
-  { 0b00010,
-    0b00010,
-    0b00010,
-    0b00010,
-    0b00011,
-    0b00000,
-    0b00000,
-    0b00000 }, //0xC0, box drawing 14
-  { 0b00010,
-    0b00010,
-    0b00010,
-    0b00010,
-    0b11111,
-    0b00000,
-    0b00000,
-    0b00000 }, //0xC1, box drawing 15
-  { 0b00000,
-    0b00000,
-    0b00000,
-    0b00000,
-    0b11111,
-    0b00010,
-    0b00010,
-    0b00010 }, //0xC2, box drawing 16
-  { 0b00010,
-    0b00010,
-    0b00010,
-    0b00010,
-    0b00011,
-    0b00010,
-    0b00010,
-    0b00010 }, //0xC3, box drawing 17
-  { 0b00000,
-    0b00000,
-    0b00000,
-    0b00000,
-    0b11111,
-    0b00000,
-    0b00000,
-    0b00000 }, //0xC4, box drawing 18
-  { 0b00010,
-    0b00010,
-    0b00010,
-    0b00010,
-    0b11111,
-    0b00010,
-    0b00010,
-    0b00010 }, //0xC5, box drawing 19
-  { 0b00010,
-    0b00010,
-    0b00011,
-    0b00010,
-    0b00011,
-    0b00010,
-    0b00010,
-    0b00010 }, //0xC6, box drawing 20
+    0b00101 }, // 0xB9, box drawing 7
   { 0b00101,
     0b00101,
     0b00101,
@@ -1620,7 +1516,111 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00101,
     0b00101,
     0b00101,
-    0b00101 }, //0xC7, box drawing 21
+    0b00101 }, // 0xBA, box drawing 8
+  { 0b00000,
+    0b00000,
+    0b11111,
+    0b00001,
+    0b11101,
+    0b00101,
+    0b00101,
+    0b00101 }, // 0xBB, box drawing 9
+  { 0b00101,
+    0b00101,
+    0b11101,
+    0b00001,
+    0b11111,
+    0b00000,
+    0b00000,
+    0b00000 }, // 0xBC, box drawing 10
+  { 0b00101,
+    0b00101,
+    0b00101,
+    0b00101,
+    0b11111,
+    0b00000,
+    0b00000,
+    0b00000 }, // 0xBD, box drawing 11
+  { 0b00010,
+    0b00010,
+    0b11110,
+    0b00010,
+    0b11110,
+    0b00000,
+    0b00000,
+    0b00000 }, // 0xBE, box drawing 12
+  { 0b00000,
+    0b00000,
+    0b00000,
+    0b00000,
+    0b11110,
+    0b00010,
+    0b00010,
+    0b00010 }, // 0xBF, box drawing 13
+  { 0b00010,
+    0b00010,
+    0b00010,
+    0b00010,
+    0b00011,
+    0b00000,
+    0b00000,
+    0b00000 }, // 0xC0, box drawing 14
+  { 0b00010,
+    0b00010,
+    0b00010,
+    0b00010,
+    0b11111,
+    0b00000,
+    0b00000,
+    0b00000 }, // 0xC1, box drawing 15
+  { 0b00000,
+    0b00000,
+    0b00000,
+    0b00000,
+    0b11111,
+    0b00010,
+    0b00010,
+    0b00010 }, // 0xC2, box drawing 16
+  { 0b00010,
+    0b00010,
+    0b00010,
+    0b00010,
+    0b00011,
+    0b00010,
+    0b00010,
+    0b00010 }, // 0xC3, box drawing 17
+  { 0b00000,
+    0b00000,
+    0b00000,
+    0b00000,
+    0b11111,
+    0b00000,
+    0b00000,
+    0b00000 }, // 0xC4, box drawing 18
+  { 0b00010,
+    0b00010,
+    0b00010,
+    0b00010,
+    0b11111,
+    0b00010,
+    0b00010,
+    0b00010 }, // 0xC5, box drawing 19
+  { 0b00010,
+    0b00010,
+    0b00011,
+    0b00010,
+    0b00011,
+    0b00010,
+    0b00010,
+    0b00010 }, // 0xC6, box drawing 20
+  { 0b00101,
+    0b00101,
+    0b00101,
+    0b00101,
+    0b00101,
+    0b00101,
+    0b00101,
+    0b00101 }, // 0xC7, box drawing 21
   { 0b00101,
     0b00101,
     0b00101,
@@ -1628,7 +1628,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00111,
     0b00000,
     0b00000,
-    0b00000 }, //0xC8, box drawing 22
+    0b00000 }, // 0xC8, box drawing 22
   { 0b00000,
     0b00000,
     0b00111,
@@ -1636,7 +1636,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00101,
     0b00101,
     0b00101,
-    0b00101 }, //0xC9, box drawing 23
+    0b00101 }, // 0xC9, box drawing 23
   { 0b00101,
     0b00101,
     0b11101,
@@ -1644,7 +1644,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00000,
     0b00000,
-    0b00000 }, //0xCA, box drawing 24
+    0b00000 }, // 0xCA, box drawing 24
   { 0b00000,
     0b00000,
     0b11111,
@@ -1652,7 +1652,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11101,
     0b00101,
     0b00101,
-    0b00101 }, //0xCB, box drawing 25
+    0b00101 }, // 0xCB, box drawing 25
   { 0b00101,
     0b00101,
     0b00101,
@@ -1660,7 +1660,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00101,
     0b00101,
     0b00101,
-    0b00101 }, //0xCC, box drawing 26
+    0b00101 }, // 0xCC, box drawing 26
   { 0b00000,
     0b00000,
     0b11111,
@@ -1668,7 +1668,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00000,
     0b00000,
-    0b00000 }, //0xCD, box drawing 27
+    0b00000 }, // 0xCD, box drawing 27
   { 0b00101,
     0b00101,
     0b11101,
@@ -1676,7 +1676,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11101,
     0b00101,
     0b00101,
-    0b00101 }, //0xCE, box drawing 28
+    0b00101 }, // 0xCE, box drawing 28
   { 0b00000,
     0b00000,
     0b00000,
@@ -1684,7 +1684,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0xCF, box drawing 29
+    0b00000 }, // 0xCF, box drawing 29
   { 0b00101,
     0b00101,
     0b00101,
@@ -1692,7 +1692,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00000,
     0b00000,
-    0b00000 }, //0xD0, box drawing 30
+    0b00000 }, // 0xD0, box drawing 30
   { 0b00000,
     0b00000,
     0b11111,
@@ -1700,7 +1700,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00010,
     0b00010,
-    0b00010 }, //0xD1, box drawing 31
+    0b00010 }, // 0xD1, box drawing 31
   { 0b00000,
     0b00000,
     0b00000,
@@ -1708,7 +1708,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00101,
     0b00101,
-    0b00101 }, //0xD2, box drawing 32
+    0b00101 }, // 0xD2, box drawing 32
   { 0b00101,
     0b00101,
     0b00101,
@@ -1716,7 +1716,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00111,
     0b00000,
     0b00000,
-    0b00000 }, //0xD3, box drawing 33
+    0b00000 }, // 0xD3, box drawing 33
   { 0b00010,
     0b00010,
     0b00011,
@@ -1724,7 +1724,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00011,
     0b00000,
     0b00000,
-    0b00000 }, //0xD4, box drawing 34
+    0b00000 }, // 0xD4, box drawing 34
   { 0b00000,
     0b00000,
     0b00011,
@@ -1732,7 +1732,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00011,
     0b00010,
     0b00010,
-    0b00010 }, //0xD5, box drawing 35
+    0b00010 }, // 0xD5, box drawing 35
   { 0b00000,
     0b00000,
     0b00000,
@@ -1740,7 +1740,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00111,
     0b00101,
     0b00101,
-    0b00101 }, //0xD6, box drawing 36
+    0b00101 }, // 0xD6, box drawing 36
   { 0b00000,
     0b00101,
     0b00101,
@@ -1748,7 +1748,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00101,
     0b00101,
-    0b00101 }, //0xD7, box drawing 37
+    0b00101 }, // 0xD7, box drawing 37
   { 0b00010,
     0b00010,
     0b11111,
@@ -1756,7 +1756,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b00010,
     0b00010,
-    0b00010 }, //0xD8, box drawing 38
+    0b00010 }, // 0xD8, box drawing 38
   { 0b00010,
     0b00010,
     0b00010,
@@ -1764,7 +1764,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11110,
     0b00000,
     0b00000,
-    0b00000 }, //0xD9, box drawing 39
+    0b00000 }, // 0xD9, box drawing 39
   { 0b00000,
     0b00000,
     0b00000,
@@ -1772,7 +1772,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00011,
     0b00010,
     0b00010,
-    0b00010 }, //0xDA, box drawing 40
+    0b00010 }, // 0xDA, box drawing 40
   { 0b11111,
     0b11111,
     0b11111,
@@ -1780,7 +1780,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b11111,
     0b11111,
-    0b11111 }, //0xDB, full block
+    0b11111 }, // 0xDB, full block
   { 0b00000,
     0b00000,
     0b00000,
@@ -1788,7 +1788,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11111,
     0b11111,
     0b11111,
-    0b11111 }, //0xDC, bottom half block
+    0b11111 }, // 0xDC, bottom half block
   { 0b11100,
     0b11100,
     0b11100,
@@ -1796,7 +1796,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b11100,
     0b11100,
     0b11100,
-    0b11100 }, //0xDD, left half block
+    0b11100 }, // 0xDD, left half block
   { 0b00000,
     0b00011,
     0b00011,
@@ -1804,7 +1804,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00011,
     0b00011,
     0b00011,
-    0b00011 }, //0xDE, right half block
+    0b00011 }, // 0xDE, right half block
   { 0b11111,
     0b11111,
     0b11111,
@@ -1812,7 +1812,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0xDF, top half block
+    0b00000 }, // 0xDF, top half block
   { 0b00000,
     0b00000,
     0b01101,
@@ -1820,7 +1820,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10010,
     0b10010,
     0b01101,
-    0b00000 }, //0xE0, greek lowercase alpha
+    0b00000 }, // 0xE0, greek lowercase alpha
   { 0b00000,
     0b01110,
     0b10001,
@@ -1828,7 +1828,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b11110,
-    0b10000 }, //0xE1, greek lowercase beta
+    0b10000 }, // 0xE1, greek lowercase beta
   { 0b00000,
     0b11111,
     0b10011,
@@ -1836,7 +1836,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10000,
     0b10000,
-    0b00000 }, //0xE2, greek capital gamma
+    0b00000 }, // 0xE2, greek capital gamma
   { 0b00000,
     0b11111,
     0b01010,
@@ -1844,7 +1844,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01010,
     0b01010,
     0b01010,
-    0b00000 }, //0xE3, greek lowercase pi
+    0b00000 }, // 0xE3, greek lowercase pi
   { 0b11111,
     0b10001,
     0b01000,
@@ -1852,7 +1852,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b10001,
     0b11111,
-    0b00000 }, //0xE4, greek capital sigma (sum)
+    0b00000 }, // 0xE4, greek capital sigma (sum)
   { 0b00000,
     0b00000,
     0b00000,
@@ -1860,7 +1860,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10010,
     0b10010,
     0b01100,
-    0b00000 }, //0xE5, greek lowercase sigma
+    0b00000 }, // 0xE5, greek lowercase sigma
   { 0b00000,
     0b01010,
     0b01010,
@@ -1868,7 +1868,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01010,
     0b01101,
     0b11000,
-    0b00000 }, //0xE6, greek lowercase mu (micro)
+    0b00000 }, // 0xE6, greek lowercase mu (micro)
   { 0b00000,
     0b11111,
     0b10100,
@@ -1876,7 +1876,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00000 }, //0xE7, greek lowercase tau
+    0b00000 }, // 0xE7, greek lowercase tau
   { 0b11111,
     0b00100,
     0b01110,
@@ -1884,7 +1884,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b01110,
     0b00100,
-    0b11111 }, //0xE8, greek capital phi
+    0b11111 }, // 0xE8, greek capital phi
   { 0b00100,
     0b01010,
     0b10001,
@@ -1892,7 +1892,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b01010,
     0b00100,
-    0b00000 }, //0xE9, greek capital theta
+    0b00000 }, // 0xE9, greek capital theta
   { 0b00000,
     0b01110,
     0b10001,
@@ -1900,7 +1900,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01010,
     0b01010,
     0b11011,
-    0b00000 }, //0xEA, greek capital omega
+    0b00000 }, // 0xEA, greek capital omega
   { 0b00110,
     0b01000,
     0b00110,
@@ -1908,7 +1908,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b01110,
-    0b00000 }, //0xEB, greek lowercase delta
+    0b00000 }, // 0xEB, greek lowercase delta
   { 0b00000,
     0b00000,
     0b00000,
@@ -1916,7 +1916,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b10101,
     0b01010,
-    0b00000 }, //0xEC, infinity
+    0b00000 }, // 0xEC, infinity
   { 0b00001,
     0b01110,
     0b10011,
@@ -1924,7 +1924,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10101,
     0b11001,
     0b01110,
-    0b10000 }, //0xED, greek lowercase phi (empty set symbol)
+    0b10000 }, // 0xED, greek lowercase phi (empty set symbol)
   { 0b01111,
     0b10000,
     0b10000,
@@ -1932,7 +1932,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10000,
     0b10000,
     0b01111,
-    0b00000 }, //0xEE, greek lowercase epsilon (in set symbol)
+    0b00000 }, // 0xEE, greek lowercase epsilon (in set symbol)
   { 0b01110,
     0b10001,
     0b10001,
@@ -1940,7 +1940,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10001,
     0b10001,
     0b10001,
-    0b00000 }, //0xEF, intersection
+    0b00000 }, // 0xEF, intersection
   { 0b00000,
     0b11111,
     0b00000,
@@ -1948,7 +1948,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b11111,
     0b00000,
-    0b00000 }, //0xF0, identical to
+    0b00000 }, // 0xF0, identical to
   { 0b00100,
     0b00100,
     0b11111,
@@ -1956,7 +1956,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00000,
     0b11111,
-    0b00000 }, //0xF1, plus/minus
+    0b00000 }, // 0xF1, plus/minus
   { 0b01000,
     0b00100,
     0b00010,
@@ -1964,7 +1964,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01000,
     0b00000,
     0b11111,
-    0b00000 }, //0xF2, greater than or equal to
+    0b00000 }, // 0xF2, greater than or equal to
   { 0b00010,
     0b00100,
     0b01000,
@@ -1972,7 +1972,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00010,
     0b00000,
     0b11111,
-    0b00000 }, //0xF3, less than or equal to
+    0b00000 }, // 0xF3, less than or equal to
   { 0b00111,
     0b00101,
     0b00100,
@@ -1980,7 +1980,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b00100,
     0b00100,
-    0b00100 }, //0xF4, top half of integral
+    0b00100 }, // 0xF4, top half of integral
   { 0b00100,
     0b00100,
     0b00100,
@@ -1988,7 +1988,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00100,
     0b10100,
     0b10100,
-    0b11100 }, //0xF5, bottom half of integral
+    0b11100 }, // 0xF5, bottom half of integral
   { 0b00110,
     0b00110,
     0b00000,
@@ -1996,7 +1996,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00110,
     0b00110,
-    0b00000 }, //0xF6, division sign
+    0b00000 }, // 0xF6, division sign
   { 0b00000,
     0b00000,
     0b11101,
@@ -2004,7 +2004,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b11101,
     0b10111,
-    0b00000 }, //0xF7, approximately equal to
+    0b00000 }, // 0xF7, approximately equal to
   { 0b01110,
     0b11011,
     0b11011,
@@ -2012,7 +2012,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }, //0xF8, degree symbol
+    0b00000 }, // 0xF8, degree symbol
   { 0b00000,
     0b00000,
     0b00000,
@@ -2020,7 +2020,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00110,
     0b00000,
     0b00000,
-    0b00000 }, //0xF9, bullet point/dot operator
+    0b00000 }, // 0xF9, bullet point/dot operator
   { 0b00000,
     0b00000,
     0b00000,
@@ -2028,7 +2028,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00110,
     0b00000,
     0b00000,
-    0b00000 }, //0xFA, middle dot
+    0b00000 }, // 0xFA, middle dot
   { 0b00111,
     0b00100,
     0b00100,
@@ -2036,7 +2036,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b10100,
     0b10100,
     0b01100,
-    0b00100 }, //0xFB, square root
+    0b00100 }, // 0xFB, square root
   { 0b01110,
     0b01001,
     0b01001,
@@ -2044,7 +2044,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01001,
     0b00000,
     0b00000,
-    0b00000 }, //0xFC, superscript lowercase n (nth power)
+    0b00000 }, // 0xFC, superscript lowercase n (nth power)
   { 0b01110,
     0b00011,
     0b00110,
@@ -2052,7 +2052,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01111,
     0b00000,
     0b00000,
-    0b00000 }, //0xFD, superscript 2 (2nd power, square)
+    0b00000 }, // 0xFD, superscript 2 (2nd power, square)
   { 0b00000,
     0b00000,
     0b01111,
@@ -2060,7 +2060,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b01111,
     0b01111,
     0b00000,
-    0b00000 }, //0xFE, black square
+    0b00000 }, // 0xFE, black square
   { 0b00000,
     0b00000,
     0b00000,
@@ -2068,7 +2068,7 @@ const uint8_t cp437[256][FONT_HEIGHT] = {
     0b00000,
     0b00000,
     0b00000,
-    0b00000 }  //0xFF, zero-width space
+    0b00000 } // 0xFF, zero-width space
 };
 
 #endif

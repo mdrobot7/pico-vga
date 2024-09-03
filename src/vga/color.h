@@ -3,10 +3,10 @@
 
 #include "pico/stdlib.h"
 
-#define COLOR_WHITE   0b11111111
-#define COLOR_SILVER  0b10110110
-#define COLOR_GRAY    0b10010010
-#define COLOR_BLACK   0b00000000
+#define COLOR_WHITE  0b11111111
+#define COLOR_SILVER 0b10110110
+#define COLOR_GRAY   0b10010010
+#define COLOR_BLACK  0b00000000
 
 #define COLOR_RED     0b11100000
 #define COLOR_MAROON  0b10000000
@@ -28,7 +28,7 @@
  * @return An 8 bit compressed color.
  */
 static inline uint8_t color_html_to_8bit(uint32_t color) {
-    return color_rgb_to_8bit((uint8_t)((color >> 16) & 255), (uint8_t)((color >> 8) & 255), (uint8_t)((color & 255)));
+  return color_rgb_to_8bit((uint8_t) ((color >> 16) & 255), (uint8_t) ((color >> 8) & 255), (uint8_t) ((color & 255)));
 }
 
 /**
@@ -40,7 +40,7 @@ static inline uint8_t color_html_to_8bit(uint32_t color) {
  * @return An 8 bit compressed color.
  */
 static inline uint8_t color_rgb_to_8bit(uint8_t r, uint8_t g, uint8_t b) {
-    return ((r/32) << 5) | ((g/32) << 2) | (b/64);
+  return ((r / 32) << 5) | ((g / 32) << 2) | (b / 64);
 }
 
 /**
@@ -51,46 +51,41 @@ static inline uint8_t color_rgb_to_8bit(uint8_t r, uint8_t g, uint8_t b) {
  * @return An 8 bit compressed color
  */
 static inline uint8_t color_hsb_to_8bit(uint8_t hue, uint8_t saturation, uint8_t value) {
-    float max = value;
-    float min = max*(255 - saturation);
+  float max = value;
+  float min = max * (255 - saturation);
 
-    // Slow...
-    float x = (max - min)*(1 - fabs(fmod(hue/(255*(1.0/6.0)), 2) - 1));
+  // Slow...
+  float x = (max - min) * (1 - fabs(fmod(hue / (255 * (1.0 / 6.0)), 2) - 1));
 
-    uint8_t r, g, b;
-    if(hue < 255*(1.0/6.0)) {
-        r = max;
-        g = x + min;
-        b = min;
-    }
-    else if(hue < 255*(2.0/6.0)) {
-        r = x + min;
-        g = max;
-        b = min;
-    }
-    else if(hue < 255*(3.0/6.0)) {
-        r = min;
-        g = max;
-        b = x + min;
-    }
-    else if(hue < 255*(4.0/6.0)) {
-        r = min;
-        g = x + min;
-        b = max;
-    }
-    else if(hue < 255*(5.0/6.0)) {
-        r = x + min;
-        g = min;
-        b = max;
-    }
-    else if(hue < 255*(6.0/6.0)) {
-        r = max;
-        g = min;
-        b = x + min;
-    }
-    else return 0;
+  uint8_t r, g, b;
+  if (hue < 255 * (1.0 / 6.0)) {
+    r = max;
+    g = x + min;
+    b = min;
+  } else if (hue < 255 * (2.0 / 6.0)) {
+    r = x + min;
+    g = max;
+    b = min;
+  } else if (hue < 255 * (3.0 / 6.0)) {
+    r = min;
+    g = max;
+    b = x + min;
+  } else if (hue < 255 * (4.0 / 6.0)) {
+    r = min;
+    g = x + min;
+    b = max;
+  } else if (hue < 255 * (5.0 / 6.0)) {
+    r = x + min;
+    g = min;
+    b = max;
+  } else if (hue < 255 * (6.0 / 6.0)) {
+    r = max;
+    g = min;
+    b = x + min;
+  } else
+    return 0;
 
-    return color_rgb_to_8bit(r, g, b);
+  return color_rgb_to_8bit(r, g, b);
 }
 
 /**
@@ -100,7 +95,7 @@ static inline uint8_t color_hsb_to_8bit(uint8_t hue, uint8_t saturation, uint8_t
  * @return The inverted version of the supplied color.
  */
 static inline uint8_t color_invert(uint8_t color) {
-    return 255 - color;
+  return 255 - color;
 }
 
 #endif

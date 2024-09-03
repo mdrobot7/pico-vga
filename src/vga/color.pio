@@ -35,10 +35,10 @@ static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPi
 
     //Setup FIFO
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
-    
+
     //Setup state machine clock divider
     sm_config_set_clkdiv(&c, divider);
-    
+
     //Setup autopull TX FIFO --> OSR after 32 bits have been shifted out of OSR
     sm_config_set_out_shift(&c, true, true, 32);
 

@@ -22,7 +22,7 @@ void renderCircleAA(uint16_t x1, uint16_t y1, uint16_t radius, uint8_t color);
  * @param color Color to write
  */
 inline void writePixelBuffered(uint16_t y, uint16_t x, uint8_t color) {
-  if (x >= frameWidth || y >= frameHeight)
+  if (x >= frame_width || y >= frame_height)
     return;
   else if (*((uint8_t **) frameReadAddrStart + y) < frameBufferStart)
     return; // don't write to interpolated lines
@@ -39,7 +39,7 @@ inline void writePixelBuffered(uint16_t y, uint16_t x, uint8_t color) {
  * @param color Color to write
  */
 inline void writePixelInterp(uint16_t y, uint16_t x, uint8_t color) {
-  if (x >= frameWidth || y >= frameHeight)
+  if (x >= frame_width || y >= frame_height)
     return;
   else if (*((uint8_t **) frameReadAddrStart + y) > frameBufferStart)
     return; // don't write to buffered lines

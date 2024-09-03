@@ -15,7 +15,7 @@ volatile uint8_t interpolationIncomplete = 0;
  */
 void updateDisplay() {
   update = 1;
-  if (displayConfig->autoRender) ((RenderQueueItem_t *) renderQueueStart)->flags |= RQI_UPDATE; // force-update in autoRender mode
+  if (displayConfig->auto_render) ((vga_render_item_t *) renderQueueStart)->flags |= RQI_UPDATE; // force-update in auto_render mode
 }
 
 
@@ -27,20 +27,20 @@ void updateDisplay() {
 void render() {
   multicore_fifo_push_blocking(13); // tell core 0 that everything is ok/it's running
 
-  RenderQueueItem_t * item;
+  vga_render_item_t * item;
 
   while (1) {
-    if (displayConfig->autoRender) {
-      item = (RenderQueueItem_t *) renderQueueStart;
+    if (displayConfig->auto_render) {
+      item = (vga_render_item_t *) renderQueueStart;
       // look for the first item that needs an update, render that item and everything after it
       while (!(item->flags & RQI_UPDATE)) {
-        if (item >= lastItem) item = (RenderQueueItem_t *) renderQueueStart;
+        if (item >= lastItem) item = (vga_render_item_t *) renderQueueStart;
       }
       // if the update is to hide or remove an item, rerender the whole thing
-      if (item->flags & RQI_HIDDEN || item->uid == RQI_UID_REMOVED) item = (RenderQueueItem_t *) renderQueueStart;
+      if (item->flags & RQI_HIDDEN || item->uid == RQI_UID_REMOVED) item = (vga_render_item_t *) renderQueueStart;
     } else { // manual rendering
       while (!update);
-      item = (RenderQueueItem_t *) renderQueueStart;
+      item = (vga_render_item_t *) renderQueueStart;
     }
 
     while (item <= lastItem) {
@@ -50,14 +50,14 @@ void render() {
             writeBufferedPixel(item->y, item->x, item->thetaZ);
             break;
           case RQI_T_LINE:
-            Points_t * pts = (Points_t *) item->pointsOrTriangles;
-            renderLine(pts->points[0], pts->points[1], pts->points[2], pts->points[3], item->thetaZ, item->scaleZ);
+            Points_t * pts = (Points_t *) item->points_or_triangles;
+            renderLine(pts->points[0], pts->points[1], pts->points[2], pts->points[3], item->thetaZ, item->scale_z);
             break;
           case RQI_T_RECTANGLE:
             break;
           case RQI_T_TRIANGLE:
-            Points_t * pts = (Points_t *) item->pointsOrTriangles;
-            renderTriangle(pts->points[0], pts->points[1], pts->points[2], pts->points[3], pts->points[4], pts->points[5], item->thetaZ, item->scaleZ);
+            Points_t * pts = (Points_t *) item->points_or_triangles;
+            renderTriangle(pts->points[0], pts->points[1], pts->points[2], pts->points[3], pts->points[4], pts->points[5], item->thetaZ, item->scale_z);
             break;
           case RQI_T_CIRCLE:
             renderCircle(item->x, item->y, item->z, item->thetaZ);
@@ -65,23 +65,23 @@ void render() {
           case RQI_T_FILLED_RECTANGLE:
             break;
           case RQI_T_FILLED_TRIANGLE:
-            Points_t * pts = (Points_t *) item->pointsOrTriangles;
+            Points_t * pts = (Points_t *) item->points_or_triangles;
             renderFilledTriangle(pts->points[0], pts->points[1], pts->points[2], pts->points[3], pts->points[4], pts->points[5], item->thetaZ);
             break;
           case RQI_T_FILLED_CIRCLE:
             renderFilledCircle(item->x, item->y, item->z, item->thetaZ);
             break;
           case RQI_T_STRING:
-            /*//x1, y = top left corner, x2 = right side (for word wrap), thetaZ = color, scaleZ = background
-            uint16_t x1 = ((Points_t *)lastItem->pointsOrTriangles)->points[0]; //Fetch points from the memory space right after item
-            uint16_t y = ((Points_t *)lastItem->pointsOrTriangles)->points[1];
-            uint16_t x2 = ((Points_t *)lastItem->pointsOrTriangles)->points[2];
-            char * str = &(((Points_t *)lastItem->pointsOrTriangles)->points[3]);
+            /*//x1, y = top left corner, x2 = right side (for word wrap), thetaZ = color, scale_z = background
+            uint16_t x1 = ((Points_t *)lastItem->points_or_triangles)->points[0]; //Fetch points from the memory space right after item
+            uint16_t y = ((Points_t *)lastItem->points_or_triangles)->points[1];
+            uint16_t x2 = ((Points_t *)lastItem->points_or_triangles)->points[2];
+            char * str = &(((Points_t *)lastItem->points_or_triangles)->points[3]);
 
             for(uint16_t c = 0; str[c] != '\0'; c++) {
                 for(uint8_t i = 0; i < CHAR_HEIGHT; i++) {
                     for(uint8_t j = 0; j < CHAR_WIDTH; j++) {
-                        writePixel(y + i, x1 + j, getFontBit(str[c], i, j) ? item->thetaZ : item->scaleZ);
+                        writePixel(y + i, x1 + j, getFontBit(str[c], i, j) ? item->thetaZ : item->scale_z);
                     }
                 }
                 x += CHAR_WIDTH + 1;
@@ -101,8 +101,8 @@ void render() {
             }*/
             break;
           case RQI_T_FILL:
-            for (uint16_t y = 0; y < frameHeight; y++) {
-              for (uint16_t x = 0; x < frameWidth; x++) {
+            for (uint16_t y = 0; y < frame_height; y++) {
+              for (uint16_t x = 0; x < frame_width; x++) {
                 writePixel(y, x, item->thetaZ);
               }
             }
@@ -180,13 +180,13 @@ struct repeating_timer garbageCollectorTimer;
 static irq_handler_t garbageCollectorHandler() {
   dma_channel_acknowledge_irq1(garbageCollectorDMA);
 
-  RenderQueueItem_t * item = findRenderQueueItem(RQI_UID_REMOVED);
+  vga_render_item_t * item = findRenderQueueItem(RQI_UID_REMOVED);
   if (item >= lastItem) {
     garbageCollectorActive = false;
     return NULL; // No garbage collecting needs to be done
   }
 
-  dma_channel_set_read_addr(garbageCollectorDMA, (item + item->numPointsOrTriangles + 1), false);
+  dma_channel_set_read_addr(garbageCollectorDMA, (item + item->num_points_or_triangles + 1), false);
   dma_channel_set_write_addr(garbageCollectorDMA, item, false);
   dma_channel_set_trans_count(garbageCollectorDMA, ((uint32_t) lastItem - (uint32_t) (dma_hw->ch[garbageCollectorDMA].read_addr)) / 4, true);
 }

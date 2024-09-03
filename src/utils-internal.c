@@ -31,16 +31,16 @@ int32_t renderQueueNumBytesFree() {
   return ptr - (uint8_t *) lastItem;
 }
 
-void clearRenderQueueItemData(RenderQueueItem_t * item) {
-  for (int i = 0; i < sizeof(RenderQueueItem_t) / 4; i++) {
+void clearRenderQueueItemData(vga_render_item_t * item) {
+  for (int i = 0; i < sizeof(vga_render_item_t) / 4; i++) {
     *((uint32_t *) item + i) = 0; // Treat the RenderQueueItem as bare memory, write zeros to it in 32bit chunks
   }
 }
 
-RenderQueueItem_t * findRenderQueueItem(RenderQueueUID_t itemUID) {
-  for (RenderQueueItem_t * i = (RenderQueueItem_t *) renderQueueStart; i < lastItem; i++) {
+vga_render_item_t * findRenderQueueItem(RenderQueueUID_t itemUID) {
+  for (vga_render_item_t * i = (vga_render_item_t *) renderQueueStart; i < lastItem; i++) {
     if (i->uid == itemUID) return i;
-    i += i->numPointsOrTriangles; // skip over the Points_t or Triangle_t structs
+    i += i->num_points_or_triangles; // skip over the Points_t or Triangle_t structs
   }
 }
 

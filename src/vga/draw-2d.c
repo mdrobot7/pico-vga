@@ -2,14 +2,14 @@
 #include "lib-internal.h"
 
 RenderQueueUID_t drawPixel(uint16_t x, uint16_t y, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_PIXEL;
-  lastItem->uid    = uid;
-  lastItem->x      = x;
-  lastItem->y      = y;
-  lastItem->thetaZ = color;
+  lastItem->type    = RQI_T_PIXEL;
+  lastItem->uid     = uid;
+  lastItem->x       = x;
+  lastItem->y       = y;
+  lastItem->theta_z = color;
 
   lastItem->flags = RQI_UPDATE;
   lastItem++;
@@ -17,18 +17,18 @@ RenderQueueUID_t drawPixel(uint16_t x, uint16_t y, uint8_t color) {
 }
 
 RenderQueueUID_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_LINE;
-  lastItem->uid    = uid;
-  lastItem->x      = (x1 + x2) / 2;
-  lastItem->y      = (y1 + y2) / 2;
-  lastItem->scaleZ = (int8_t) thickness;
-  lastItem->thetaZ = (int8_t) color;
+  lastItem->type    = RQI_T_LINE;
+  lastItem->uid     = uid;
+  lastItem->x       = (x1 + x2) / 2;
+  lastItem->y       = (y1 + y2) / 2;
+  lastItem->scale_z  = (int8_t) thickness;
+  lastItem->theta_z = (int8_t) color;
 
-  lastItem->numPointsOrTriangles = 4;
-  lastItem->pointsOrTriangles    = (Points_t *) ++lastItem;
+  lastItem->num_points_or_triangles = 4;
+  lastItem->points_or_triangles    = (Points_t *) ++lastItem;
 
   // lastItem now points to a Points_t struct right after the RenderQueueItem.
   clearRenderQueueItemData(lastItem); // Clear out garbage data in the Points_t struct
@@ -43,18 +43,18 @@ RenderQueueUID_t drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, ui
 }
 
 RenderQueueUID_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t thickness, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_RECTANGLE;
-  lastItem->uid    = uid;
-  lastItem->x      = (x1 + x2) / 2;
-  lastItem->y      = (y1 + y2) / 2;
-  lastItem->scaleZ = (int8_t) thickness;
-  lastItem->thetaZ = (int8_t) color;
+  lastItem->type    = RQI_T_RECTANGLE;
+  lastItem->uid     = uid;
+  lastItem->x       = (x1 + x2) / 2;
+  lastItem->y       = (y1 + y2) / 2;
+  lastItem->scale_z  = (int8_t) thickness;
+  lastItem->theta_z = (int8_t) color;
 
-  lastItem->numPointsOrTriangles = 8;
-  lastItem->pointsOrTriangles    = (Points_t *) ++lastItem;
+  lastItem->num_points_or_triangles = 8;
+  lastItem->points_or_triangles    = (Points_t *) ++lastItem;
 
   // lastItem now points to a Points_t struct right after the RenderQueueItem.
   clearRenderQueueItemData(lastItem); // Clear out garbage data in the Points_t struct
@@ -73,18 +73,18 @@ RenderQueueUID_t drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y
 }
 
 RenderQueueUID_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t thickness, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_TRIANGLE;
-  lastItem->uid    = uid;
-  lastItem->x      = (x1 + x2 + x3) / 3;
-  lastItem->y      = (y1 + y2 + y3) / 3;
-  lastItem->scaleZ = (int8_t) thickness;
-  lastItem->thetaZ = (int8_t) color;
+  lastItem->type    = RQI_T_TRIANGLE;
+  lastItem->uid     = uid;
+  lastItem->x       = (x1 + x2 + x3) / 3;
+  lastItem->y       = (y1 + y2 + y3) / 3;
+  lastItem->scale_z  = (int8_t) thickness;
+  lastItem->theta_z = (int8_t) color;
 
-  lastItem->numPointsOrTriangles = 6;
-  lastItem->pointsOrTriangles    = (Points_t *) ++lastItem;
+  lastItem->num_points_or_triangles = 6;
+  lastItem->points_or_triangles    = (Points_t *) ++lastItem;
 
   // lastItem now points to a Points_t struct right after the RenderQueueItem.
   clearRenderQueueItemData(lastItem); // Clear out garbage data in the Points_t struct
@@ -101,16 +101,16 @@ RenderQueueUID_t drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2
 }
 
 RenderQueueUID_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t thickness, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_CIRCLE;
-  lastItem->uid    = uid;
-  lastItem->x      = x;
-  lastItem->y      = y;
-  lastItem->z      = radius; // Can't use scaleX/Y/Z because they are 8 bit signed (not big enough).
-  lastItem->scaleZ = thickness;
-  lastItem->thetaZ = color;
+  lastItem->type    = RQI_T_CIRCLE;
+  lastItem->uid     = uid;
+  lastItem->x       = x;
+  lastItem->y       = y;
+  lastItem->z       = radius; // Can't use scale_x/Y/Z because they are 8 bit signed (not big enough).
+  lastItem->scale_z  = thickness;
+  lastItem->theta_z = color;
 
   lastItem->flags = RQI_UPDATE;
   lastItem++;
@@ -119,17 +119,17 @@ RenderQueueUID_t drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t thi
 
 // Draws lines between all points in the list. Points must be in clockwise order.
 RenderQueueUID_t drawPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t thickness, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_POLYGON;
-  lastItem->uid    = uid;
-  lastItem->scaleZ = (int8_t) thickness;
-  lastItem->thetaZ = (int8_t) color;
-  lastItem->flags  = RQI_UPDATE;
+  lastItem->type    = RQI_T_POLYGON;
+  lastItem->uid     = uid;
+  lastItem->scale_z  = (int8_t) thickness;
+  lastItem->theta_z = (int8_t) color;
+  lastItem->flags   = RQI_UPDATE;
 
-  lastItem->numPointsOrTriangles = numPoints;
-  lastItem->pointsOrTriangles    = (Points_t *) ++lastItem;
+  lastItem->num_points_or_triangles = numPoints;
+  lastItem->points_or_triangles    = (Points_t *) ++lastItem;
 
   /* This convoluted loop copies the data from points[][] into the Points_t structs. Each Points_t holds 12
    * values (6 coordinate pairs in 2D space). This copies 6 points in, then goes to the next Points_t. This
@@ -148,17 +148,17 @@ RenderQueueUID_t drawPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t th
 }
 
 RenderQueueUID_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_FILLED_RECTANGLE;
-  lastItem->uid    = uid;
-  lastItem->x      = (x1 + x2) / 2;
-  lastItem->y      = (y1 + y2) / 2;
-  lastItem->thetaZ = (int8_t) color;
+  lastItem->type    = RQI_T_FILLED_RECTANGLE;
+  lastItem->uid     = uid;
+  lastItem->x       = (x1 + x2) / 2;
+  lastItem->y       = (y1 + y2) / 2;
+  lastItem->theta_z = (int8_t) color;
 
-  lastItem->numPointsOrTriangles = 8;
-  lastItem->pointsOrTriangles    = (Points_t *) ++lastItem;
+  lastItem->num_points_or_triangles = 8;
+  lastItem->points_or_triangles    = (Points_t *) ++lastItem;
 
   // lastItem now points to a Points_t struct right after the RenderQueueItem.
   clearRenderQueueItemData(lastItem); // Clear out garbage data in the Points_t struct
@@ -177,17 +177,17 @@ RenderQueueUID_t drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint
 }
 
 RenderQueueUID_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_FILLED_TRIANGLE;
-  lastItem->uid    = uid;
-  lastItem->x      = (x1 + x2 + x3) / 3;
-  lastItem->y      = (y1 + y2 + y3) / 3;
-  lastItem->thetaZ = (int8_t) color;
+  lastItem->type    = RQI_T_FILLED_TRIANGLE;
+  lastItem->uid     = uid;
+  lastItem->x       = (x1 + x2 + x3) / 3;
+  lastItem->y       = (y1 + y2 + y3) / 3;
+  lastItem->theta_z = (int8_t) color;
 
-  lastItem->numPointsOrTriangles = 6;
-  lastItem->pointsOrTriangles    = (Points_t *) ++lastItem;
+  lastItem->num_points_or_triangles = 6;
+  lastItem->points_or_triangles    = (Points_t *) ++lastItem;
 
   // lastItem now points to a Points_t struct right after the RenderQueueItem.
   clearRenderQueueItemData(lastItem); // Clear out garbage data in the Points_t struct
@@ -204,32 +204,32 @@ RenderQueueUID_t drawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint1
 }
 
 RenderQueueUID_t drawFilledCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_FILLED_CIRCLE;
-  lastItem->uid    = uid;
-  lastItem->x      = x;
-  lastItem->y      = y;
-  lastItem->z      = radius; // Can't use scaleX/Y/Z because they are 8 bit signed (not big enough).
-  lastItem->thetaZ = color;
-  lastItem->flags  = RQI_UPDATE;
+  lastItem->type    = RQI_T_FILLED_CIRCLE;
+  lastItem->uid     = uid;
+  lastItem->x       = x;
+  lastItem->y       = y;
+  lastItem->z       = radius; // Can't use scale_x/Y/Z because they are 8 bit signed (not big enough).
+  lastItem->theta_z = color;
+  lastItem->flags   = RQI_UPDATE;
   lastItem++;
   return uid++;
 }
 
 // Draws lines and fills between all points in the list. Points must be in clockwise order.
 RenderQueueUID_t fillPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
-  lastItem->type   = RQI_T_FILLED_POLYGON;
-  lastItem->uid    = uid;
-  lastItem->thetaZ = (int8_t) color;
-  lastItem->flags  = RQI_UPDATE;
+  lastItem->type    = RQI_T_FILLED_POLYGON;
+  lastItem->uid     = uid;
+  lastItem->theta_z = (int8_t) color;
+  lastItem->flags   = RQI_UPDATE;
 
-  lastItem->numPointsOrTriangles = numPoints;
-  lastItem->pointsOrTriangles    = (Points_t *) ++lastItem;
+  lastItem->num_points_or_triangles = numPoints;
+  lastItem->points_or_triangles    = (Points_t *) ++lastItem;
 
   /* This convoluted loop copies the data from points[][] into the Points_t structs. Each Points_t holds 12
    * values (6 coordinate pairs in 2D space). This copies 6 points in, then goes to the next Points_t. This
@@ -248,13 +248,13 @@ RenderQueueUID_t fillPolygon(uint16_t points[][2], uint8_t numPoints, uint8_t co
 }
 
 RenderQueueUID_t fillScreen(uint8_t * obj, uint8_t color) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
   lastItem->type              = RQI_T_FILL;
   lastItem->uid               = uid;
-  lastItem->thetaZ            = color;
-  lastItem->pointsOrTriangles = (void *) obj;
+  lastItem->theta_z           = color;
+  lastItem->points_or_triangles = (void *) obj;
 
   lastItem->flags = RQI_UPDATE;
   lastItem++;
@@ -263,13 +263,13 @@ RenderQueueUID_t fillScreen(uint8_t * obj, uint8_t color) {
 
 // Removes everything from the list, marks all elements for deletion (handled in garbage collector)
 void clearScreen() {
-  RenderQueueItem_t * item = (RenderQueueItem_t *) buffer;
+  vga_render_item_t * item = (vga_render_item_t *) buffer;
   while (item < lastItem) {
     item->uid = RQI_UID_REMOVED;
-    item += item->numPointsOrTriangles + 1; // get past the Points_t or Triangle_t structs packed next to the item
+    item += item->num_points_or_triangles + 1; // get past the Points_t or Triangle_t structs packed next to the item
   }
 
-  lastItem = (RenderQueueItem_t *) buffer;
+  lastItem = (vga_render_item_t *) buffer;
   uid      = 1;
 }
 
@@ -281,7 +281,7 @@ void clearScreen() {
 uint8_t * font = (uint8_t *) cp437; // The current font in use by the system
 
 RenderQueueUID_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char * str, uint8_t color, uint16_t bgColor, bool wrap, uint8_t strSizeOverrideBytes) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
   lastItem->type = RQI_T_STRING;
@@ -293,22 +293,22 @@ RenderQueueUID_t drawText(uint16_t x1, uint16_t y, uint16_t x2, char * str, uint
     lastItem->x = (x1 + x2) / 2;
     lastItem->y = y;
   }
-  lastItem->scaleZ = (int8_t) bgColor;
-  lastItem->thetaZ = (int8_t) color;
+  lastItem->scale_z  = (int8_t) bgColor;
+  lastItem->theta_z = (int8_t) color;
 
   if (strSizeOverrideBytes != 0) {
     if (strSizeOverrideBytes % sizeof(Points_t) == 0) {
-      lastItem->numPointsOrTriangles = strSizeOverrideBytes / sizeof(Points_t);
+      lastItem->num_points_or_triangles = strSizeOverrideBytes / sizeof(Points_t);
     } else
-      lastItem->numPointsOrTriangles = (strSizeOverrideBytes / sizeof(Points_t)) + 1;
+      lastItem->num_points_or_triangles = (strSizeOverrideBytes / sizeof(Points_t)) + 1;
   } else {
     if (strlen(str) % sizeof(Points_t) == 0) {
-      lastItem->numPointsOrTriangles = strlen(str) / sizeof(Points_t);
+      lastItem->num_points_or_triangles = strlen(str) / sizeof(Points_t);
     } else
-      lastItem->numPointsOrTriangles = (strlen(str) / sizeof(Points_t)) + 1;
+      lastItem->num_points_or_triangles = (strlen(str) / sizeof(Points_t)) + 1;
   }
-  uint16_t tempNumPointsOrTriangles = lastItem->numPointsOrTriangles;
-  lastItem->pointsOrTriangles       = (Points_t *) ++lastItem;
+  uint16_t tempNumPointsOrTriangles = lastItem->num_points_or_triangles;
+  lastItem->points_or_triangles       = (Points_t *) ++lastItem;
 
   // lastItem now points to the memory location right after the RenderQueueItem.
   ((Points_t *) lastItem)->points[0] = x1;
@@ -331,21 +331,21 @@ void setTextFont(uint8_t * newFont) {
         Sprite Drawing Functions
 ========================================
 */
-RenderQueueUID_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, int8_t scaleX, int8_t scaleY) {
-  if (renderQueueNumBytesFree() < sizeof(RenderQueueItem_t)) return 0;
+RenderQueueUID_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t dimX, uint16_t dimY, uint8_t nullColor, int8_t scale_x, int8_t scale_y) {
+  if (renderQueueNumBytesFree() < sizeof(vga_render_item_t)) return 0;
   clearRenderQueueItemData(lastItem);
 
   lastItem->type                 = RQI_T_SPRITE;
   lastItem->uid                  = uid;
   lastItem->x                    = (x + (x + dimX)) / 2;
   lastItem->y                    = (y + (y + dimY)) / 2;
-  lastItem->scaleX               = scaleX;
-  lastItem->scaleY               = scaleY;
-  lastItem->thetaZ               = nullColor;
+  lastItem->scale_x              = scale_x;
+  lastItem->scale_y              = scale_y;
+  lastItem->theta_z              = nullColor;
   lastItem->z                    = dimX; // Using the z and numPoints... field because there are no other uint16_t fields available.
-  lastItem->numPointsOrTriangles = dimY;
+  lastItem->num_points_or_triangles = dimY;
 
-  lastItem->pointsOrTriangles = sprite;
+  lastItem->points_or_triangles = sprite;
 
   lastItem->flags = RQI_UPDATE;
   lastItem++;
@@ -359,7 +359,7 @@ RenderQueueUID_t drawSprite(uint8_t * sprite, uint16_t x, uint16_t y, uint16_t d
 */
 // Set item to be hidden (true = hidden, false = showing)
 void setHidden(RenderQueueUID_t itemUID, bool hidden) {
-  RenderQueueItem_t * item = findRenderQueueItem(itemUID);
+  vga_render_item_t * item = findRenderQueueItem(itemUID);
   if (item->flags & RQI_HIDDEN)
     item->flags &= ~RQI_HIDDEN;
   else
@@ -371,7 +371,7 @@ void setHidden(RenderQueueUID_t itemUID, bool hidden) {
 // Permanently remove item from the render queue.
 void removeItem(RenderQueueUID_t itemUID) {
   if (itemUID == 0) return;
-  RenderQueueItem_t * item = findRenderQueueItem(itemUID);
+  vga_render_item_t * item = findRenderQueueItem(itemUID);
   item->uid                = RQI_UID_REMOVED;
   updateFullDisplay();
 }

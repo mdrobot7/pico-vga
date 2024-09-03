@@ -282,7 +282,7 @@ void renderCircleAA(uint16_t x1, uint16_t y1, uint16_t radius, uint8_t color) {
 
 void renderPolygon(uint16_t points[], uint8_t numPoints, uint8_t dimPoints, uint8_t color, uint8_t thickness) {
   // Split up for performance
-  if (displayConfig->antiAliasing) {
+  if (displayConfig->antialiasing) {
     for (int i = 0; i < numPoints - 2; i += 2) {
       renderLineAA(points[i], points[i + 1], points[i + 2], points[i + 3], color, thickness);
     }
@@ -324,7 +324,7 @@ void renderFillScreen(uint8_t color) {
   uint32_t color32 = color | (color << 8) | (color << 16) | (color << 24);
 
   uint8_t dmaChan    = dma_claim_unused_channel(true);
-  uint8_t spareBytes = (frameWidth * frameHeight) % 4;
+  uint8_t spareBytes = (frame_width * frame_height) % 4;
 
   for (uint8_t i = 0; i < spareBytes; i++) {
     frameBufferStart[i] = color; // treating the frame buffer as a large 1D array
@@ -334,7 +334,7 @@ void renderFillScreen(uint8_t color) {
   channel_config_set_high_priority(&config, true); // channels are round-robin arbitrated, this is probably fine
   channel_config_set_read_increment(&config, false);
   channel_config_set_write_increment(&config, true);
-  dma_channel_configure(dmaChan, &config, &color32, &frameBufferStart[spareBytes], (frameWidth * frameHeight) / 4, true);
+  dma_channel_configure(dmaChan, &config, &color32, &frameBufferStart[spareBytes], (frame_width * frame_height) / 4, true);
 
   dma_channel_wait_for_finish_blocking(dmaChan);
 

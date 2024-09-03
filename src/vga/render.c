@@ -9,6 +9,8 @@ static volatile uint8_t update           = 0;
 volatile uint8_t interpolatedLine        = 0;
 volatile uint8_t interpolationIncomplete = 0;
 
+volatile bool clear_screen = false;
+
 /**
  * @brief Force-refresh the display.
  *

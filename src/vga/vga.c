@@ -322,6 +322,10 @@ int vga_deinit(vga_config_t * config) {
   return 0;
 }
 
+const vga_config_t * vga_get_config() {
+  return (const vga_config_t *) vga_config; // Force read-only
+}
+
 uint16_t vga_get_width() {
   return frame_width;
 }

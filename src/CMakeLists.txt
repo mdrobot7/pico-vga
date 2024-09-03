@@ -7,9 +7,10 @@ target_sources(libpicovga PUBLIC
 
     vga/draw-2d.c
     vga/draw-3d.c
-    vga/vga.c
-    vga/render.c
+    vga/draw-common.c
     vga/render-2d.c
+    vga/render.c
+    vga/vga.c
 
     utils-internal.c
 )
@@ -17,6 +18,8 @@ target_sources(libpicovga PUBLIC
 target_include_directories(libpicovga PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/../inc
 )
+
+target_compile_definitions(libpicovga PRIVATE PARAM_ASSERTIONS_ENABLE_ALL=1)
 
 # Create C header file with the name <pio program>.pio.h
 # Note: You need one call per file

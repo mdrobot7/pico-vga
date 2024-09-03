@@ -3,7 +3,7 @@
 #ifndef __PICO_VGA_H
 #define __PICO_VGA_H
 
-#include <pico/stdlib.h>
+#include "pico/stdlib.h"
 
 #include "audio.h"
 #include "color.h"
@@ -19,8 +19,8 @@
 #define	__aligned(x)	__attribute__((__aligned__(x)))
 #endif
 
-// The size of the frame buffer for the pico-vga renderer. Try to maximize this, since the
-// more memory the library is given the better it will perform (recommended: 256kB)
+// The maximum size of the frame buffer for the pico-vga renderer. The renderer will use
+// either the allocated size or the size of 1 frame, whichever is smaller.
 // Allocated at compile-time, so be careful of other memory-intensive parts of your program.
 #ifndef PV_FRAMEBUFFER_BYTES
 #define PV_FRAMEBUFFER_BYTES 200000

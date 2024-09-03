@@ -1,7 +1,8 @@
 #ifndef __PV_DRAW_H
 #define __PV_DRAW_H
 
-#include <pico/stdlib.h>
+#include "pico/stdlib.h"
+#include "hardware/pio.h"
 
 typedef enum {
     RES_800x600,

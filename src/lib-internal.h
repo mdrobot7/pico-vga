@@ -222,24 +222,4 @@ RenderQueueItem_t * findRenderQueueItem(RenderQueueUID_t itemUID);
 uint16_t min(uint16_t a, uint16_t b, uint16_t c);
 uint16_t max(uint16_t a, uint16_t b, uint16_t c);
 
-
-/*
-        Constants
-=========================
-*/
-//LSBs for DMA CTRL register bits (pico's SDK constants weren't great)
-#define SDK_DMA_CTRL_EN 0
-#define SDK_DMA_CTRL_HIGH_PRIORITY 1
-#define SDK_DMA_CTRL_DATA_SIZE 2
-#define SDK_DMA_CTRL_INCR_READ 4
-#define SDK_DMA_CTRL_INCR_WRITE 5
-#define SDK_DMA_CTRL_RING_SIZE 6
-#define SDK_DMA_CTRL_RING_SEL 10
-#define SDK_DMA_CTRL_CHAIN_TO 11
-#define SDK_DMA_CTRL_TREQ_SEL 15
-#define SDK_DMA_CTRL_IRQ_QUIET 21
-#define SDK_DMA_CTRL_BSWAP 22
-#define SDK_DMA_CTRL_SNIFF_EN 23
-#define SDK_DMA_CTRL_BUSY 24
-
 #endif

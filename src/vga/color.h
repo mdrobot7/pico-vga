@@ -1,7 +1,7 @@
 #ifndef __PV_COLOR_H
 #define __PV_COLOR_H
 
-#include <pico/stdlib.h>
+#include "pico/stdlib.h"
 
 #define COLOR_WHITE   0b11111111
 #define COLOR_SILVER  0b10110110

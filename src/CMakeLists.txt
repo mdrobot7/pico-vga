@@ -11,8 +11,6 @@ target_sources(libpicovga PUBLIC
     vga/render-2d.c
     vga/render.c
     vga/vga.c
-
-    utils-internal.c
 )
 
 target_include_directories(libpicovga PUBLIC

@@ -24,16 +24,6 @@ typedef uint8_t vga_color_t;
 #define COLOR_PURPLE  (0b10000010)
 
 /**
- * @brief Convert a 3 byte HTML color code into an 8 bit color.
- *
- * @param color The HTML color code.
- * @return An 8 bit compressed color.
- */
-static inline vga_color_t color_html_to_vga(uint32_t html_color) {
-  return color_rgb_to_8bit((uint8_t) ((color >> 16) & 255), (uint8_t) ((color >> 8) & 255), (uint8_t) ((color & 255)));
-}
-
-/**
  * @brief Convert red, green, and blue color values into a single 8 bit color.
  *
  * @param r Red value
@@ -46,6 +36,16 @@ static inline vga_color_t color_rgb_to_vga(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 /**
+ * @brief Convert a 3 byte HTML color code into an 8 bit color.
+ *
+ * @param color The HTML color code.
+ * @return An 8 bit compressed color.
+ */
+static inline vga_color_t color_html_to_vga(uint32_t html_color) {
+  return color_rgb_to_vga((uint8_t) ((html_color >> 16) & 255), (uint8_t) ((html_color >> 8) & 255), (uint8_t) ((html_color & 255)));
+}
+
+/**
  * @brief Convert HSV colors into 8 bit compressed RGB.
  * @param hue Hue value, 0-255
  * @param saturation Saturation value, 0-255
@@ -53,41 +53,43 @@ static inline vga_color_t color_rgb_to_vga(uint8_t r, uint8_t g, uint8_t b) {
  * @return An 8 bit compressed color
  */
 static inline vga_color_t color_hsv_to_vga(uint8_t hue, uint8_t saturation, uint8_t value) {
-  float max = value;
-  float min = max * (255 - saturation);
+  // TODO: Find an integer-only version of this
+  // float max = value;
+  // float min = max * (255 - saturation);
 
-  // Slow...
-  float x = (max - min) * (1 - fabs(fmod(hue / (255 * (1.0 / 6.0)), 2) - 1));
+  // // Slow...
+  // float x = (max - min) * (1 - fabs(fmod(hue / (255 * (1.0 / 6.0)), 2) - 1));
 
-  uint8_t r, g, b;
-  if (hue < 255 * (1.0 / 6.0)) {
-    r = max;
-    g = x + min;
-    b = min;
-  } else if (hue < 255 * (2.0 / 6.0)) {
-    r = x + min;
-    g = max;
-    b = min;
-  } else if (hue < 255 * (3.0 / 6.0)) {
-    r = min;
-    g = max;
-    b = x + min;
-  } else if (hue < 255 * (4.0 / 6.0)) {
-    r = min;
-    g = x + min;
-    b = max;
-  } else if (hue < 255 * (5.0 / 6.0)) {
-    r = x + min;
-    g = min;
-    b = max;
-  } else if (hue < 255 * (6.0 / 6.0)) {
-    r = max;
-    g = min;
-    b = x + min;
-  } else
-    return 0;
+  // uint8_t r, g, b;
+  // if (hue < 255 * (1.0 / 6.0)) {
+  //   r = max;
+  //   g = x + min;
+  //   b = min;
+  // } else if (hue < 255 * (2.0 / 6.0)) {
+  //   r = x + min;
+  //   g = max;
+  //   b = min;
+  // } else if (hue < 255 * (3.0 / 6.0)) {
+  //   r = min;
+  //   g = max;
+  //   b = x + min;
+  // } else if (hue < 255 * (4.0 / 6.0)) {
+  //   r = min;
+  //   g = x + min;
+  //   b = max;
+  // } else if (hue < 255 * (5.0 / 6.0)) {
+  //   r = x + min;
+  //   g = min;
+  //   b = max;
+  // } else if (hue < 255 * (6.0 / 6.0)) {
+  //   r = max;
+  //   g = min;
+  //   b = x + min;
+  // } else
+  //   return 0;
 
-  return color_rgb_to_vga(r, g, b);
+  // return color_rgb_to_vga(r, g, b);
+  return 0;
 }
 
 /**

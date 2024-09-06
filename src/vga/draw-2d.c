@@ -7,8 +7,6 @@
  * EXTERN VARIABLES
  ************************************/
 
-volatile uint8_t * font = (uint8_t *) cp437; // The current font in use by the system
-
 /************************************
  * PRIVATE MACROS AND DEFINES
  ************************************/
@@ -21,14 +19,16 @@ volatile uint8_t * font = (uint8_t *) cp437; // The current font in use by the s
  * STATIC VARIABLES
  ************************************/
 
+static volatile uint8_t (*font)[FONT_HEIGHT] = cp437; // The current font in use by the system
+
 /************************************
  * STATIC FUNCTIONS
  ************************************/
 
 // Reset any flags, trigger it to be rendered
 static void clear_and_activate_item(vga_render_item_t * item) {
-  item->header.flags_byte = 0;
-  clear_and_activate_item(item);
+  item->header.flags_byte   = 0;
+  item->header.flags.update = true;
 }
 
 /************************************
@@ -36,7 +36,7 @@ static void clear_and_activate_item(vga_render_item_t * item) {
  ************************************/
 
 void draw2d_set_scale(vga_render_item_t * item, uint8_t scale_x, uint8_t scale_y) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->item_2d.scale_x     = scale_x;
   item->item_2d.scale_y     = scale_y;
@@ -44,14 +44,14 @@ void draw2d_set_scale(vga_render_item_t * item, uint8_t scale_x, uint8_t scale_y
 }
 
 void draw2d_set_rotation(vga_render_item_t * item, int8_t theta) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->item_2d.theta       = theta;
   item->header.flags.update = true;
 }
 
 void draw2d_set_color(vga_render_item_t * item, vga_color_t color) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->item_2d.color       = color;
   item->header.flags.update = true;
@@ -59,7 +59,7 @@ void draw2d_set_color(vga_render_item_t * item, vga_color_t color) {
 
 
 void draw2d_pixel(vga_render_item_t * item, uint16_t x, uint16_t y, vga_color_t color) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.type   = VGA_RENDER_ITEM_PIXEL;
   item->item_2d.x     = x;
@@ -71,7 +71,7 @@ void draw2d_pixel(vga_render_item_t * item, uint16_t x, uint16_t y, vga_color_t 
 
 // TODO: Add line thickness
 void draw2d_line(vga_render_item_t * item, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, vga_color_t color) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.type        = VGA_RENDER_ITEM_LINE;
   item->item_2d.x          = AVG(x1, x2); // Center point
@@ -87,23 +87,23 @@ void draw2d_line(vga_render_item_t * item, uint16_t x1, uint16_t y1, uint16_t x2
 
 // TODO: Add line thickness
 void draw2d_rectangle(vga_render_item_t * item, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, vga_color_t color) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.type        = VGA_RENDER_ITEM_RECTANGLE;
   item->item_2d.x          = AVG(x1, x2); // Center point
   item->item_2d.y          = AVG(y1, y2);
   item->item_2d.color      = color;
-  item->item_2d.point.x[0] = x1; // Diagonal Corners
-  item->item_2d.point.y[0] = y1;
-  item->item_2d.point.x[1] = x2;
-  item->item_2d.point.y[1] = y2;
+  item->item_2d.point.x[0] = MIN(x1, x2); // Top left
+  item->item_2d.point.y[0] = MIN(y1, y2);
+  item->item_2d.point.x[1] = MAX(x1, x2); // Bottom right
+  item->item_2d.point.y[1] = MAX(y1, y2);
 
   clear_and_activate_item(item);
 }
 
 // TODO: Add line thickness
 void draw2d_triangle(vga_render_item_t * item, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, vga_color_t color) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.type        = VGA_RENDER_ITEM_TRIANGLE;
   item->item_2d.x          = (x1 + x2 + x3) / 3; // Center point
@@ -121,7 +121,7 @@ void draw2d_triangle(vga_render_item_t * item, uint16_t x1, uint16_t y1, uint16_
 
 // TODO: Add line thickness
 void draw2d_circle(vga_render_item_t * item, uint16_t x, uint16_t y, uint16_t radius, uint8_t color) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.type        = VGA_RENDER_ITEM_CIRCLE;
   item->item_2d.x          = x; // Center point
@@ -135,7 +135,7 @@ void draw2d_circle(vga_render_item_t * item, uint16_t x, uint16_t y, uint16_t ra
 
 // Draws lines between all points in the list. Points must be in clockwise order.
 void draw2d_polygon(vga_render_item_t * item, uint16_t points[][2], uint16_t num_points, vga_color_t color) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.type                   = VGA_RENDER_ITEM_POLYGON;
   item->item_2d.x                     = points[0][0]; // Just grab the first point, be lazy
@@ -154,7 +154,7 @@ void draw2d_rectangle_filled(vga_render_item_t * item, uint16_t x1, uint16_t y1,
 }
 
 void draw2d_triangle_filled(vga_render_item_t * item, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, vga_color_t color) {
-  draw2d_triangle(item, x1, y2, x2, y2, x3, y3, color);
+  draw2d_triangle(item, x1, y1, x2, y2, x3, y3, color);
   item->header.type = VGA_RENDER_ITEM_FILLED_TRIANGLE;
   clear_and_activate_item(item);
 }
@@ -173,7 +173,7 @@ void draw2d_polygon_filled(vga_render_item_t * item, uint16_t points[][2], uint1
 }
 
 void draw2d_fill(vga_render_item_t * item, vga_color_t color) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.type   = VGA_RENDER_ITEM_FILL;
   item->item_2d.color = color;
@@ -187,7 +187,7 @@ void draw2d_fill(vga_render_item_t * item, vga_color_t color) {
 */
 
 void draw2d_text(vga_render_item_t * item, uint16_t x1, uint16_t y, uint16_t x2, char * str, vga_color_t color, bool wrap) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.type     = VGA_RENDER_ITEM_STRING;
   item->item_2d.x       = x1; // Grab the top left corner, be lazy
@@ -201,10 +201,14 @@ void draw2d_text(vga_render_item_t * item, uint16_t x1, uint16_t y, uint16_t x2,
   item->header.flags.update   = true;
 }
 
-void draw2d_set_font(uint8_t * new_font[256][FONT_HEIGHT]) {
-  invalid_params_if(new_font, NULL);
+void draw2d_set_font(const uint8_t new_font[256][FONT_HEIGHT]) {
+  assert(new_font);
 
   font = new_font;
+}
+
+const uint8_t * draw2d_get_font() {
+  return (const uint8_t *) font;
 }
 
 
@@ -213,7 +217,7 @@ void draw2d_set_font(uint8_t * new_font[256][FONT_HEIGHT]) {
 ========================================
 */
 void draw2d_sprite(vga_render_item_t * item, uint16_t x, uint16_t y, vga_color_t * sprite, uint16_t size_x, uint16_t size_y, vga_color_t null_color) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.type               = VGA_RENDER_ITEM_SPRITE;
   item->item_2d.x                 = x; // Grab the top left corner, be lazy

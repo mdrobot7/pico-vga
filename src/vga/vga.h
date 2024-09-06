@@ -46,6 +46,12 @@ typedef enum {
   VGA_RENDER_ITEM_MAX = 255, // Ensure that a vga_render_item_type_t variable is 8 bits
 } vga_render_item_type_t;
 
+enum {
+  POINT_X = 0,
+  POINT_Y,
+  POINT_Z,
+};
+
 typedef struct __packed {
   vga_render_item_type_t type : 8;
 
@@ -98,7 +104,7 @@ typedef struct __packed {
         struct __packed {
           // Pointer to an array of points that make up polygons in 2D
           uint16_t num_points;
-          uint16_t * points;
+          uint16_t (*points)[2]; // Pointer to a [num_points][2] array
         } points_arr;
         struct __packed {
           // Small points array, covers anything up to triangle (larger polygons, just use points_arr.points above)
@@ -181,11 +187,6 @@ typedef struct {
  * EXTERN VARIABLES
  ************************************/
 
-// TODO: Find a better place for this so it isn't exposed to the user
-extern volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES];
-extern volatile bool clear_screen;
-extern volatile uint8_t * font;
-
 /************************************
  * GLOBAL FUNCTIONS
  ************************************/
@@ -242,6 +243,19 @@ uint16_t vga_get_width_full();
  * @return uint16_t Height
  */
 uint16_t vga_get_height_full();
+
+/**
+ * @brief Force-refresh the display (auto-render mode or manual mode)
+ *
+ */
+void vga_refresh();
+
+/**
+ * @brief Get the frame read address buffer
+ *
+ * @return uint8_t*
+ */
+uint8_t ** __vga_get_frame_read_addr();
 
 /**
  * @brief Set an item's scale
@@ -411,7 +425,14 @@ void draw2d_text(vga_render_item_t * item, uint16_t x1, uint16_t y, uint16_t x2,
  *
  * @param new_font Pointer to the new font
  */
-void draw2d_set_font(uint8_t * new_font[256][FONT_HEIGHT]);
+void draw2d_set_font(const uint8_t new_font[256][FONT_HEIGHT]);
+
+/**
+ * @brief Get the system font
+ *
+ * @return uint8_t* Pointer to the current system font, a 256*FONT_HEIGHT array
+ */
+const uint8_t * draw2d_get_font();
 
 /**
  * @brief Draw a sprite (2d array of pixels)

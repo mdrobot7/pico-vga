@@ -1,6 +1,8 @@
 #ifndef __PV_FONT_H
 #define __PV_FONT_H
 
+#include "pico/stdlib.h"
+
 /*
 - This file contains constant bit arrays representing the layout of the IBM CP437 character list.
 
@@ -16,9 +18,9 @@
 
 */
 
-#define FONT_WIDTH  5
-#define FONT_HEIGHT 8
-extern uint8_t * font; // The current font in use by the system
+#define FONT_WIDTH   5
+#define FONT_HEIGHT  8
+#define FONT_SPACING 1
 
 const uint8_t cp437[256][FONT_HEIGHT] = {
   { 0b00000,

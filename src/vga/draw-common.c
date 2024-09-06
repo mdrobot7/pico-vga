@@ -33,12 +33,12 @@ void draw_clear() {
   for (int i = 0; i < config->render_queue_len; i++) {
     config->render_queue[i].header.flags.hidden = true;
   }
-  clear_screen = true;
+  vga_refresh();
 }
 
 // Set item to be hidden (true = hidden, false = showing)
 void draw_set_hidden(vga_render_item_t * item, bool hidden) {
-  invalid_params_if(item, NULL);
+  assert(item);
 
   item->header.flags.hidden = hidden;
   item->header.flags.update = true;

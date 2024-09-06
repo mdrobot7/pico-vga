@@ -1,50 +1,22 @@
-#ifndef RENDER_H
-#include "lib-internal.h"
+#ifndef __PV_RENDER_H
+#define __PV_RENDER_H
 
-void renderLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness);
-void renderTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color, uint8_t thickness);
-void renderFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color);
-void renderCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
-void renderFilledCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t color);
-void renderPolygon(uint16_t points[], uint8_t numPoints, uint8_t dimPoints, uint8_t color, uint8_t thickness);
-void renderFilledPolygon(uint16_t points[], uint8_t numPoints, uint8_t dimPoints, uint8_t color, uint8_t thickness);
-void renderFillScreen(uint8_t color);
+#include "vga.h"
 
-void renderLineAA(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color, uint8_t thickness);
-void renderCircleAA(uint16_t x1, uint16_t y1, uint16_t radius, uint8_t color);
+void render_pixel(uint16_t y, uint16_t x, vga_color_t color);
+uint8_t * render_get_pixel_ptr(uint16_t y, uint16_t x);
 
-/**
- * @brief Writes the color to the pixel at x, y. Handles out-of-bounds coordinates. Will not write to
- * interpolated lines, use writePixelInterp() for that instead.
- *
- * @param y Y coordinate in screen space
- * @param x X coordinate in screen space
- * @param color Color to write
- */
-inline void writePixelBuffered(uint16_t y, uint16_t x, uint8_t color) {
-  if (x >= frame_width || y >= frame_height)
-    return;
-  else if (*((uint8_t **) frameReadAddrStart + y) < frameBufferStart)
-    return; // don't write to interpolated lines
-  else
-    *((uint8_t *) (*((uint8_t **) frameReadAddrStart + y)) + x) = color; // This grabs the y'th element of frameReadAddr, adds x to it, dereferences, and writes the color to it
-}
-
-/**
- * @brief Writes the color to the pixel at x, y. Handles out-of-bounds coordinates. Will not write to
- * buffered lines, only the interpolated lines, use writePixelBuffered() for that instead.
- *
- * @param y Y coordinate in screen space
- * @param x X coordinate in screen space
- * @param color Color to write
- */
-inline void writePixelInterp(uint16_t y, uint16_t x, uint8_t color) {
-  if (x >= frame_width || y >= frame_height)
-    return;
-  else if (*((uint8_t **) frameReadAddrStart + y) > frameBufferStart)
-    return; // don't write to buffered lines
-  else
-    *((uint8_t *) (*((uint8_t **) frameReadAddrStart + y)) + x) = color; // This grabs the y'th element of frameReadAddr, adds x to it, dereferences, and writes the color to it
-}
+void render2d_fill(vga_color_t color);
+void render2d_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, vga_color_t color);
+void render2d_rectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, vga_color_t color);
+void render2d_rectangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, vga_color_t color);
+void render2d_triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, vga_color_t color);
+void render2d_triangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, vga_color_t color);
+void render2d_circle(uint16_t x, uint16_t y, uint16_t radius, vga_color_t color);
+void render2d_circle_filled(uint16_t x, uint16_t y, uint16_t radius, vga_color_t color);
+void render2d_polygon(uint16_t points[][2], uint16_t num_points, vga_color_t color);
+void render2d_polygon_filled(uint16_t points[][2], const uint16_t num_points, vga_color_t color);
+void render2d_string(char * str, uint16_t x1, uint16_t y, uint16_t x2, bool wrap, vga_color_t color);
+void render2d_sprite(vga_color_t * sprite, uint16_t x, uint16_t y, uint16_t size_x, uint16_t size_y, vga_color_t null_color);
 
 #endif

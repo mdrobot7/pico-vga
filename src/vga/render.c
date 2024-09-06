@@ -1,25 +1,36 @@
 #include "render.h"
 
-#include "hardware/dma.h"
-#include "hardware/irq.h"
-#include "pico/multicore.h"
-#include "pico/time.h"
+#include "vga.h"
 
-static volatile uint8_t update           = 0;
-volatile uint8_t interpolatedLine        = 0;
-volatile uint8_t interpolationIncomplete = 0;
+/************************************
+ * EXTERN VARIABLES
+ ************************************/
 
-volatile bool clear_screen = false;
+// TODO: Add interpolation back in
+// volatile uint8_t interpolatedLine        = 0;
+// volatile uint8_t interpolationIncomplete = 0;
 
-/**
- * @brief Force-refresh the display.
- *
- */
-void updateDisplay() {
-  update = 1;
-  if (displayConfig->auto_render) ((vga_render_item_t *) renderQueueStart)->flags |= RQI_UPDATE; // force-update in auto_render mode
-}
+/************************************
+ * PRIVATE MACROS AND DEFINES
+ ************************************/
 
+/************************************
+ * PRIVATE TYPEDEFS
+ ************************************/
+
+/************************************
+ * STATIC VARIABLES
+ ************************************/
+
+static volatile bool update = 0;
+
+/************************************
+ * STATIC FUNCTIONS
+ ************************************/
+
+/************************************
+ * GLOBAL FUNCTIONS
+ ************************************/
 
 /**
  * @brief The renderer! Loops over the render queue waiting for something to update (or to be told
@@ -27,131 +38,122 @@ void updateDisplay() {
  *
  */
 void render() {
-  multicore_fifo_push_blocking(13); // tell core 0 that everything is ok/it's running
+  const vga_config_t * config = vga_get_config();
+  vga_render_item_t * rq      = config->render_queue;
+  uint16_t rq_len             = config->render_queue_len;
 
-  vga_render_item_t * item;
+  int i = 0;
 
-  while (1) {
-    if (displayConfig->auto_render) {
-      item = (vga_render_item_t *) renderQueueStart;
+  while (true) {
+    if (config->auto_render) {
       // look for the first item that needs an update, render that item and everything after it
-      while (!(item->flags & RQI_UPDATE)) {
-        if (item >= lastItem) item = (vga_render_item_t *) renderQueueStart;
+      i = 0;
+      while (!rq[i].header.flags.update && !update) {
+        i = (i + 1) % rq_len;
       }
-      // if the update is to hide or remove an item, rerender the whole thing
-      if (item->flags & RQI_HIDDEN || item->uid == RQI_UID_REMOVED) item = (vga_render_item_t *) renderQueueStart;
+      // if the update is to hide an item or a force-refresh, rerender the whole thing
+      if (rq[i].header.flags.hidden || update) {
+        i = 0;
+      }
     } else { // manual rendering
       while (!update);
-      item = (vga_render_item_t *) renderQueueStart;
+      i = 0;
     }
 
-    while (item <= lastItem) {
-      if (!(item->flags & RQI_HIDDEN) && item->uid == RQI_UID_REMOVED) {
-        switch (item->type) {
-          case RQI_T_PIXEL:
-            writeBufferedPixel(item->y, item->x, item->thetaZ);
+    render2d_fill(COLOR_BLACK); // wipe the display
+    for (; i < rq_len; i++) {
+      if (!rq[i].header.flags.hidden) {
+        switch (rq[i].header.type) {
+          case VGA_RENDER_ITEM_FILL:
+            render2d_fill(rq[i].item_2d.color);
             break;
-          case RQI_T_LINE:
-            Points_t * pts = (Points_t *) item->points_or_triangles;
-            renderLine(pts->points[0], pts->points[1], pts->points[2], pts->points[3], item->thetaZ, item->scale_z);
+          case VGA_RENDER_ITEM_PIXEL:
+            render_pixel(rq[i].item_2d.y, rq[i].item_2d.x, rq[i].item_2d.color);
             break;
-          case RQI_T_RECTANGLE:
+          case VGA_RENDER_ITEM_LINE:
+            render2d_line(rq[i].item_2d.point.x[0], rq[i].item_2d.point.y[0], rq[i].item_2d.point.x[1], rq[i].item_2d.point.y[1], rq[i].item_2d.color);
             break;
-          case RQI_T_TRIANGLE:
-            Points_t * pts = (Points_t *) item->points_or_triangles;
-            renderTriangle(pts->points[0], pts->points[1], pts->points[2], pts->points[3], pts->points[4], pts->points[5], item->thetaZ, item->scale_z);
+          case VGA_RENDER_ITEM_RECTANGLE:
+            render2d_rectangle(rq[i].item_2d.point.x[0], rq[i].item_2d.point.y[0], rq[i].item_2d.point.x[1], rq[i].item_2d.point.y[1], rq[i].item_2d.color);
             break;
-          case RQI_T_CIRCLE:
-            renderCircle(item->x, item->y, item->z, item->thetaZ);
+          case VGA_RENDER_ITEM_FILLED_RECTANGLE:
+            render2d_rectangle_filled(rq[i].item_2d.point.x[0], rq[i].item_2d.point.y[0], rq[i].item_2d.point.x[1], rq[i].item_2d.point.y[1], rq[i].item_2d.color);
             break;
-          case RQI_T_FILLED_RECTANGLE:
+          case VGA_RENDER_ITEM_TRIANGLE:
+            render2d_triangle(rq[i].item_2d.point.x[0], rq[i].item_2d.point.y[0], rq[i].item_2d.point.x[1], rq[i].item_2d.point.y[1], rq[i].item_2d.point.x[2], rq[i].item_2d.point.y[2], rq[i].item_2d.color);
             break;
-          case RQI_T_FILLED_TRIANGLE:
-            Points_t * pts = (Points_t *) item->points_or_triangles;
-            renderFilledTriangle(pts->points[0], pts->points[1], pts->points[2], pts->points[3], pts->points[4], pts->points[5], item->thetaZ);
+          case VGA_RENDER_ITEM_FILLED_TRIANGLE:
+            render2d_triangle_filled(rq[i].item_2d.point.x[0], rq[i].item_2d.point.y[0], rq[i].item_2d.point.x[1], rq[i].item_2d.point.y[1], rq[i].item_2d.point.x[2], rq[i].item_2d.point.y[2], rq[i].item_2d.color);
             break;
-          case RQI_T_FILLED_CIRCLE:
-            renderFilledCircle(item->x, item->y, item->z, item->thetaZ);
+          case VGA_RENDER_ITEM_CIRCLE:
+            render2d_circle(rq[i].item_2d.x, rq[i].item_2d.y, rq[i].item_2d.point.x[0], rq[i].item_2d.color);
             break;
-          case RQI_T_STRING:
-            /*//x1, y = top left corner, x2 = right side (for word wrap), thetaZ = color, scale_z = background
-            uint16_t x1 = ((Points_t *)lastItem->points_or_triangles)->points[0]; //Fetch points from the memory space right after item
-            uint16_t y = ((Points_t *)lastItem->points_or_triangles)->points[1];
-            uint16_t x2 = ((Points_t *)lastItem->points_or_triangles)->points[2];
-            char * str = &(((Points_t *)lastItem->points_or_triangles)->points[3]);
-
-            for(uint16_t c = 0; str[c] != '\0'; c++) {
-                for(uint8_t i = 0; i < CHAR_HEIGHT; i++) {
-                    for(uint8_t j = 0; j < CHAR_WIDTH; j++) {
-                        writePixel(y + i, x1 + j, getFontBit(str[c], i, j) ? item->thetaZ : item->scale_z);
-                    }
-                }
-                x += CHAR_WIDTH + 1;
-                if(item->flags & RQI_WORDWRAP && x + CHAR_WIDTH >= x2) {
-                    x = item->x;
-                    y += CHAR_HEIGHT;
-                }
-            }*/
+          case VGA_RENDER_ITEM_FILLED_CIRCLE:
+            render2d_circle_filled(rq[i].item_2d.x, rq[i].item_2d.y, rq[i].item_2d.point.x[0], rq[i].item_2d.color);
             break;
-          case RQI_T_SPRITE:
-            /*for(uint16_t i = 0; i < item->y2; i++) {
-                for(uint16_t j = 0; j < item->x2; j++) {
-                    if(*(item->obj + i*item->x2 + j) != item->color) {
-                        writePixel(item->y1 + i, item->x1 + j, *(item->obj + i*item->x2 + j));
-                    }
-                }
-            }*/
+          case VGA_RENDER_ITEM_STRING:
+            render2d_string(rq[i].item_2d.str.str, rq[i].item_2d.x, rq[i].item_2d.y, rq[i].item_2d.str.x2, rq[i].header.flags.wordwrap, rq[i].item_2d.color);
             break;
-          case RQI_T_FILL:
-            for (uint16_t y = 0; y < frame_height; y++) {
-              for (uint16_t x = 0; x < frame_width; x++) {
-                writePixel(y, x, item->thetaZ);
-              }
-            }
-            /*if(item->obj == NULL) {
-                for(uint16_t i = 0; i < FRAME_WIDTH; i++) {
-                    frame[l][i] = item->color;
-                }
-            }
-            else {
-                for(uint16_t i = 0; i < FRAME_WIDTH; i++) {
-                    //Skip changing the pixel if it's set to the COLOR_NULL value
-                    if(*(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i) == COLOR_NULL) continue;
-                    //*(original mem location + (currentRowInArray * nColumns) + currentColumnInArray)
-                    frame[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
-                }
-            }*/
+          case VGA_RENDER_ITEM_SPRITE:
+            render2d_sprite(rq[i].item_2d.sprite.sprite, rq[i].item_2d.x, rq[i].item_2d.y, rq[i].item_2d.sprite.size_x, rq[i].item_2d.sprite.size_y, rq[i].item_2d.sprite.null_color);
+            break;
+          case VGA_RENDER_ITEM_BITMAP:
+            break;
+          case VGA_RENDER_ITEM_POLYGON:
+            render2d_polygon(rq[i].item_2d.points_arr.points, rq[i].item_2d.points_arr.num_points, rq[i].item_2d.color);
+            break;
+          case VGA_RENDER_ITEM_FILLED_POLYGON:
+            render2d_polygon_filled(rq[i].item_2d.points_arr.points, rq[i].item_2d.points_arr.num_points, rq[i].item_2d.color);
+            break;
+          case VGA_RENDER_ITEM_LIGHT:
+            break;
+          case VGA_RENDER_ITEM_SVG:
+            break;
+          case VGA_RENDER_ITEM_MAX:
+          default:
             break;
         }
       }
 
-      item->flags &= ~RQI_UPDATE; // Clear the update bit
-      item++;
+      if (rq[i].animate) {
+        rq[i].animate((struct vga_render_item_t *) &rq[i]);
+      }
+
+      rq[i].header.flags.update = false;
     }
 
-    update = 0;
+    update = false;
   }
 }
 
 /**
- * @brief The renderer, but with antialiasing! Splitting the functions like this saves CPU cycles and
- * makes the code neater, but it's entirely the same code except it calls renderThingAA() instead of the
- * standard render functions.
+ * @brief Writes the color to the pixel at x, y. Handles out-of-bounds coordinates.
  *
+ * @param y Y coordinate in screen space
+ * @param x X coordinate in screen space
+ * @param color Color to write
  */
-void renderAA() {
-  return;
+void render_pixel(uint16_t y, uint16_t x, vga_color_t color) {
+  if (x >= vga_get_width() || y >= vga_get_height())
+    return;
+  __vga_get_frame_read_addr()[y][x] = color; // Grabs the correct memory for the line, interpolated or not
 }
 
-static void interpolate(uint16_t line) {
-  return;
+uint8_t * render_get_pixel_ptr(uint16_t y, uint16_t x) {
+  return &(__vga_get_frame_read_addr()[y][x]);
 }
 
+void vga_refresh() {
+  update = true;
+}
 
 /*
         Line Interpolation
 ==================================
 */
+
+// TODO: Add this back in
+/*
 volatile uint8_t lineInterpolationIRQ = 0;
 
 static irq_handler_t lineInterpolationHandler() {
@@ -168,60 +170,4 @@ void initLineInterpolation() {
 void deInitLineInterpolation() {
   irq_set_enabled(31, false);
   user_irq_unclaim(lineInterpolationIRQ);
-}
-
-
-/*
-        Garbage Collector
-=================================
-*/
-static volatile bool garbageCollectorActive = false;
-static uint8_t garbageCollectorDMA          = 0;
-struct repeating_timer garbageCollectorTimer;
-
-static irq_handler_t garbageCollectorHandler() {
-  dma_channel_acknowledge_irq1(garbageCollectorDMA);
-
-  vga_render_item_t * item = findRenderQueueItem(RQI_UID_REMOVED);
-  if (item >= lastItem) {
-    garbageCollectorActive = false;
-    return NULL; // No garbage collecting needs to be done
-  }
-
-  dma_channel_set_read_addr(garbageCollectorDMA, (item + item->num_points_or_triangles + 1), false);
-  dma_channel_set_write_addr(garbageCollectorDMA, item, false);
-  dma_channel_set_trans_count(garbageCollectorDMA, ((uint32_t) lastItem - (uint32_t) (dma_hw->ch[garbageCollectorDMA].read_addr)) / 4, true);
-}
-
-bool garbageCollector(struct repeating_timer * t) {
-  if (garbageCollectorActive) return true; // Don't start it again if it hasn't finished already
-  garbageCollectorActive = true;
-  garbageCollectorHandler();
-  return true;
-}
-
-void initGarbageCollector() {
-  garbageCollectorDMA = dma_claim_unused_channel(true);
-
-  // Default channel config is **NOT** the same as the register reset values. See pg 106 of C SDK docs for info.
-  dma_channel_config garbage_collector_config = dma_channel_get_default_config(garbageCollectorDMA);
-  channel_config_set_write_increment(&garbage_collector_config, true);
-  dma_channel_set_config(garbageCollectorDMA, &garbage_collector_config, false);
-
-  dma_channel_set_irq1_enabled(garbageCollectorDMA, true);
-  irq_set_exclusive_handler(DMA_IRQ_1, (irq_handler_t) garbageCollectorHandler);
-  irq_set_priority(DMA_IRQ_1, 32);
-  irq_set_enabled(DMA_IRQ_1, true);
-
-  // Set the garbage collector to run every n ms
-  add_repeating_timer_ms(5, garbageCollector, NULL, &garbageCollectorTimer);
-}
-
-void deInitGarbageCollector() {
-  cancel_repeating_timer(&garbageCollectorTimer);
-
-  irq_set_enabled(DMA_IRQ_1, false); // Disable IRQ first, see pg 93 of C SDK docs
-  dma_channel_abort(garbageCollectorDMA);
-
-  dma_channel_unclaim(garbageCollectorDMA);
-}
+}*/

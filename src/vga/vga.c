@@ -14,8 +14,6 @@
  * EXTERN VARIABLES
  ************************************/
 
-volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES];
-
 /************************************
  * PRIVATE MACROS AND DEFINES
  ************************************/
@@ -42,6 +40,8 @@ enum {
 static const uint16_t frame_size[3][4] = { { 800, 600, 1056, 628 },
                                            { 640, 480, 800, 525 },
                                            { 1024, 768, 1344, 806 } };
+#define LARGEST_FRAME_WIDTH       (768)
+#define LARGEST_FRAME_FULL_HEIGHT (1344)
 
 static uint16_t frame_width       = 0;
 static uint16_t frame_height      = 0;
@@ -54,12 +54,36 @@ static uint8_t blank_data_dma = 0;
 
 static uint8_t color_pio_sm = 0;
 
-static volatile uint8_t * frame_read_addr[frame_size[RES_1024x768][FRAME_HEIGHT_FULL_IDX]]; // ~3.2kB
-static const volatile uint8_t blank[frame_size[RES_1024x768][FRAME_WIDTH_IDX]] = { 0 };     // ~1kB
+static volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES];
+static const volatile uint8_t blank[LARGEST_FRAME_WIDTH]             = { 0 }; // ~1kB
+static volatile uint8_t * frame_read_addr[LARGEST_FRAME_FULL_HEIGHT] = { 0 }; // ~3.2kB
+
+// static const volatile uint8_t blank[806]        = { 0 }; // ~1kB
+// static volatile uint8_t * frame_read_addr[1344] = { 0 }; // ~3.2kB
+
 
 /************************************
  * STATIC FUNCTIONS
  ************************************/
+
+// DMA Interrupt Callback
+static irq_handler_t update_frame_ptr() {
+  dma_channel_acknowledge_irq0(frame_ctrl_dma);
+
+  // TODO: Add this back in
+  // Grab the element in frameReadAddr that frame_ctrl_dma just wrote (hence the -1) and see if it was an
+  // interpolated line. If so, incrememt the interpolated line counter and flag the renderer so it can start
+  // re-rendering it.
+  // if (config->interpolated_mode && (((uint8_t *) dma_hw->ch[frame_ctrl_dma].read_addr) - 1) < frameBufferStart && (((uint8_t *) dma_hw->ch[frame_ctrl_dma].read_addr) - 1) >= (blankLineStart + frame_width)) {
+  //   interpolatedLine = (interpolatedLine + 1) % config->num_interpolated_lines;
+  //   irq_set_pending(lineInterpolationIRQ);
+  // }
+
+  // If the DMA read "cursor" is past the end of the frame data, reset it to the beginning
+  if (dma_hw->ch[frame_ctrl_dma].read_addr >= (io_rw_32) &frame_read_addr[frame_height_full * vga_config->scaled_resolution]) {
+    dma_hw->ch[frame_ctrl_dma].read_addr = (io_rw_32) frame_read_addr;
+  }
+}
 
 static void dma_init(vga_config_t * config) {
   frame_ctrl_dma = dma_claim_unused_channel(true);
@@ -119,29 +143,12 @@ static void second_core_init() {
   pwm_set_enabled(HSYNC_PWM_SLICE, true);                          // start hsync and vsync signals
   pwm_set_enabled(VSYNC_PWM_SLICE, true);
 
+  multicore_fifo_push_blocking(SECOND_CORE_MAGIC);
+
   if (vga_config->antialiasing) {
     renderAA();
   } else {
     render();
-  }
-}
-
-// DMA Interrupt Callback
-static irq_handler_t update_frame_ptr() {
-  dma_channel_acknowledge_irq0(frame_ctrl_dma);
-
-  // TODO: Add this back in
-  // Grab the element in frameReadAddr that frame_ctrl_dma just wrote (hence the -1) and see if it was an
-  // interpolated line. If so, incrememt the interpolated line counter and flag the renderer so it can start
-  // re-rendering it.
-  // if (config->interpolated_mode && (((uint8_t *) dma_hw->ch[frame_ctrl_dma].read_addr) - 1) < frameBufferStart && (((uint8_t *) dma_hw->ch[frame_ctrl_dma].read_addr) - 1) >= (blankLineStart + frame_width)) {
-  //   interpolatedLine = (interpolatedLine + 1) % config->num_interpolated_lines;
-  //   irq_set_pending(lineInterpolationIRQ);
-  // }
-
-  // If the DMA read "cursor" is past the end of the frame data, reset it to the beginning
-  if (dma_hw->ch[frame_ctrl_dma].read_addr >= (io_rw_32) &frame_read_addr[frame_height_full * vga_config->scaled_resolution]) {
-    dma_hw->ch[frame_ctrl_dma].read_addr = (io_rw_32) frame_read_addr;
   }
 }
 
@@ -340,4 +347,8 @@ uint16_t vga_get_width_full() {
 
 uint16_t vga_get_height_full() {
   return frame_height_full;
+}
+
+uint8_t ** __vga_get_frame_read_addr() {
+  return frame_read_addr;
 }

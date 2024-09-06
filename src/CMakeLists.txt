@@ -20,6 +20,8 @@ target_include_directories(libpicovga PUBLIC
 )
 
 target_compile_definitions(libpicovga PRIVATE PARAM_ASSERTIONS_ENABLE_ALL=1)
+target_compile_options(libpicovga PUBLIC -Wno-discarded-qualifiers -Wno-discarded-array-qualifiers
+    -Wno-unused-function)
 
 # Create C header file with the name <pio program>.pio.h
 # Note: You need one call per file

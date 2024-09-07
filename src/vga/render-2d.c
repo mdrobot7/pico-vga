@@ -160,8 +160,10 @@ void render2d_rectangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y
   int spare_bytes  = (x2 - x1) % sizeof(uint32_t);
 
   // DMA one line at a time -- if a rectangle is in the middle of
-  // the screen DMA can't jump the gaps on the left and right
-  for (int y = y1; y < y2; y++) {
+  // the screen DMA can't jump the gaps on the left and right.
+  // Handle line doubling as well: only write to doubled lines once,
+  // skip over all of the duplicates (hence the +=)
+  for (int y = y1; y < y2; y += vga_get_config()->scaled_resolution) {
     channel_config_set_chain_to(&config, dma_chan); // Make sure chaining is off
     dma_channel_configure(dma_chan, &config, &color32, render_get_pixel_ptr(y, x1), dma_bytes, true);
 

@@ -136,7 +136,19 @@ void render() {
 void render_pixel(uint16_t y, uint16_t x, vga_color_t color) {
   if (x >= vga_get_width() || y >= vga_get_height())
     return;
-  __vga_get_frame_read_addr()[y][x] = color; // Grabs the correct memory for the line, interpolated or not
+  // Write out to the screen, but also handle line doubling.
+  // Line doubling (for scaled resolutions) is done by writing the same
+  // pointer to frame_read_addr 2 (4, 8) times in a row. This means that any
+  // data written to that pointer will automatically be duped to the line(s)
+  // below it. We need to make sure we write to the right coords and fill in
+  // the correct number of pixels on the line, though.
+  // i.e. (2, 2) on a 400x300 scaled display -> frame_read_addr[4][4], fill in 2 pixels
+  y *= vga_get_config()->scaled_resolution;
+  x *= vga_get_config()->scaled_resolution;
+
+  for (uint32_t i = 0; i < vga_get_config()->scaled_resolution; i++) {
+    __vga_get_frame_read_addr()[y][x + i] = color; // Grabs the correct memory for the line, interpolated or not
+  }
 }
 
 uint8_t * render_get_pixel_ptr(uint16_t y, uint16_t x) {

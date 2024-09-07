@@ -2,19 +2,12 @@
 #include "pico/stdlib.h"
 
 vga_config_t displayConf = {
-  .base_resolution          = RES_800x600,
-  .scaled_resolution        = RES_SCALED_400x300,
-  .auto_render              = true,
-  .antialiasing             = false,
-  .frameBufferSizeBytes     = 0xFFFFFFFF,
-  .renderQueueSizeBytes     = 0,
-  .num_interpolated_lines   = 0,
-  .peripheralMode           = false,
-  .clearRenderQueueOnDeInit = false,
-  .color_delay_cycles       = 0
-};
-ControllerConfig_t controllerConf = {
-  .numControllers = 4,
+  .base_resolution        = RES_800x600,
+  .scaled_resolution      = RES_SCALED_400x300,
+  .auto_render            = true,
+  .antialiasing           = false,
+  .num_interpolated_lines = 0,
+  .color_delay_cycles     = 0
 };
 
 vga_render_item_t render_queue[100]; // The render queue
@@ -26,8 +19,6 @@ int main() {
     // sleep_ms(250);
   }
   // printf("\n");
-
-  initPicoVGA(&displayConf, &controllerConf, &audioConf, &sdConf);
 
   // Draw lines
   /*for(uint16_t i = 0; i < frame_height; i += 10) {

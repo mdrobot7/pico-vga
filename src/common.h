@@ -1,8 +1,12 @@
 #ifndef __PV_COMMON_H
 #define __PV_COMMON_H
 
+#ifndef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
+#endif
+#ifndef MAX
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
+#endif
 
 #define AVG(x, y) ((x + y) >> 2)
 
@@ -18,5 +22,7 @@
   }
 
 #define GET_BIT(val, bit) ((val >> bit) & 1u)
+
+#define UNUSED(x) ((void) x)
 
 #endif

@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 add_compile_options(-O3 -Wall -Wextra)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE) # Link-time optimization
+# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE) # Link-time optimization
 
 # Add in the pico-vga library
 add_subdirectory(src)

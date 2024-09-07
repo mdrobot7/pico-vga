@@ -14,7 +14,7 @@
 #ifndef __packed
 #define __packed __attribute__((__packed__))
 #endif
-#ifndef __aligned(x)
+#ifndef __aligned
 #define __aligned(x) __attribute__((__aligned__(x)))
 #endif
 

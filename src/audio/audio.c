@@ -1,8 +1,20 @@
+#include "audio.h"
+
+#include "../common.h"
+#include "../pinout.h"
 #include "hardware/clocks.h"
 #include "hardware/gpio.h"
 #include "hardware/irq.h"
 #include "hardware/pwm.h"
 #include "pico/stdlib.h"
+
+/************************************
+ * EXTERN VARIABLES
+ ************************************/
+
+/************************************
+ * PRIVATE MACROS AND DEFINES
+ ************************************/
 
 #define BASE_SAMPLE_FREQ_HZ             11025
 #define MAX_SAMPLE_FREQ_HZ              44100
@@ -12,25 +24,27 @@
 #define BITS_PER_SAMP_32 24
 #define BITS_PER_SAMP_16 8
 
-typedef struct {
-  uint8_t bits_per_samp;    // = 24 for 32bit samples, = 8 for 16bit samples (see defines above)
-  uint8_t sample_freq_mult; // this*BASE_SAMPLE_FREQ_HZ = sample freqency
-  uint8_t num_channels;
-  uint8_t vol; // relative volume, for mixing. 0 (loudest) - 7 (quietest)
-  bool wrap;
-  bool cache_after_play; // keep the sound in RAM even after it has been played
-  uint32_t len_data_bytes;
-  int32_t * data; // audio data is SIGNED!
-} sound_t;
-
 #define SOUND_QUEUE_LEN 8
-static sound_t * sound_queue_l[SOUND_QUEUE_LEN];
-static sound_t * sound_queue_r[SOUND_QUEUE_LEN];
+
+/************************************
+ * PRIVATE TYPEDEFS
+ ************************************/
+
+/************************************
+ * STATIC VARIABLES
+ ************************************/
+
+static audio_sound_t * sound_queue_l[SOUND_QUEUE_LEN];
+static audio_sound_t * sound_queue_r[SOUND_QUEUE_LEN];
 static uint32_t sound_i_l[SOUND_QUEUE_LEN];
 static uint32_t sound_i_r[SOUND_QUEUE_LEN];
 
 // lower = louder, max vol = 1
 static uint8_t volume = 1;
+
+/************************************
+ * STATIC FUNCTIONS
+ ************************************/
 
 /**
  * @brief Finds an empty index in a sound queue
@@ -38,7 +52,7 @@ static uint8_t volume = 1;
  * @param sound_queue The sound queue to look in
  * @return uint32_t The first NULL index, or 0xFFFF if none found.
  */
-static uint32_t find_empty_sound_queue_index(sound_t * sound_queue[]) {
+static uint32_t find_empty_sound_queue_index(audio_sound_t * sound_queue[]) {
   for (int i = 0; i < SOUND_QUEUE_LEN; i++) {
     if (sound_queue[i] == NULL) return i;
   }
@@ -51,7 +65,7 @@ static uint32_t find_empty_sound_queue_index(sound_t * sound_queue[]) {
  * @param sound_queue The sound queue to look in
  * @return uint32_t The number of empty indices in the sound queue
  */
-static uint32_t num_empty_sound_queue_indices(sound_t * sound_queue[]) {
+static uint32_t num_empty_sound_queue_indices(audio_sound_t * sound_queue[]) {
   uint32_t num = 0;
   for (int i = 0; i < SOUND_QUEUE_LEN; i++) {
     if (sound_queue[i] == NULL) num++;
@@ -66,7 +80,7 @@ static uint32_t num_empty_sound_queue_indices(sound_t * sound_queue[]) {
  * @param data_i
  * @return uint8_t
  */
-static inline uint32_t parse_audio_data_16(sound_t * s, uint32_t data_i) {
+static inline uint32_t parse_audio_data_16(audio_sound_t * s, uint32_t data_i) {
   int32_t temp;
   temp = ((int16_t *) (s->data))[data_i >> s->sample_freq_mult];
   temp = temp >> BITS_PER_SAMP_16;
@@ -82,7 +96,7 @@ static inline uint32_t parse_audio_data_16(sound_t * s, uint32_t data_i) {
  * @param data_i
  * @return uint8_t
  */
-static inline uint32_t parse_audio_data_32(sound_t * s, uint32_t data_i) {
+static inline uint32_t parse_audio_data_32(audio_sound_t * s, uint32_t data_i) {
   int32_t temp;
   temp = ((int32_t *) (s->data))[data_i >> s->sample_freq_mult];
   temp = temp >> BITS_PER_SAMP_32;
@@ -92,14 +106,14 @@ static inline uint32_t parse_audio_data_32(sound_t * s, uint32_t data_i) {
 }
 
 /**
- * @brief Remove a song from the sound queue. Handles deallocating the sound_t.data[] memory space,
+ * @brief Remove a song from the sound queue. Handles deallocating the audio_sound_t.data[] memory space,
  *        if applicable (NOT IMPLEMENTED YET).
  *
  * @param sound_queue
  * @param sound_i
  * @param index
  */
-static inline void remove_song(sound_t * sound_queue[], uint32_t sound_i[], uint32_t index) {
+static inline void remove_song(audio_sound_t * sound_queue[], uint32_t sound_i[], uint32_t index) {
   sound_queue[index] = NULL;
   sound_i[index]     = 0;
 }
@@ -107,9 +121,8 @@ static inline void remove_song(sound_t * sound_queue[], uint32_t sound_i[], uint
 /**
  * @brief Handle setting the PWM duty cycle for the audio pins
  *
- * @return irq_handler_t
  */
-irq_handler_t audio_irq_handler() {
+static void audio_irq_handler() {
   uint32_t l = 0;
   uint32_t r = 0;
 
@@ -188,7 +201,12 @@ irq_handler_t audio_irq_handler() {
   pwm_clear_irq(AUDIO_R_PWM_SLICE);
 }
 
-int initAudio() {
+/************************************
+ * GLOBAL FUNCTIONS
+ ************************************/
+
+int audio_init(audio_config_t * config) {
+  UNUSED(config);
   if (clock_get_hz(clk_sys) < 120000000) return 1;
 
   gpio_set_function(AUDIO_L_PIN, GPIO_FUNC_PWM);
@@ -212,124 +230,59 @@ int initAudio() {
   pwm_set_irq_enabled(AUDIO_R_PWM_SLICE, true);
   irq_set_exclusive_handler(PWM_IRQ_WRAP, (irq_handler_t) audio_irq_handler);
   irq_set_enabled(PWM_IRQ_WRAP, true);
+  return 0;
 }
 
-int deInitAudio() {
+int audio_deinit(audio_config_t * config) {
+  UNUSED(config);
   pwm_set_enabled(AUDIO_L_PWM_SLICE, false);
   pwm_set_enabled(AUDIO_R_PWM_SLICE, false);
 
   irq_set_enabled(PWM_IRQ_WRAP, false);
+  return 0;
 }
 
-/**
- * @brief Get a blank sound_t struct.
- *
- * @return sound_t
- */
-sound_t audio_get_default_sound() {
-  sound_t sound;
+audio_sound_t audio_get_default_sound() {
+  audio_sound_t sound = { 0 };
   return sound;
 }
 
-/**
- * @brief Set the number of bits per sample for a particular sound
- *
- * @param sound
- * @param bits_per_samp Either 16 or 32 bits/sample
- */
-void audio_set_bits_per_sample(sound_t * sound, uint8_t bits_per_samp) {
+void audio_set_bits_per_sample(audio_sound_t * sound, uint8_t bits_per_samp) {
   if (bits_per_samp == 16)
     sound->bits_per_samp = BITS_PER_SAMP_16;
   else
     sound->bits_per_samp = BITS_PER_SAMP_32;
 }
 
-/**
- * @brief Set the sample rate of a particular sound.
- *
- * @param sound
- * @param sample_rate Supported sample rates: 11025 Hz, 22050 Hz, 44100 Hz.
- */
-void audio_set_sample_rate(sound_t * sound, uint32_t sample_rate) {
+void audio_set_sample_rate(audio_sound_t * sound, uint32_t sample_rate) {
   if (sample_rate != 11025 && sample_rate != 22050 && sample_rate != 44100) return;
   sound->sample_freq_mult = sample_rate / BASE_SAMPLE_FREQ_HZ;
 }
 
-/**
- * @brief Set the number of audio channels present in sound data
- *
- * @param sound
- * @param num_channels Either 1 or 2 channels
- */
-void audio_set_num_channels(sound_t * sound, uint8_t num_channels) {
+void audio_set_num_channels(audio_sound_t * sound, uint8_t num_channels) {
   if (num_channels > 2 || num_channels == 0) return;
   sound->num_channels = num_channels;
 }
 
-/**
- * @brief Set the relative volume "mixing" of sounds
- *
- * @param sound
- * @param vol Relative volume -- 0 is quietest, 7 is loudest
- */
-void audio_set_sound_vol(sound_t * sound, uint8_t vol) {
+void audio_set_sound_vol(audio_sound_t * sound, uint8_t vol) {
   if (vol > 7) vol = 7;
   sound->vol = 8 - vol;
 }
 
-/**
- * @brief Set whether or not the sound should repeat infinitely after it ends
- *
- * @param sound
- * @param wrap
- */
-void audio_set_sound_wrap(sound_t * sound, bool wrap) {
+void audio_set_sound_wrap(audio_sound_t * sound, bool wrap) {
   sound->wrap = wrap;
 }
 
-/**
- * @brief Set whether the sound should remain in RAM after it is played
- *
- * @param sound
- * @param cache If true, the processor will attempt to keep the sound data in RAM after the sound is played.
- *              If false, the processor will deallocate the memory after playing the song and use it for
- *              future sound data.
- * @return true if there is enough memory to cache the data, false otherwise
- */
-bool audio_set_cache_after_play(sound_t * sound, bool cache) {
+void audio_set_cache_after_play(audio_sound_t * sound, bool cache) {
   sound->cache_after_play = cache;
 }
 
-/**
- * @brief Set the data for a sound
- *
- * @param sound
- * @param data A pointer to the start of the data buffer. It must be SIGNED int16_ts or int32_ts
- *             (signed int or signed short)
- * @param len_data_bytes The length of the data in **bytes**
- */
-void audio_set_data(sound_t * sound, void * data, uint32_t len_data_bytes) {
+void audio_set_data(audio_sound_t * sound, void * data, uint32_t len_data_bytes) {
   sound->data           = data;
   sound->len_data_bytes = len_data_bytes;
 }
 
-typedef enum {
-  SOUND_CHANNEL_MONO_L,    // play the one channel through the left output only
-  SOUND_CHANNEL_MONO_R,    // play the one channel through the right output only
-  SOUND_CHANNEL_MONO_BOTH, // play the one channel through both the left and right outputs
-  SOUND_CHANNEL_STEREO_L,  // play both channels through the left channel output ONLY
-  SOUND_CHANNEL_STEREO_R,  // play both channels through the right channel output ONLY
-  SOUND_CHANNEL_STEREO,
-} sound_channel_type_t;
-
-/**
- * @brief Play the sound using a specific channel configuration
- *
- * @param sound
- * @param channel_type What output channel(s) to use to play the sound. See sound_channel_type_t enum.
- * @return int Returns a nonzero value if the function fails.
- */
-int play_sound(sound_t * sound, sound_channel_type_t channel_type) {
+int audio_play(audio_sound_t * sound, audio_sound_channel_type_t channel_type) {
   if (channel_type == SOUND_CHANNEL_MONO_L) {
     if (num_empty_sound_queue_indices(sound_queue_l) < 1) return 1;
     sound_queue_l[find_empty_sound_queue_index(sound_queue_l)] = sound;

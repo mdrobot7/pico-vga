@@ -1,1 +1,1 @@
-#include "lib-internal.h"
+#include "vga.h"

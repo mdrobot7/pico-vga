@@ -9,6 +9,7 @@
 #include "hardware/pio.h"
 #include "hardware/pwm.h"
 #include "pico/multicore.h"
+#include "render.h"
 
 /************************************
  * EXTERN VARIABLES
@@ -67,7 +68,7 @@ static volatile uint8_t * frame_read_addr[LARGEST_FRAME_FULL_HEIGHT] = { 0 }; //
  ************************************/
 
 // DMA Interrupt Callback
-static irq_handler_t update_frame_ptr() {
+static void update_frame_ptr() {
   dma_channel_acknowledge_irq0(frame_ctrl_dma);
 
   // TODO: Add this back in
@@ -146,7 +147,7 @@ static void second_core_init() {
   multicore_fifo_push_blocking(SECOND_CORE_MAGIC);
 
   if (vga_config->antialiasing) {
-    renderAA();
+    render(); // TODO: add antialiasing support
   } else {
     render();
   }
@@ -239,7 +240,7 @@ int vga_init(vga_config_t * config) {
   // Fail if the frame buffer is too small
   if (PV_FRAMEBUFFER_BYTES < frame_width * 5) return 1;
 
-  uint32_t num_buffered_lines = PV_FRAMEBUFFER_BYTES / frame_width;
+  // uint32_t num_buffered_lines = PV_FRAMEBUFFER_BYTES / frame_width;
 
   // TODO: Add interpolation back
   /*
@@ -350,5 +351,5 @@ uint16_t vga_get_height_full() {
 }
 
 uint8_t ** __vga_get_frame_read_addr() {
-  return frame_read_addr;
+  return (uint8_t **) frame_read_addr; // remove volatile qualifier
 }

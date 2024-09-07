@@ -22,7 +22,7 @@
 #define FONT_HEIGHT  8
 #define FONT_SPACING 1
 
-const uint8_t cp437[256][FONT_HEIGHT] = {
+static const uint8_t cp437[256][FONT_HEIGHT] = {
   { 0b00000,
     0b00000,
     0b00000,

@@ -1,6 +1,4 @@
-add_library(libpicovga STATIC)
-
-target_sources(libpicovga PUBLIC
+add_library(libpicovga
     audio/audio.c
 
     # controller/controller.c
@@ -15,11 +13,12 @@ target_sources(libpicovga PUBLIC
 
 target_include_directories(libpicovga PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/../inc
+    ${CMAKE_CURRENT_LIST_DIR}/../src
 )
 
 target_compile_definitions(libpicovga PRIVATE PARAM_ASSERTIONS_ENABLE_ALL=1)
 target_compile_options(libpicovga PUBLIC -Wno-discarded-qualifiers -Wno-discarded-array-qualifiers
-    -Wno-unused-function)
+    -Wno-unused-function -Wno-comment)
 
 # Create C header file with the name <pio program>.pio.h
 # Note: You need one call per file
@@ -27,7 +26,7 @@ pico_generate_pio_header(libpicovga
         ${CMAKE_CURRENT_LIST_DIR}/vga/color.pio
 )
 
-target_link_libraries(libpicovga STATIC
+target_link_libraries(libpicovga PUBLIC
     pico_stdlib
     hardware_gpio
     hardware_pio

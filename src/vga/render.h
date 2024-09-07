@@ -3,6 +3,7 @@
 
 #include "vga.h"
 
+void render();
 void render_pixel(uint16_t y, uint16_t x, vga_color_t color);
 uint8_t * render_get_pixel_ptr(uint16_t y, uint16_t x);
 

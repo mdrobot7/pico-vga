@@ -1,6 +1,7 @@
 #include "../common.h"
 #include "color.h"
 #include "hardware/dma.h"
+#include "pico/platform.h"
 #include "render.h"
 #include "vga.h"
 

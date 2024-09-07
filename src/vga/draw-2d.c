@@ -1,6 +1,7 @@
 #include "../common.h"
 #include "font.h"
 #include "pico/assert.h"
+#include "pico/platform.h"
 #include "vga.h"
 
 /************************************

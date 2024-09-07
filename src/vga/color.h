@@ -1,6 +1,7 @@
 #ifndef __PV_COLOR_H
 #define __PV_COLOR_H
 
+#include "../common.h"
 #include "pico/stdlib.h"
 
 typedef uint8_t vga_color_t;
@@ -53,6 +54,9 @@ static inline vga_color_t color_html_to_vga(uint32_t html_color) {
  * @return An 8 bit compressed color
  */
 static inline vga_color_t color_hsv_to_vga(uint8_t hue, uint8_t saturation, uint8_t value) {
+  UNUSED(hue);
+  UNUSED(saturation);
+  UNUSED(value);
   // TODO: Find an integer-only version of this
   // float max = value;
   // float min = max * (255 - saturation);

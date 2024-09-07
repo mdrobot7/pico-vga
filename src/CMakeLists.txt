@@ -7,6 +7,7 @@ add_library(libpicovga
     vga/draw-3d.c
     vga/draw-common.c
     vga/render-2d.c
+    vga/render-3d.c
     vga/render.c
     vga/vga.c
 )

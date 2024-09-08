@@ -23,6 +23,12 @@ target_include_directories(${EXECUTABLE} PUBLIC
     "${LIBPICOVGA_INCLUDE_DIR}"
 )
 
+# Print out flash/RAM usage after build finished successfully
+add_custom_command(
+  TARGET ${EXECUTABLE} POST_BUILD
+  COMMAND arm-none-eabi-size "$<TARGET_FILE:${EXECUTABLE}>"
+  VERBATIM)
+
 # create map/bin/hex file etc.
 pico_add_extra_outputs(${EXECUTABLE})
 

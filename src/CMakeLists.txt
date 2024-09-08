@@ -1,4 +1,6 @@
-add_library(libpicovga
+add_library(libpicovga INTERFACE)
+
+target_sources(libpicovga INTERFACE
     audio/audio.c
 
     # controller/controller.c
@@ -12,13 +14,13 @@ add_library(libpicovga
     vga/vga.c
 )
 
-target_include_directories(libpicovga PUBLIC
+target_include_directories(libpicovga INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../inc
-    ${CMAKE_CURRENT_LIST_DIR}/../src
+    ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_compile_definitions(libpicovga PRIVATE PARAM_ASSERTIONS_ENABLE_ALL=1)
-target_compile_options(libpicovga PUBLIC -Wno-discarded-qualifiers -Wno-discarded-array-qualifiers
+target_compile_definitions(libpicovga INTERFACE PARAM_ASSERTIONS_ENABLE_ALL=1)
+target_compile_options(libpicovga INTERFACE -Wno-discarded-qualifiers -Wno-discarded-array-qualifiers
     -Wno-unused-function -Wno-comment)
 
 # Create C header file with the name <pio program>.pio.h
@@ -27,7 +29,7 @@ pico_generate_pio_header(libpicovga
         ${CMAKE_CURRENT_LIST_DIR}/vga/color.pio
 )
 
-target_link_libraries(libpicovga PUBLIC
+target_link_libraries(libpicovga INTERFACE
     pico_stdlib
     hardware_gpio
     hardware_pio

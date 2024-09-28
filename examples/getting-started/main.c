@@ -1,25 +1,40 @@
+#include "hardware/pio.h"
+#include "hardware/sync.h"
 #include "pico-vga.h"
 #include "pico/stdlib.h"
 
-vga_config_t displayConf = {
+#define RENDER_QUEUE_LEN (100)
+vga_render_item_t render_queue[RENDER_QUEUE_LEN]; // The render queue
+
+vga_config_t display_conf = {
+  .pio                    = pio0,
   .base_resolution        = RES_800x600,
   .scaled_resolution      = RES_SCALED_400x300,
+  .render_queue           = render_queue,
+  .render_queue_len       = RENDER_QUEUE_LEN,
   .auto_render            = true,
   .antialiasing           = false,
   .num_interpolated_lines = 0,
   .color_delay_cycles     = 0
 };
 
-vga_render_item_t render_queue[100]; // The render queue
-
 int main() {
-  stdio_init_all();
-  for (uint8_t i = 0; i < 20; i++) { // 5 seconds to open serial communication
-    // printf("Waiting for user to open serial...\n");
-    // sleep_ms(250);
-  }
-  // printf("\n");
+  // DEBUG ONLY: The debugger pausing at the start of main() causes it to read all
+  // spinlock regs, "claiming" all spinlocks. This should be fixed in future SDK revs,
+  // see https://github.com/raspberrypi/pico-examples/issues/363. For now, this.
+  spin_locks_reset();
 
+  gpio_init(PICO_DEFAULT_LED_PIN);
+  gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+  gpio_put(PICO_DEFAULT_LED_PIN, true);
+
+  vga_init(&display_conf);
+  gpio_put(PICO_DEFAULT_LED_PIN, false);
+  draw2d_rectangle_filled(&render_queue[0], 100, 100, 300, 300, COLOR_RED);
+  for (uint i = 0; i < 1000000; i++) {
+    asm("nop");
+  }
+  gpio_put(PICO_DEFAULT_LED_PIN, true);
   // Draw lines
   /*for(uint16_t i = 0; i < frame_height; i += 10) {
       drawLine(frame_width/2, frame_height/2, i, 0, COLOR_RED, 0);

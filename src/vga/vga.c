@@ -56,12 +56,8 @@ static uint8_t blank_data_dma = 0;
 static uint8_t color_pio_sm = 0;
 
 static volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES];
-static const volatile uint8_t blank[LARGEST_FRAME_WIDTH]             = { 0 }; // ~1kB
-static volatile uint8_t * frame_read_addr[LARGEST_FRAME_FULL_HEIGHT] = { 0 }; // ~3.2kB
-
-// static const volatile uint8_t blank[806]        = { 0 }; // ~1kB
-// static volatile uint8_t * frame_read_addr[1344] = { 0 }; // ~3.2kB
-
+static const volatile uint8_t blank[LARGEST_FRAME_WIDTH]             = { 0 }; // ~0.7kB
+static volatile uint8_t * frame_read_addr[LARGEST_FRAME_FULL_HEIGHT] = { 0 }; // ~5.2kB
 
 /************************************
  * STATIC FUNCTIONS

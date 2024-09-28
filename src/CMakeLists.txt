@@ -20,6 +20,7 @@ target_include_directories(libpicovga INTERFACE
 )
 
 target_compile_definitions(libpicovga INTERFACE PARAM_ASSERTIONS_ENABLE_ALL=1)
+target_compile_definitions(libpicovga INTERFACE PICO_CORE1_STACK_SIZE=0x1000u) #default: 0x800 (pico-sdk/multicore.h)
 target_compile_options(libpicovga INTERFACE -Wno-discarded-qualifiers -Wno-discarded-array-qualifiers
     -Wno-unused-function -Wno-comment)
 

@@ -58,7 +58,7 @@ typedef struct __packed {
   // FLAGS
   union {
     struct __packed {
-      uint32_t hidden     : 1;
+      uint32_t shown      : 1;
       uint32_t update     : 1;
       uint32_t wordwrap   : 1;
       uint32_t __reserved : 5;

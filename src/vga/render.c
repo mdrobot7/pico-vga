@@ -52,7 +52,7 @@ void render() {
         i = (i + 1) % rq_len;
       }
       // if the update is to hide an item or a force-refresh, rerender the whole thing
-      if (rq[i].header.flags.hidden || update) {
+      if (!rq[i].header.flags.shown || update) {
         i = 0;
       }
     } else { // manual rendering
@@ -62,7 +62,7 @@ void render() {
 
     render2d_fill(COLOR_BLACK); // wipe the display
     for (; i < rq_len; i++) {
-      if (!rq[i].header.flags.hidden) {
+      if (rq[i].header.flags.shown) {
         switch (rq[i].header.type) {
           case VGA_RENDER_ITEM_FILL:
             render2d_fill(rq[i].item_2d.color);

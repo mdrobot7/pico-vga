@@ -155,9 +155,19 @@ void render2d_rectangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y
   };
   uint32_t color32 = color | (color << 8) | (color << 16) | (color << 24);
 
-  uint8_t dma_chan = dma_claim_unused_channel(true);
-  int dma_bytes    = (x2 - x1) / sizeof(uint32_t);
-  int spare_bytes  = (x2 - x1) % sizeof(uint32_t);
+  for (int y = y1; y <= y2; y++) {
+    for (int x = x1; x <= x2; x++) {
+      render_pixel(y, x, color);
+    }
+  }
+  return;
+
+  // *** Don't care about this for now ***
+
+  static uint8_t dma_chan;
+  dma_chan        = !dma_chan ? dma_claim_unused_channel(true) : dma_chan;
+  int dma_bytes   = (x2 - x1 + 1) / sizeof(uint32_t); // coordinates are inclusive
+  int spare_bytes = (x2 - x1 + 1) % sizeof(uint32_t);
 
   // DMA one line at a time -- if a rectangle is in the middle of
   // the screen DMA can't jump the gaps on the left and right.
@@ -174,7 +184,8 @@ void render2d_rectangle_filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y
     dma_channel_wait_for_finish_blocking(dma_chan);
   }
 
-  dma_channel_unclaim(dma_chan);
+  // dma_channel_unclaim(dma_chan);
+  asm("nop");
 }
 
 void render2d_triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, vga_color_t color) {

@@ -29,6 +29,7 @@ static volatile uint8_t (*font)[FONT_HEIGHT] = cp437; // The current font in use
 // Reset any flags, trigger it to be rendered
 static void clear_and_activate_item(vga_render_item_t * item) {
   item->header.flags_byte   = 0;
+  item->header.flags.shown  = true;
   item->header.flags.update = true;
 }
 

@@ -15,7 +15,8 @@ target_compile_definitions(${EXECUTABLE} PUBLIC PV_PERIPHERAL_MODE=false)
 target_link_libraries(${EXECUTABLE}
     pico_stdlib
     libpicovga
-    hardware_gpio
+    hardware_pio
+    hardware_sync
 )
 
 target_include_directories(${EXECUTABLE} PUBLIC

@@ -155,35 +155,40 @@ static void initDMA() {
 
     dma_claim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA)); //mark channels as used in the SDK
 
-    dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
-    dma_hw->ch[frameCtrlDMA].write_addr = &dma_hw->ch[frameDataDMA].al3_read_addr_trig;
-    dma_hw->ch[frameCtrlDMA].transfer_count = 1;
-    dma_hw->ch[frameCtrlDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
-                                        (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_FORCE << SDK_DMA_CTRL_TREQ_SEL);
+    // Default channel config is **NOT** the same as the register reset values. See pg 106 of C SDK docs for info.
 
-    dma_hw->ch[frameDataDMA].read_addr = NULL;
-    dma_hw->ch[frameDataDMA].write_addr = &pio0_hw->txf[0];
-    dma_hw->ch[frameDataDMA].transfer_count = FRAME_WIDTH/4;
-    dma_hw->ch[frameDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (1 << SDK_DMA_CTRL_INCR_READ) |
-                                        (blankDataDMA << SDK_DMA_CTRL_CHAIN_TO) | (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL) |
-                                        (1 << SDK_DMA_CTRL_IRQ_QUIET);
+    // &frame_read_addr[i] -> frameDataDMA.read_addr (tell frameDataDMA where to read from)
+    dma_channel_config frame_ctrl_config = dma_channel_get_default_config(frameCtrlDMA);
+    channel_config_set_high_priority(&frame_ctrl_config, true);
+    channel_config_set_transfer_data_size(&frame_ctrl_config, DMA_SIZE_32);
+    dma_channel_configure(frameCtrlDMA, &frame_ctrl_config, &dma_hw->ch[frameDataDMA].al3_read_addr_trig, frameReadAddr, 1, false);
 
-    dma_hw->ch[blankDataDMA].read_addr = BLANK;
-    dma_hw->ch[blankDataDMA].write_addr = &pio0_hw->txf[0];
-    dma_hw->ch[blankDataDMA].transfer_count = (FRAME_FULL_WIDTH - FRAME_WIDTH)/4;
-    dma_hw->ch[blankDataDMA].al1_ctrl = (1 << SDK_DMA_CTRL_EN)                  | (1 << SDK_DMA_CTRL_HIGH_PRIORITY) |
-                                        (DMA_SIZE_32 << SDK_DMA_CTRL_DATA_SIZE) | (frameCtrlDMA << SDK_DMA_CTRL_CHAIN_TO) |
-                                        (DREQ_PIO0_TX0 << SDK_DMA_CTRL_TREQ_SEL)| (1 << SDK_DMA_CTRL_IRQ_QUIET);
+    // frame_read_addr[i] -> pioX->txfifo (read from the address in frame_read_addr, send to PIO)
+    dma_channel_config frame_data_config = dma_channel_get_default_config(frameDataDMA);
+    channel_config_set_high_priority(&frame_data_config, true);
+    channel_config_set_transfer_data_size(&frame_data_config, DMA_SIZE_32);
+    channel_config_set_chain_to(&frame_data_config, blankDataDMA);
+    channel_config_set_dreq(&frame_data_config, pio_get_dreq(pio0, 0, true));
+    channel_config_set_irq_quiet(&frame_data_config, true);
+    dma_channel_configure(frameDataDMA, &frame_data_config, &pio0->txf[0], NULL, FRAME_WIDTH / 4, false);
 
-    dma_hw->inte0 = (1 << frameCtrlDMA);
+    // 0x00 -> pioX->txfifo (send 0s to the PIO for blanking time)
+    dma_channel_config blank_data_config = dma_channel_get_default_config(blankDataDMA);
+    channel_config_set_high_priority(&blank_data_config, true);
+    channel_config_set_transfer_data_size(&blank_data_config, DMA_SIZE_32);
+    channel_config_set_read_increment(&blank_data_config, false); // Defaults to true
+    channel_config_set_chain_to(&blank_data_config, frameCtrlDMA);
+    channel_config_set_dreq(&blank_data_config, pio_get_dreq(pio0, 0, true));
+    channel_config_set_irq_quiet(&blank_data_config, true);
+    dma_channel_configure(blankDataDMA, &blank_data_config, &pio0->txf[0], BLANK, (FRAME_FULL_WIDTH - FRAME_WIDTH) / 4, false);
 
-    // Configure the processor to update the line count when DMA IRQ 0 is asserted
-    irq_set_exclusive_handler(DMA_IRQ_0, updateFramePtr);
+    dma_channel_set_irq0_enabled(frameCtrlDMA, true);
+    irq_set_priority(DMA_IRQ_0, 0); // Set the DMA interrupt to the highest priority
+
+    irq_set_exclusive_handler(DMA_IRQ_0, (irq_handler_t)updateFramePtr);
     irq_set_enabled(DMA_IRQ_0, true);
 
-    dma_hw->multi_channel_trigger = (1 << frameCtrlDMA); //Start!
+    dma_channel_start(frameCtrlDMA); // Start!
 }
 
 static void initPIO() {

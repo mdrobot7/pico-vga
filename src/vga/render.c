@@ -43,6 +43,7 @@ void render() {
   uint16_t rq_len             = config->render_queue_len;
 
   int i = 0;
+  while (true);
 
   while (true) {
     if (config->auto_render) {

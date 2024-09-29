@@ -21,6 +21,21 @@
 
 #define SECOND_CORE_MAGIC (13)
 
+// LSBs for DMA CTRL register bits (pico's SDK constants weren't great)
+#define SDK_DMA_CTRL_EN            0
+#define SDK_DMA_CTRL_HIGH_PRIORITY 1
+#define SDK_DMA_CTRL_DATA_SIZE     2
+#define SDK_DMA_CTRL_INCR_READ     4
+#define SDK_DMA_CTRL_INCR_WRITE    5
+#define SDK_DMA_CTRL_RING_SIZE     6
+#define SDK_DMA_CTRL_RING_SEL      10
+#define SDK_DMA_CTRL_CHAIN_TO      11
+#define SDK_DMA_CTRL_TREQ_SEL      15
+#define SDK_DMA_CTRL_IRQ_QUIET     21
+#define SDK_DMA_CTRL_BSWAP         22
+#define SDK_DMA_CTRL_SNIFF_EN      23
+#define SDK_DMA_CTRL_BUSY          24
+
 /************************************
  * PRIVATE TYPEDEFS
  ************************************/
@@ -55,7 +70,7 @@ static uint8_t blank_data_dma = 0;
 
 static uint8_t color_pio_sm = 0;
 
-static volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES];
+static volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES]            = { COLOR_BLUE };
 static const volatile uint8_t blank[LARGEST_FRAME_WIDTH]             = { 0 }; // ~0.7kB
 static volatile uint8_t * frame_read_addr[LARGEST_FRAME_FULL_HEIGHT] = { 0 }; // ~5.2kB
 
@@ -93,7 +108,7 @@ static void dma_init(vga_config_t * config) {
   dma_channel_config frame_ctrl_config = dma_channel_get_default_config(frame_ctrl_dma);
   channel_config_set_high_priority(&frame_ctrl_config, true);
   channel_config_set_transfer_data_size(&frame_ctrl_config, DMA_SIZE_32);
-  channel_config_set_chain_to(&frame_ctrl_config, frame_data_dma);
+  // channel_config_set_chain_to(&frame_ctrl_config, frame_data_dma);
   dma_channel_configure(frame_ctrl_dma, &frame_ctrl_config, &dma_hw->ch[frame_data_dma].al3_read_addr_trig, frame_read_addr, 1, false);
 
   // frame_read_addr[i] -> pioX->txfifo (read from the address in frame_read_addr, send to PIO)
@@ -101,31 +116,24 @@ static void dma_init(vga_config_t * config) {
   channel_config_set_high_priority(&frame_data_config, true);
   channel_config_set_transfer_data_size(&frame_data_config, DMA_SIZE_32);
   channel_config_set_chain_to(&frame_data_config, blank_data_dma);
-  channel_config_set_dreq(&frame_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
+  // channel_config_set_dreq(&frame_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
+  channel_config_set_dreq(&frame_data_config, DREQ_PIO0_TX0);
   channel_config_set_irq_quiet(&frame_data_config, true);
-  dma_channel_configure(frame_data_dma, &frame_data_config, NULL, NULL, frame_width / 4, false);
-  if (config->pio == pio0) {
-    dma_channel_set_write_addr(frame_data_dma, &pio0_hw->txf[color_pio_sm], false);
-  } else {
-    dma_channel_set_write_addr(frame_data_dma, &pio1_hw->txf[color_pio_sm], false);
-  }
+  dma_channel_configure(frame_data_dma, &frame_data_config, &(config->pio)->txf[color_pio_sm], NULL, frame_width / 4, false);
 
   // 0x00 -> pioX->txfifo (send 0s to the PIO for blanking time)
   dma_channel_config blank_data_config = dma_channel_get_default_config(blank_data_dma);
   channel_config_set_high_priority(&blank_data_config, true);
   channel_config_set_transfer_data_size(&blank_data_config, DMA_SIZE_32);
+  channel_config_set_read_increment(&blank_data_config, false); // Defaults to true
   channel_config_set_chain_to(&blank_data_config, frame_ctrl_dma);
-  channel_config_set_dreq(&blank_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
+  // channel_config_set_dreq(&blank_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
+  channel_config_set_dreq(&blank_data_config, DREQ_PIO0_TX0);
   channel_config_set_irq_quiet(&blank_data_config, true);
-  dma_channel_configure(blank_data_dma, &blank_data_config, NULL, blank, (frame_width_full - frame_width) / 4, false);
-  if (config->pio == pio0) {
-    dma_channel_set_write_addr(blank_data_dma, &pio0_hw->txf[color_pio_sm], false);
-  } else {
-    dma_channel_set_write_addr(blank_data_dma, &pio1_hw->txf[color_pio_sm], false);
-  }
+  dma_channel_configure(blank_data_dma, &blank_data_config, &(config->pio)->txf[color_pio_sm], blank, (frame_width_full - frame_width) / 4, false);
 
   dma_channel_set_irq0_enabled(frame_ctrl_dma, true);
-  irq_set_priority(DMA_IRQ_0, 0); // Set the DMA interrupt to the highest priority
+  // irq_set_priority(DMA_IRQ_0, 0); // Set the DMA interrupt to the highest priority
 
   irq_set_exclusive_handler(DMA_IRQ_0, (irq_handler_t) update_frame_ptr);
   irq_set_enabled(DMA_IRQ_0, true);
@@ -134,12 +142,6 @@ static void dma_init(vga_config_t * config) {
 }
 
 static void second_core_init() {
-  dma_init(vga_config); // Must be run here so the IRQ runs on the second core
-
-  pio_enable_sm_mask_in_sync(vga_config->pio, 1u << color_pio_sm); // start color state machine and clock
-  pwm_set_enabled(HSYNC_PWM_SLICE, true);                          // start hsync and vsync signals
-  pwm_set_enabled(VSYNC_PWM_SLICE, true);
-
   multicore_fifo_push_blocking(SECOND_CORE_MAGIC);
 
   if (vga_config->antialiasing) {
@@ -168,7 +170,7 @@ int vga_init(vga_config_t * config) {
 
   // Add PIO program to PIO instruction memory. SDK will find location and
   // return with the memory offset of the program.
-  uint offset = pio_add_program(config->pio, &color_program);
+  // uint offset = pio_add_program(config->pio, &color_program);
 
   gpio_set_function(HSYNC_PIN, GPIO_FUNC_PWM);
   gpio_set_function(VSYNC_PIN, GPIO_FUNC_PWM);
@@ -182,6 +184,7 @@ int vga_init(vga_config_t * config) {
 
     // Initialize color pio program, but DON'T enable PIO state machine
     // CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock
+    uint offset = pio_add_program(config->pio, &color_program);
     color_program_init(config->pio, color_pio_sm, offset, COLOR_LSB_PIN, 3 * config->scaled_resolution);
 
     pwm_set_clkdiv(HSYNC_PWM_SLICE, 3.0);                     // pixel clock
@@ -197,6 +200,7 @@ int vga_init(vga_config_t * config) {
     // 125MHz system clock frequency -- possibly bump to 150MHz later
     set_sys_clock_pll(1500000000, 6, 2);
 
+    uint offset = pio_add_program(config->pio, &color_program);
     color_program_init(config->pio, color_pio_sm, offset, COLOR_LSB_PIN, 5 * config->scaled_resolution);
 
     // Sources for these timings, because they are slightly different (for a 25MHz pixel clock, not 25.175MHz)
@@ -218,6 +222,7 @@ int vga_init(vga_config_t * config) {
     // 150MHz system clock frequency
     set_sys_clock_pll(1500000000, 5, 2);
 
+    uint offset = pio_add_program(config->pio, &color_program);
     color_program_init(config->pio, color_pio_sm, offset, COLOR_LSB_PIN, 2 * config->scaled_resolution);
 
     pwm_set_output_polarity(HSYNC_PWM_SLICE, !HSYNC_PWM_CHAN ? true : false, HSYNC_PWM_CHAN ? true : false);
@@ -301,6 +306,13 @@ for (int i = 0, j = 0, k = 0; i < frame_height; i++) {
   if (config->base_resolution == RES_640x480) {
     frame_read_addr[524] = blank;
   }
+
+  dma_init(vga_config); // Must be run here so the IRQ runs on the second core
+
+  pio_enable_sm_mask_in_sync(vga_config->pio, 1u << color_pio_sm); // start color state machine and clock
+  pwm_set_enabled(HSYNC_PWM_SLICE, true);                          // start hsync and vsync signals
+  pwm_set_enabled(VSYNC_PWM_SLICE, true);
+  while (true);
 
   multicore_launch_core1(second_core_init);
   while (multicore_fifo_pop_blocking() != SECOND_CORE_MAGIC); // busy wait while the core is initializing

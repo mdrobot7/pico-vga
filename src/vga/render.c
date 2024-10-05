@@ -43,7 +43,6 @@ void render() {
   uint16_t rq_len             = config->render_queue_len;
 
   int i = 0;
-  while (true);
 
   while (true) {
     if (config->auto_render) {
@@ -61,7 +60,7 @@ void render() {
       i = 0;
     }
 
-    render2d_fill(COLOR_BLACK); // wipe the display
+    render2d_fill(COLOR_GREEN); // wipe the display
     for (; i < rq_len; i++) {
       if (rq[i].header.flags.shown) {
         switch (rq[i].header.type) {

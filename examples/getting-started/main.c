@@ -24,17 +24,9 @@ int main() {
   // see https://github.com/raspberrypi/pico-examples/issues/363. For now, this.
   spin_locks_reset();
 
-  gpio_init(PICO_DEFAULT_LED_PIN);
-  gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-  gpio_put(PICO_DEFAULT_LED_PIN, true);
-
   vga_init(&display_conf);
-  gpio_put(PICO_DEFAULT_LED_PIN, false);
-  draw2d_rectangle_filled(&render_queue[0], 100, 100, 300, 300, COLOR_RED);
-  for (uint i = 0; i < 1000000; i++) {
-    asm("nop");
-  }
-  gpio_put(PICO_DEFAULT_LED_PIN, true);
+  //   draw2d_rectangle_filled(&render_queue[0], 100, 100, 300, 300, COLOR_RED);
+  while (1);
   // Draw lines
   /*for(uint16_t i = 0; i < frame_height; i += 10) {
       drawLine(frame_width/2, frame_height/2, i, 0, COLOR_RED, 0);

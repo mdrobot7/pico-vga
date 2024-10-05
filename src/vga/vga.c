@@ -70,7 +70,7 @@ static uint8_t blank_data_dma = 0;
 
 static uint8_t color_pio_sm = 0;
 
-static volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES]            = { COLOR_BLUE };
+static volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES];
 static const volatile uint8_t blank[LARGEST_FRAME_WIDTH]             = { 0 }; // ~0.7kB
 static volatile uint8_t * frame_read_addr[LARGEST_FRAME_FULL_HEIGHT] = { 0 }; // ~5.2kB
 
@@ -108,7 +108,6 @@ static void dma_init(vga_config_t * config) {
   dma_channel_config frame_ctrl_config = dma_channel_get_default_config(frame_ctrl_dma);
   channel_config_set_high_priority(&frame_ctrl_config, true);
   channel_config_set_transfer_data_size(&frame_ctrl_config, DMA_SIZE_32);
-  // channel_config_set_chain_to(&frame_ctrl_config, frame_data_dma);
   dma_channel_configure(frame_ctrl_dma, &frame_ctrl_config, &dma_hw->ch[frame_data_dma].al3_read_addr_trig, frame_read_addr, 1, false);
 
   // frame_read_addr[i] -> pioX->txfifo (read from the address in frame_read_addr, send to PIO)
@@ -116,8 +115,7 @@ static void dma_init(vga_config_t * config) {
   channel_config_set_high_priority(&frame_data_config, true);
   channel_config_set_transfer_data_size(&frame_data_config, DMA_SIZE_32);
   channel_config_set_chain_to(&frame_data_config, blank_data_dma);
-  // channel_config_set_dreq(&frame_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
-  channel_config_set_dreq(&frame_data_config, DREQ_PIO0_TX0);
+  channel_config_set_dreq(&frame_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
   channel_config_set_irq_quiet(&frame_data_config, true);
   dma_channel_configure(frame_data_dma, &frame_data_config, &(config->pio)->txf[color_pio_sm], NULL, frame_width / 4, false);
 
@@ -127,13 +125,12 @@ static void dma_init(vga_config_t * config) {
   channel_config_set_transfer_data_size(&blank_data_config, DMA_SIZE_32);
   channel_config_set_read_increment(&blank_data_config, false); // Defaults to true
   channel_config_set_chain_to(&blank_data_config, frame_ctrl_dma);
-  // channel_config_set_dreq(&blank_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
-  channel_config_set_dreq(&blank_data_config, DREQ_PIO0_TX0);
+  channel_config_set_dreq(&blank_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
   channel_config_set_irq_quiet(&blank_data_config, true);
   dma_channel_configure(blank_data_dma, &blank_data_config, &(config->pio)->txf[color_pio_sm], blank, (frame_width_full - frame_width) / 4, false);
 
   dma_channel_set_irq0_enabled(frame_ctrl_dma, true);
-  // irq_set_priority(DMA_IRQ_0, 0); // Set the DMA interrupt to the highest priority
+  irq_set_priority(DMA_IRQ_0, 0); // Set the DMA interrupt to the highest priority
 
   irq_set_exclusive_handler(DMA_IRQ_0, (irq_handler_t) update_frame_ptr);
   irq_set_enabled(DMA_IRQ_0, true);
@@ -162,6 +159,10 @@ int vga_init(vga_config_t * config) {
   frame_height      = frame_size[config->base_resolution][FRAME_HEIGHT_IDX] / config->scaled_resolution;
   frame_width_full  = frame_size[config->base_resolution][FRAME_WIDTH_FULL_IDX] / config->scaled_resolution;
   frame_height_full = frame_size[config->base_resolution][FRAME_HEIGHT_FULL_IDX] / config->scaled_resolution;
+
+  for (int i = 0; i < 120000; i++) {
+    framebuffer[i] = COLOR_YELLOW;
+  }
 
   // Override if there are less than 2 interpolated lines
   if (config->num_interpolated_lines < 2) config->num_interpolated_lines = 2;
@@ -312,7 +313,6 @@ for (int i = 0, j = 0, k = 0; i < frame_height; i++) {
   pio_enable_sm_mask_in_sync(vga_config->pio, 1u << color_pio_sm); // start color state machine and clock
   pwm_set_enabled(HSYNC_PWM_SLICE, true);                          // start hsync and vsync signals
   pwm_set_enabled(VSYNC_PWM_SLICE, true);
-  while (true);
 
   multicore_launch_core1(second_core_init);
   while (multicore_fifo_pop_blocking() != SECOND_CORE_MAGIC); // busy wait while the core is initializing

@@ -26,7 +26,7 @@
  ************************************/
 
 static void render_fast_vert_line(uint16_t x, uint16_t y1, uint16_t y2, vga_color_t color) {
-  if (y2 > y1) {
+  if (y2 < y1) {
     SWAP(y1, y2);
   }
   for (; y1 <= y2; y1++) {
@@ -35,7 +35,7 @@ static void render_fast_vert_line(uint16_t x, uint16_t y1, uint16_t y2, vga_colo
 }
 
 static void render_fast_horiz_line(uint16_t x1, uint16_t x2, uint16_t y, vga_color_t color) {
-  if (x2 > x1) {
+  if (x2 < x1) {
     SWAP(x1, x2);
   }
   for (; x1 <= x2; x1++) {

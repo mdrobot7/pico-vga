@@ -25,7 +25,8 @@ int main() {
   spin_locks_reset();
 
   vga_init(&display_conf);
-  //   draw2d_rectangle_filled(&render_queue[0], 100, 100, 300, 300, COLOR_RED);
+  draw2d_rectangle(&render_queue[0], 0, 0, vga_get_width() - 1, vga_get_height() - 1, COLOR_WHITE);
+  draw2d_rectangle_filled(&render_queue[1], 50, 50, 350, 250, COLOR_RED);
   while (1);
   // Draw lines
   /*for(uint16_t i = 0; i < frame_height; i += 10) {

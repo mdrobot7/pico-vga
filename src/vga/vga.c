@@ -21,21 +21,6 @@
 
 #define SECOND_CORE_MAGIC (13)
 
-// LSBs for DMA CTRL register bits (pico's SDK constants weren't great)
-#define SDK_DMA_CTRL_EN            0
-#define SDK_DMA_CTRL_HIGH_PRIORITY 1
-#define SDK_DMA_CTRL_DATA_SIZE     2
-#define SDK_DMA_CTRL_INCR_READ     4
-#define SDK_DMA_CTRL_INCR_WRITE    5
-#define SDK_DMA_CTRL_RING_SIZE     6
-#define SDK_DMA_CTRL_RING_SEL      10
-#define SDK_DMA_CTRL_CHAIN_TO      11
-#define SDK_DMA_CTRL_TREQ_SEL      15
-#define SDK_DMA_CTRL_IRQ_QUIET     21
-#define SDK_DMA_CTRL_BSWAP         22
-#define SDK_DMA_CTRL_SNIFF_EN      23
-#define SDK_DMA_CTRL_BUSY          24
-
 /************************************
  * PRIVATE TYPEDEFS
  ************************************/
@@ -139,6 +124,11 @@ static void dma_init(vga_config_t * config) {
 }
 
 static void second_core_init() {
+  dma_init(vga_config); // Must be run here so the IRQ runs on the second core
+
+  pio_enable_sm_mask_in_sync(vga_config->pio, 1u << color_pio_sm);         // start color state machine and clock
+  pwm_set_mask_enabled((1u << HSYNC_PWM_SLICE) | (1u << VSYNC_PWM_SLICE)); // DO NOT use pwm_set_enabled, it breaks things
+
   multicore_fifo_push_blocking(SECOND_CORE_MAGIC);
 
   if (vga_config->antialiasing) {
@@ -160,10 +150,6 @@ int vga_init(vga_config_t * config) {
   frame_width_full  = frame_size[config->base_resolution][FRAME_WIDTH_FULL_IDX] / config->scaled_resolution;
   frame_height_full = frame_size[config->base_resolution][FRAME_HEIGHT_FULL_IDX] / config->scaled_resolution;
 
-  for (int i = 0; i < 120000; i++) {
-    framebuffer[i] = COLOR_YELLOW;
-  }
-
   // Override if there are less than 2 interpolated lines
   if (config->num_interpolated_lines < 2) config->num_interpolated_lines = 2;
 
@@ -171,7 +157,7 @@ int vga_init(vga_config_t * config) {
 
   // Add PIO program to PIO instruction memory. SDK will find location and
   // return with the memory offset of the program.
-  // uint offset = pio_add_program(config->pio, &color_program);
+  uint offset = pio_add_program(config->pio, &color_program);
 
   gpio_set_function(HSYNC_PIN, GPIO_FUNC_PWM);
   gpio_set_function(VSYNC_PIN, GPIO_FUNC_PWM);
@@ -185,7 +171,6 @@ int vga_init(vga_config_t * config) {
 
     // Initialize color pio program, but DON'T enable PIO state machine
     // CPU Base clock (after reconfig): 120.0 MHz. 120/3 = 40Mhz pixel clock
-    uint offset = pio_add_program(config->pio, &color_program);
     color_program_init(config->pio, color_pio_sm, offset, COLOR_LSB_PIN, 3 * config->scaled_resolution);
 
     pwm_set_clkdiv(HSYNC_PWM_SLICE, 3.0);                     // pixel clock
@@ -201,7 +186,6 @@ int vga_init(vga_config_t * config) {
     // 125MHz system clock frequency -- possibly bump to 150MHz later
     set_sys_clock_pll(1500000000, 6, 2);
 
-    uint offset = pio_add_program(config->pio, &color_program);
     color_program_init(config->pio, color_pio_sm, offset, COLOR_LSB_PIN, 5 * config->scaled_resolution);
 
     // Sources for these timings, because they are slightly different (for a 25MHz pixel clock, not 25.175MHz)
@@ -223,7 +207,6 @@ int vga_init(vga_config_t * config) {
     // 150MHz system clock frequency
     set_sys_clock_pll(1500000000, 5, 2);
 
-    uint offset = pio_add_program(config->pio, &color_program);
     color_program_init(config->pio, color_pio_sm, offset, COLOR_LSB_PIN, 2 * config->scaled_resolution);
 
     pwm_set_output_polarity(HSYNC_PWM_SLICE, !HSYNC_PWM_CHAN ? true : false, HSYNC_PWM_CHAN ? true : false);
@@ -237,6 +220,8 @@ int vga_init(vga_config_t * config) {
     pwm_set_wrap(VSYNC_PWM_SLICE, (806 * 16) - 1);
     pwm_set_counter(VSYNC_PWM_SLICE, (6 + 29) * 16);
     pwm_set_chan_level(VSYNC_PWM_SLICE, VSYNC_PWM_CHAN, 6 * 16);
+  } else {
+    return 1;
   }
 
   // Fail if the frame buffer is too small
@@ -295,33 +280,21 @@ for (int i = 0, j = 0, k = 0; i < frame_height; i++) {
 }
 */
 
-  // for (int i = 0; i < frame_height * config->scaled_resolution; i++) {
-  //   frame_read_addr[i] = (uint8_t *) framebuffer + frame_width * (i / config->scaled_resolution);
-  // }
-
-  // // Fill in blanking time at the bottom of the screen
-  // for (int i = frame_height * config->scaled_resolution; i < frame_height_full * config->scaled_resolution; i++) {
-  //   frame_read_addr[i] = blank;
-  // }
-  // // Hacky fix: Since the true height of 640x480 is 525 lines, integer division becomes an issue. This is the fix
-  // if (config->base_resolution == RES_640x480) {
-  //   frame_read_addr[524] = blank;
-  // }
-  for (uint16_t i = 0; i < frame_height_full * config->scaled_resolution; i++) {
-    if (i >= frame_height * config->scaled_resolution)
-      frame_read_addr[i] = blank;
-    else
-      // frame_read_addr[i] = framebuffer[i / config->scaled_resolution];
-      frame_read_addr[i] = (uint8_t *) framebuffer + frame_width * (i / config->scaled_resolution);
+  for (int i = 0; i < frame_height * config->scaled_resolution; i++) {
+    frame_read_addr[i] = (uint8_t *) framebuffer + frame_width * (i / config->scaled_resolution);
   }
 
-  dma_init(vga_config); // Must be run here so the IRQ runs on the second core
+  // Fill in blanking time at the bottom of the screen
+  for (int i = frame_height * config->scaled_resolution; i < frame_height_full * config->scaled_resolution; i++) {
+    frame_read_addr[i] = blank;
+  }
+  // Hacky fix: Since the true height of 640x480 is 525 lines, integer division becomes an issue. This is the fix
+  if (config->base_resolution == RES_640x480) {
+    frame_read_addr[524] = blank;
+  }
 
-  pio_enable_sm_mask_in_sync(vga_config->pio, 1u << color_pio_sm);         // start color state machine and clock
-  pwm_set_mask_enabled((1u << HSYNC_PWM_SLICE) | (1u << VSYNC_PWM_SLICE)); // DO NOT use pwm_set_enabled, it breaks things
-
-  // multicore_launch_core1(second_core_init);
-  // while (multicore_fifo_pop_blocking() != SECOND_CORE_MAGIC); // busy wait while the core is initializing
+  multicore_launch_core1(second_core_init);
+  while (multicore_fifo_pop_blocking() != SECOND_CORE_MAGIC); // busy wait while the core is initializing
   return 0;
 }
 

@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 17)
 # Creates a pico-sdk subdirectory in our project for the libraries
 pico_sdk_init()
 
-add_compile_options(-O0 -DNDEBUG -Wall -Wextra)
+# add_compile_options(-O0 -DNDEBUG -Wall -Wextra)
 # set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE) # Link-time optimization, broken on Windows
 # add_compile_options(-flto) # Works on Windows, but causes a linker error. TODO
 # add_link_options(-flto)

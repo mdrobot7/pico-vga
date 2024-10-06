@@ -16,11 +16,11 @@
 */
 
 int main() {
-    stdio_init_all();
-    for(uint8_t i = 0; i < 20; i++) { //5 seconds to open serial communication
-        //printf("Waiting for user to open serial...\n");
-        //sleep_ms(250);
-    }
+    // stdio_init_all();
+    // for(uint8_t i = 0; i < 20; i++) { //5 seconds to open serial communication
+    //     //printf("Waiting for user to open serial...\n");
+    //     //sleep_ms(250);
+    // }
     //printf("\n");
 
     Controller P1;
@@ -29,6 +29,7 @@ int main() {
     Controller P4;
     
     initDisplay(&P1, &P2, &P3, &P4, true);
+    while(true){}
 
     fillScreen(NULL, NULL, 0b11100000);
     drawFilledRectangle(NULL, 0, 0, 10, FRAME_HEIGHT - 1, 0b00011100, 0b00011100);

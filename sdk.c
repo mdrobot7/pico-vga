@@ -25,9 +25,11 @@ Ideas:
 ===========================================
 */
 //Constants for the DMA channels
-#define frameCtrlDMA 0
-#define frameDataDMA 1
-#define blankDataDMA 2
+static uint8_t frameCtrlDMA;
+static uint8_t frameDataDMA;
+static uint8_t blankDataDMA;
+
+static uint8_t color_pio_sm;
 
 //LSBs for DMA CTRL register bits (pico's SDK constants weren't great)
 #define SDK_DMA_CTRL_EN 0
@@ -44,9 +46,9 @@ Ideas:
 #define SDK_DMA_CTRL_SNIFF_EN 23
 #define SDK_DMA_CTRL_BUSY 24
 
-static volatile uint8_t frame[FRAME_HEIGHT][FRAME_WIDTH];
-static uint8_t * frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER];
-static uint8_t BLANK[FRAME_WIDTH];
+static volatile uint8_t frame[200000];
+static volatile uint8_t * frameReadAddr[1344];
+static const volatile uint8_t BLANK[768];
 
 volatile RenderQueueItem background = { //First element of the linked list, can be reset to any background
     .type = 'f',
@@ -83,22 +85,10 @@ static void render();
 int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, uint8_t autoRenderEn) {
     //Clock configuration -- 120MHz system clock frequency
     clocks_init();
-    set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
 
-    if(P1 != NULL) C1 = P1;
-    if(P2 != NULL) C2 = P2;
-    if(P3 != NULL) C3 = P3;
-    if(P4 != NULL) C4 = P4;
-
-    sio_hw->gpio_oe_set = (1u << CONTROLLER_SEL_A_PIN) | (1u << CONTROLLER_SEL_B_PIN); //Enable outputs on pins 22 and 26
-    static struct repeating_timer controllerTimer;
-    add_repeating_timer_ms(1, updateAllControllers, NULL, &controllerTimer);
-
-    autoRender = autoRenderEn;
-
-    initPIO();
-    initDMA();
-    //pio_enable_sm_mask_in_sync(pio0, (unsigned int)0b0111); //start all 4 state machines
+    for(int i = 0; i < 120000; i++) {
+        frame[i] = COLOR_YELLOW;
+    }
 
 //======================================================================//
 
@@ -107,53 +97,48 @@ int initDisplay(Controller *P1, Controller *P2, Controller *P3, Controller *P4, 
 
     gpio_set_function(8, GPIO_FUNC_PWM);
     gpio_set_function(10, GPIO_FUNC_PWM);
+    pwm_config default_pwm_conf = pwm_get_default_config();
+    pwm_init(4, &default_pwm_conf, false); // reset to known state
+    pwm_init(5, &default_pwm_conf, false);
 
+    set_sys_clock_pll(1440000000, 6, 2); //VCO frequency (MHz), PD1, PD2 -- see vcocalc.py
+    initPIO();
 
-    /*
-    //Leave CSR at default
-    pwm_hw->slice[4].div = 3 << 4; //Base frequency of 120MHz/3 = 40MHz
-    pwm_hw->slice[4].top = 1056; //num pixels in the line
-    pwm_hw->slice[4].ctr = 128 + 88; //Write to the counter -- sync pulse + back porch
-    pwm_hw->slice[4].cc = 128; //length of the sync pulse
+    pwm_set_clkdiv(4, 3.0);                     // pixel clock
+    pwm_set_wrap(4, 1056 - 1);                  // full line width - 1
+    pwm_set_counter(4, 128 + 88);               // sync pulse + back porch
+    pwm_set_chan_level(4, 0, 128); // sync pulse
 
-    //Leave CSR at default
-    pwm_hw->slice[5].div = 198 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
-    pwm_hw->slice[5].top = 628*16; //num lines in frame, adjusted for clk div fix
-    pwm_hw->slice[5].ctr = (4 + 23)*16; // sync pulse + back porch
-    pwm_hw->slice[5].cc = 4*16; //length of sync
-    */
+    pwm_set_clkdiv(5, 198.0);                      // clkdiv maxes out at /256, so this (pixel clock * full line width)/16 = (3*1056)/16, dividing by 16 to compensate
+    pwm_set_wrap(5, (628 * 16) - 1);               // full frame height, adjusted for clkdiv fix
+    pwm_set_counter(5, (4 + 23) * 16);             // sync pulse + back porch
+    pwm_set_chan_level(5, 0, 4 * 16); // back porch
 
-    //Leave CSR at default
-    pwm_hw->slice[4].div = 3 << 4; //Base frequency of 120MHz/3 = 40MHz
-    pwm_hw->slice[4].top = 1056 - 1; //num pixels in the line
-    pwm_hw->slice[4].ctr = 128 + 88; //Write to the counter -- sync pulse + back porch
-    pwm_hw->slice[4].cc = 128; //length of the sync pulse
+    initDMA();
 
-    //Leave CSR at default
-    pwm_hw->slice[5].div = 198 << 4; //clk divider maxes out at /256 (pio maxes out at /65536). had to adjust duty cycle, top, and clkdiv to make it fit
-    pwm_hw->slice[5].top = (628*16) - 1; //num lines in frame, adjusted for clk div fix
-    pwm_hw->slice[5].ctr = (4 + 23)*16; // sync pulse + back porch
-    pwm_hw->slice[5].cc = 4*16; //length of sync
-
-    pio0_hw->ctrl |= 1u | (1u << 8); //Enable and restart clock for color state machine
-    pwm_hw->en |= (1 << 4) | (1 << 5);
+    pio_enable_sm_mask_in_sync(pio0, 1u << color_pio_sm); // start color state machine and clock
+    pwm_set_mask_enabled((1u << 4) | (1u << 5));
 
 //=======================================================================//
-    multicore_launch_core1(render);
-    while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
-    
-    for(uint64_t wait = 0; wait < 10000000; wait++) asm("nop"); //busy wait to make sure everything is stable (not using sleep_ms(), it causes issues)
+    // multicore_launch_core1(render);
+    // while(multicore_fifo_pop_blocking() != 13); //busy wait while the core is initializing
 
     return 0;
 }
 
 static void initDMA() {
-    for(uint16_t i = 0; i < FRAME_FULL_HEIGHT*FRAME_SCALER; i++) {
-        if(i >= FRAME_HEIGHT*FRAME_SCALER) frameReadAddr[i] = BLANK;
-        else frameReadAddr[i] = frame[i/FRAME_SCALER];
+    frameCtrlDMA = dma_claim_unused_channel(true);
+    frameDataDMA = dma_claim_unused_channel(true);
+    blankDataDMA = dma_claim_unused_channel(true);
+
+    for (int i = 0; i < FRAME_HEIGHT * FRAME_SCALER; i++) {
+        frameReadAddr[i] = (uint8_t *)frame + FRAME_WIDTH * (i / FRAME_SCALER);
     }
 
-    dma_claim_mask((1 << frameCtrlDMA) | (1 << frameDataDMA) | (1 << blankDataDMA)); //mark channels as used in the SDK
+    // Fill in blanking time at the bottom of the screen
+    for (int i = FRAME_HEIGHT * FRAME_SCALER; i < FRAME_FULL_HEIGHT * FRAME_SCALER; i++) {
+        frameReadAddr[i] = BLANK;
+    }
 
     // Default channel config is **NOT** the same as the register reset values. See pg 106 of C SDK docs for info.
 
@@ -170,7 +155,7 @@ static void initDMA() {
     channel_config_set_chain_to(&frame_data_config, blankDataDMA);
     channel_config_set_dreq(&frame_data_config, pio_get_dreq(pio0, 0, true));
     channel_config_set_irq_quiet(&frame_data_config, true);
-    dma_channel_configure(frameDataDMA, &frame_data_config, &pio0->txf[0], NULL, FRAME_WIDTH / 4, false);
+    dma_channel_configure(frameDataDMA, &frame_data_config, &pio0->txf[color_pio_sm], NULL, FRAME_WIDTH / 4, false);
 
     // 0x00 -> pioX->txfifo (send 0s to the PIO for blanking time)
     dma_channel_config blank_data_config = dma_channel_get_default_config(blankDataDMA);
@@ -180,7 +165,7 @@ static void initDMA() {
     channel_config_set_chain_to(&blank_data_config, frameCtrlDMA);
     channel_config_set_dreq(&blank_data_config, pio_get_dreq(pio0, 0, true));
     channel_config_set_irq_quiet(&blank_data_config, true);
-    dma_channel_configure(blankDataDMA, &blank_data_config, &pio0->txf[0], BLANK, (FRAME_FULL_WIDTH - FRAME_WIDTH) / 4, false);
+    dma_channel_configure(blankDataDMA, &blank_data_config, &pio0->txf[color_pio_sm], BLANK, (FRAME_FULL_WIDTH - FRAME_WIDTH) / 4, false);
 
     dma_channel_set_irq0_enabled(frameCtrlDMA, true);
     irq_set_priority(DMA_IRQ_0, 0); // Set the DMA interrupt to the highest priority
@@ -192,18 +177,14 @@ static void initDMA() {
 }
 
 static void initPIO() {
+    color_pio_sm = pio_claim_unused_sm(pio0, true);
+
     // Add PIO program to PIO instruction memory. SDK will find location and
     // return with the memory offset of the program.
     uint offset = pio_add_program(pio0, &color_program);
 
     // Initialize color pio program, but DON'T enable PIO state machine
-    color_program_init(pio0, 0, offset, 0, FRAME_SCALER);
-
-    //offset = pio_add_program(pio0, &hsync_program);
-    //hsync_program_init(pio0, 1, offset, HSYNC_PIN);
-
-    //offset = pio_add_program(pio0, &vsync_program);
-    //vsync_program_init(pio0, 2, offset, VSYNC_PIN);
+    color_program_init(pio0, color_pio_sm, offset, 0, 3 * FRAME_SCALER);
 }
 
 
@@ -212,12 +193,12 @@ static void initPIO() {
 =============================
 */
 static void updateFramePtr() {
-    // Clear the interrupt request.
-    dma_hw->ints0 = 1u << frameCtrlDMA;
+  dma_channel_acknowledge_irq0(frameCtrlDMA);
 
-    if(dma_hw->ch[frameCtrlDMA].read_addr >= &frameReadAddr[FRAME_FULL_HEIGHT*FRAME_SCALER]) {
-        dma_hw->ch[frameCtrlDMA].read_addr = frameReadAddr;
-    }
+  // If the DMA read "cursor" is past the end of the frame data, reset it to the beginning
+  if (dma_hw->ch[frameCtrlDMA].read_addr >= (io_rw_32) &frameReadAddr[FRAME_FULL_HEIGHT * FRAME_SCALER]) {
+    dma_hw->ch[frameCtrlDMA].read_addr = (io_rw_32) frameReadAddr;
+  }
 }
 
 
@@ -257,7 +238,7 @@ static bool updateAllControllers(struct repeating_timer *t) {
 
     sio_hw->gpio_set = (1u << CONTROLLER_SEL_A_PIN); //Connect Controller 4
     updateController(C4);
- 
+
     return true; //not sure if this is required or not, but it's in the sample code
 }
 
@@ -639,7 +620,7 @@ static void checkOvf(uint16_t *x, uint16_t *y) {
     if(*y >= FRAME_HEIGHT) *y = FRAME_HEIGHT - 1;
 }
 
-static void render() {
+/*static void render() {
     multicore_fifo_push_blocking(13); //tell core 0 that everything is ok/it's running
 
     RenderQueueItem *item;
@@ -720,7 +701,7 @@ static void render() {
                                 frame[l][x + j] = item->color;
                             }
                         }
-                    }*/
+                    }*//*
                     break;
                 case 's': //Sprites
                     /*for(uint16_t i = item->x1; i < item->x2; i++) {
@@ -733,7 +714,7 @@ static void render() {
                         else {
                             frame[l][i] = item->color;
                         }
-                    }*/
+                    }*//*
                     break;
                 case 'f': //Fill the screen
                     for(uint16_t y = 0; y < FRAME_HEIGHT; y++) {
@@ -753,7 +734,7 @@ static void render() {
                             //*(original mem location + (currentRowInArray * nColumns) + currentColumnInArray)
                             frame[l][i] = *(item->obj + ((currentLine - item->y1)*(item->x2 - item->x1)) + i);
                         }
-                    }*/
+                    }*//*
                     break;
                 case 'n': //Deleted item (garbage collector)
                     previousItem->next = item->next;
@@ -761,7 +742,7 @@ static void render() {
                     item = previousItem; //prevent the code from skipping items
                     break;
             }
-            
+
             item->update = false;
             previousItem = item;
             item = item->next;
@@ -769,4 +750,4 @@ static void render() {
 
         update = 0;
     }
-}
+}*/

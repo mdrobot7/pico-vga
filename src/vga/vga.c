@@ -59,16 +59,16 @@ static const uint16_t frame_size[3][4] = { { 800, 600, 1056, 628 },
 #define LARGEST_FRAME_WIDTH       (768)
 #define LARGEST_FRAME_FULL_HEIGHT (1344)
 
-static uint16_t frame_width       = 0;
-static uint16_t frame_height      = 0;
-static uint16_t frame_width_full  = 0;
-static uint16_t frame_height_full = 0;
+static volatile uint16_t frame_width       = 0;
+static volatile uint16_t frame_height      = 0;
+static volatile uint16_t frame_width_full  = 0;
+static volatile uint16_t frame_height_full = 0;
 
-static uint8_t frame_ctrl_dma = 0;
-static uint8_t frame_data_dma = 0;
-static uint8_t blank_data_dma = 0;
+static volatile uint8_t frame_ctrl_dma = 0;
+static volatile uint8_t frame_data_dma = 0;
+static volatile uint8_t blank_data_dma = 0;
 
-static uint8_t color_pio_sm = 0;
+static volatile uint8_t color_pio_sm = 0;
 
 static volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES];
 static const volatile uint8_t blank[LARGEST_FRAME_WIDTH]             = { 0 }; // ~0.7kB
@@ -295,27 +295,33 @@ for (int i = 0, j = 0, k = 0; i < frame_height; i++) {
 }
 */
 
-  for (int i = 0; i < frame_height * config->scaled_resolution; i++) {
-    frame_read_addr[i] = framebuffer + frame_width * (i / config->scaled_resolution);
-  }
+  // for (int i = 0; i < frame_height * config->scaled_resolution; i++) {
+  //   frame_read_addr[i] = (uint8_t *) framebuffer + frame_width * (i / config->scaled_resolution);
+  // }
 
-  // Fill in blanking time at the bottom of the screen
-  for (int i = frame_height * config->scaled_resolution; i < frame_height_full * config->scaled_resolution; i++) {
-    frame_read_addr[i] = blank;
-  }
-  // Hacky fix: Since the true height of 640x480 is 525 lines, integer division becomes an issue. This is the fix
-  if (config->base_resolution == RES_640x480) {
-    frame_read_addr[524] = blank;
+  // // Fill in blanking time at the bottom of the screen
+  // for (int i = frame_height * config->scaled_resolution; i < frame_height_full * config->scaled_resolution; i++) {
+  //   frame_read_addr[i] = blank;
+  // }
+  // // Hacky fix: Since the true height of 640x480 is 525 lines, integer division becomes an issue. This is the fix
+  // if (config->base_resolution == RES_640x480) {
+  //   frame_read_addr[524] = blank;
+  // }
+  for (uint16_t i = 0; i < frame_height_full * config->scaled_resolution; i++) {
+    if (i >= frame_height * config->scaled_resolution)
+      frame_read_addr[i] = blank;
+    else
+      // frame_read_addr[i] = framebuffer[i / config->scaled_resolution];
+      frame_read_addr[i] = (uint8_t *) framebuffer + frame_width * (i / config->scaled_resolution);
   }
 
   dma_init(vga_config); // Must be run here so the IRQ runs on the second core
 
-  pio_enable_sm_mask_in_sync(vga_config->pio, 1u << color_pio_sm); // start color state machine and clock
-  pwm_set_enabled(HSYNC_PWM_SLICE, true);                          // start hsync and vsync signals
-  pwm_set_enabled(VSYNC_PWM_SLICE, true);
+  pio_enable_sm_mask_in_sync(vga_config->pio, 1u << color_pio_sm);         // start color state machine and clock
+  pwm_set_mask_enabled((1u << HSYNC_PWM_SLICE) | (1u << VSYNC_PWM_SLICE)); // DO NOT use pwm_set_enabled, it breaks things
 
-  multicore_launch_core1(second_core_init);
-  while (multicore_fifo_pop_blocking() != SECOND_CORE_MAGIC); // busy wait while the core is initializing
+  // multicore_launch_core1(second_core_init);
+  // while (multicore_fifo_pop_blocking() != SECOND_CORE_MAGIC); // busy wait while the core is initializing
   return 0;
 }
 

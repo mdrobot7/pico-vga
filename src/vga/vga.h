@@ -259,6 +259,20 @@ void vga_refresh();
 uint8_t ** __vga_get_frame_read_addr();
 
 /**
+ * @brief Hide all items in the render queue.
+ *
+ */
+void draw_clear();
+
+/**
+ * @brief Set an item shown or hidden.
+ *
+ * @param item The item to show/hide
+ * @param shown True to show, false to hide
+ */
+void draw_set_shown(vga_render_item_t * item, bool shown);
+
+/**
  * @brief Set an item's scale
  *
  * @param item The item to scale

@@ -18,6 +18,22 @@ vga_config_t display_conf = {
   .color_delay_cycles     = 0
 };
 
+static void demo_lines_down() {
+  int item = 0;
+  for (int y = 0; y < vga_get_height(); y += 10) {
+    draw2d_line(&render_queue[item++], 0, 0, vga_get_width() - 1, y, COLOR_RED);
+    sleep_ms(100);
+  }
+}
+
+static void demo_lines_up() {
+  int item = 0;
+  for (int y = 0; y < vga_get_height(); y += 10) {
+    draw2d_line(&render_queue[item++], vga_get_width() - 1, 0, 0, y, COLOR_RED);
+    sleep_ms(100);
+  }
+}
+
 int main() {
   // DEBUG ONLY: The debugger pausing at the start of main() causes it to read all
   // spinlock regs, "claiming" all spinlocks. This should be fixed in future SDK revs,
@@ -25,14 +41,11 @@ int main() {
   spin_locks_reset();
 
   vga_init(&display_conf);
-  draw2d_rectangle(&render_queue[0], 0, 0, vga_get_width() - 1, vga_get_height() - 1, COLOR_WHITE);
-  draw2d_rectangle_filled(&render_queue[1], 50, 50, vga_get_width() - 50, vga_get_height() - 50, COLOR_RED);
-  while (1);
-  // Draw lines
-  /*for(uint16_t i = 0; i < frame_height; i += 10) {
-      drawLine(frame_width/2, frame_height/2, i, 0, COLOR_RED, 0);
-      sleep_ms(15);
-  }*/
+
+  demo_lines_down();
+  sleep_ms(500);
+  draw_clear();
+  demo_lines_up();
   /*for(uint16_t i = 0; i < frame_height; i += 10) {
       drawLine(NULL, frame_width/2, frame_height/2, frame_width - 1, i, COLOR_GREEN, 0);
       sleep_ms(15);

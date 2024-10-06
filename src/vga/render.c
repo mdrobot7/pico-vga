@@ -46,22 +46,22 @@ void render() {
 
   while (true) {
     if (config->auto_render) {
-      // look for the first item that needs an update, render that item and everything after it
+      // Look for any updates, then rerender the display from scratch
+      // We used to only rerender items *after* the updated item,
+      // but this means items that move leave "ghosts" if they move.
+      // Just rerender the whole thing.
       i = 0;
       while (!rq[i].header.flags.update && !update) {
         i = (i + 1) % rq_len;
       }
-      // if the update is to hide an item or a force-refresh, rerender the whole thing
-      if (!rq[i].header.flags.shown || update) {
-        i = 0;
-      }
-    } else { // manual rendering
+      render2d_fill(COLOR_BLACK); // wipe the display
+    } else {                      // manual rendering
       while (!update);
       i = 0;
+      render2d_fill(COLOR_BLACK); // wipe the display
     }
 
-    render2d_fill(COLOR_BLACK); // wipe the display
-    for (; i < rq_len; i++) {
+    for (i = 0; i < rq_len; i++) {
       if (rq[i].header.flags.shown) {
         switch (rq[i].header.type) {
           case VGA_RENDER_ITEM_FILL:

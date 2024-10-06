@@ -143,9 +143,9 @@ typedef struct __packed {
  ************************************/
 
 typedef enum {
-  RES_800x600 = 0,
-  RES_640x480,
-  RES_1024x768,
+  RES_800x600 = 0, // @ 60Hz, 40MHz pixel clock
+  RES_640x480,     // @ 60Hz, 25MHz pixel clock
+  RES_1024x768,    // @ 60Hz, 65MHz pixel clock
 } vga_resolution_base_t;
 
 typedef enum {
@@ -158,6 +158,7 @@ typedef enum {
   RES_SCALED_160x120  = 4,
   RES_SCALED_80x60    = 8,
   RES_SCALED_1024x768 = 1,
+  RES_SCALED_512x384  = 2,
 } vga_resolution_scaled_t;
 
 typedef struct {

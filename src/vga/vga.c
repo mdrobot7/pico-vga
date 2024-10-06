@@ -39,7 +39,7 @@ enum {
 };
 // Widths and heights for the three base resolutions
 static const uint16_t frame_size[3][4] = { { 800, 600, 1056, 628 },
-                                           { 640, 480, 800, 525 },
+                                           { 640, 480, 800, 521 },
                                            { 1024, 768, 1344, 806 } };
 #define LARGEST_FRAME_WIDTH       (768)
 #define LARGEST_FRAME_FULL_HEIGHT (1344)
@@ -77,7 +77,7 @@ static void update_frame_ptr() {
   // }
 
   // If the DMA read "cursor" is past the end of the frame data, reset it to the beginning
-  if (dma_hw->ch[frame_ctrl_dma].read_addr >= (io_rw_32) &frame_read_addr[frame_height_full * vga_config->scaled_resolution]) {
+  if (dma_hw->ch[frame_ctrl_dma].read_addr >= (io_rw_32) &frame_read_addr[frame_size[vga_config->base_resolution][FRAME_HEIGHT_FULL_IDX]]) {
     dma_hw->ch[frame_ctrl_dma].read_addr = (io_rw_32) frame_read_addr;
   }
 }
@@ -181,7 +181,7 @@ int vga_init(vga_config_t * config) {
     pwm_set_clkdiv(VSYNC_PWM_SLICE, 198.0);                      // clkdiv maxes out at /256, so this (pixel clock * full line width)/16 = (3*1056)/16, dividing by 16 to compensate
     pwm_set_wrap(VSYNC_PWM_SLICE, (628 * 16) - 1);               // full frame height, adjusted for clkdiv fix
     pwm_set_counter(VSYNC_PWM_SLICE, (4 + 23) * 16);             // sync pulse + back porch
-    pwm_set_chan_level(VSYNC_PWM_SLICE, VSYNC_PWM_CHAN, 4 * 16); // back porch
+    pwm_set_chan_level(VSYNC_PWM_SLICE, VSYNC_PWM_CHAN, 4 * 16); // sync pulse
   } else if (config->base_resolution == RES_640x480) {
     // 125MHz system clock frequency -- possibly bump to 150MHz later
     set_sys_clock_pll(1500000000, 6, 2);
@@ -192,31 +192,33 @@ int vga_init(vga_config_t * config) {
     // https://www.eevblog.com/forum/microcontrollers/implementing-a-vga-controller-on-spartan-3-board-with-25-0-mhz-clock/
     // pg 24: https://docs.xilinx.com/v/u/en-US/ug130
 
-    pwm_set_output_polarity(HSYNC_PWM_SLICE, !HSYNC_PWM_CHAN ? true : false, HSYNC_PWM_CHAN ? true : false);
+    // Sync polarity is inverted
+    pwm_set_output_polarity(HSYNC_PWM_SLICE, true, true);
     pwm_set_clkdiv(HSYNC_PWM_SLICE, 5.0);
     pwm_set_wrap(HSYNC_PWM_SLICE, 800 - 1);
     pwm_set_counter(HSYNC_PWM_SLICE, 96 + 48);
     pwm_set_chan_level(HSYNC_PWM_SLICE, HSYNC_PWM_CHAN, 96);
 
-    pwm_set_output_polarity(VSYNC_PWM_SLICE, !VSYNC_PWM_CHAN ? true : false, VSYNC_PWM_CHAN ? true : false);
+    pwm_set_output_polarity(VSYNC_PWM_SLICE, true, true);
     pwm_set_clkdiv(VSYNC_PWM_SLICE, 250.0); // see above for reasoning behind this -- (5*800)/16
     pwm_set_wrap(VSYNC_PWM_SLICE, (521 * 16) - 1);
     pwm_set_counter(VSYNC_PWM_SLICE, (2 + 29) * 16);
     pwm_set_chan_level(VSYNC_PWM_SLICE, VSYNC_PWM_CHAN, 2 * 16);
   } else if (config->base_resolution == RES_1024x768) {
-    // 150MHz system clock frequency
-    set_sys_clock_pll(1500000000, 5, 2);
+    // 130MHz system clock frequency
+    set_sys_clock_pll(1560000000, 6, 2);
 
     color_program_init(config->pio, color_pio_sm, offset, COLOR_LSB_PIN, 2 * config->scaled_resolution);
 
-    pwm_set_output_polarity(HSYNC_PWM_SLICE, !HSYNC_PWM_CHAN ? true : false, HSYNC_PWM_CHAN ? true : false);
+    // Sync polarity is inverted
+    pwm_set_output_polarity(HSYNC_PWM_SLICE, true, true);
     pwm_set_clkdiv(HSYNC_PWM_SLICE, 2.0);
-    pwm_set_wrap(HSYNC_PWM_SLICE, 1328 - 1);
-    pwm_set_counter(HSYNC_PWM_SLICE, 136 + 144);
+    pwm_set_wrap(HSYNC_PWM_SLICE, 1344 - 1);
+    pwm_set_counter(HSYNC_PWM_SLICE, 136 + 160);
     pwm_set_chan_level(HSYNC_PWM_SLICE, HSYNC_PWM_CHAN, 136);
 
-    pwm_set_output_polarity(VSYNC_PWM_SLICE, !VSYNC_PWM_CHAN ? true : false, VSYNC_PWM_CHAN ? true : false);
-    pwm_set_clkdiv(VSYNC_PWM_SLICE, 166.0); // see above for reasoning behind this -- (2*800)/16
+    pwm_set_output_polarity(VSYNC_PWM_SLICE, true, true);
+    pwm_set_clkdiv(VSYNC_PWM_SLICE, 168.0); // see above for reasoning behind this -- (2*1344)/16
     pwm_set_wrap(VSYNC_PWM_SLICE, (806 * 16) - 1);
     pwm_set_counter(VSYNC_PWM_SLICE, (6 + 29) * 16);
     pwm_set_chan_level(VSYNC_PWM_SLICE, VSYNC_PWM_CHAN, 6 * 16);
@@ -290,7 +292,7 @@ for (int i = 0, j = 0, k = 0; i < frame_height; i++) {
   }
   // Hacky fix: Since the true height of 640x480 is 525 lines, integer division becomes an issue. This is the fix
   if (config->base_resolution == RES_640x480) {
-    frame_read_addr[524] = blank;
+    frame_read_addr[frame_size[RES_640x480][FRAME_HEIGHT_FULL_IDX] - 1] = blank;
   }
 
   multicore_launch_core1(second_core_init);

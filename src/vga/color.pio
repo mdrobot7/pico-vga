@@ -10,25 +10,25 @@
 
 // Helper function (for use in C program) to initialize this PIO program
 
-static inline void color_program_init(PIO pio, uint sm, uint offset, uint dataPin, uint divider) {
+static inline void color_program_init(PIO pio, uint sm, uint offset, uint data_pin, uint divider) {
     //Initialize 8 data pins for 8 bit color
-    pio_gpio_init(pio, dataPin);     //B2 -- LSB (reversed because of how the RP2040 works internally)
-    pio_gpio_init(pio, dataPin + 1);
-    pio_gpio_init(pio, dataPin + 2);
-    pio_gpio_init(pio, dataPin + 3);
-    pio_gpio_init(pio, dataPin + 4);
-    pio_gpio_init(pio, dataPin + 5);
-    pio_gpio_init(pio, dataPin + 6);
-    pio_gpio_init(pio, dataPin + 7); //R1 -- MSB
+    pio_gpio_init(pio, data_pin);     //B2 -- LSB (reversed because of how the RP2040 works internally)
+    pio_gpio_init(pio, data_pin + 1);
+    pio_gpio_init(pio, data_pin + 2);
+    pio_gpio_init(pio, data_pin + 3);
+    pio_gpio_init(pio, data_pin + 4);
+    pio_gpio_init(pio, data_pin + 5);
+    pio_gpio_init(pio, data_pin + 6);
+    pio_gpio_init(pio, data_pin + 7); //R1 -- MSB
 
     //Set all 8 pins to outputs
-    pio_sm_set_consecutive_pindirs(pio, sm, dataPin, 8, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, data_pin, 8, true);
 
     //Get default state machine configuration
     pio_sm_config c = color_program_get_default_config(offset);
 
     //Set all 8 pins to 'out' pins
-    sm_config_set_out_pins(&c, dataPin, 8);
+    sm_config_set_out_pins(&c, data_pin, 8);
 
     //Preset pins to LOW
     pio_sm_set_pins(pio, sm, 0);

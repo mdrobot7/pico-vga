@@ -18,20 +18,145 @@ vga_config_t display_conf = {
   .color_delay_cycles     = 0
 };
 
+static void demo_lines_up() {
+  int item = 0;
+  draw_clear();
+  for (int y = 0; y < vga_get_height(); y += 10) {
+    draw2d_line(&render_queue[item++], vga_get_width() - 1, 0, 0, y, COLOR_RED);
+    sleep_ms(100);
+  }
+}
+
 static void demo_lines_down() {
   int item = 0;
+  draw_clear();
   for (int y = 0; y < vga_get_height(); y += 10) {
     draw2d_line(&render_queue[item++], 0, 0, vga_get_width() - 1, y, COLOR_RED);
     sleep_ms(100);
   }
 }
 
-static void demo_lines_up() {
+static void demo_rectangles() {
   int item = 0;
-  for (int y = 0; y < vga_get_height(); y += 10) {
-    draw2d_line(&render_queue[item++], vga_get_width() - 1, 0, 0, y, COLOR_RED);
+  draw_clear();
+  for (int i = 0; i < 250; i += 10) {
+    draw2d_rectangle(&render_queue[item++], 0 + i, 0 + i, vga_get_width() - 1 - i, vga_get_height() - 1 - i, COLOR_BLUE);
     sleep_ms(100);
   }
+}
+
+static void demo_filled_rectangles() {
+  int item = 0;
+  draw_clear();
+  for (int y = 0; y < vga_get_height(); y += vga_get_height() / 3) {
+    for (int x = 0; x < vga_get_width(); x += vga_get_width() / 4) {
+      draw2d_rectangle_filled(&render_queue[item++], x + 25, y + 25, x + 75, y + 75, COLOR_BLUE);
+      sleep_ms(100);
+    }
+  }
+}
+
+static void demo_triangles_up() {
+  int item     = 0;
+  int center_x = vga_get_width() / 2;
+  draw_clear();
+  for (int i = 0; i < 125; i++) {
+    draw2d_triangle(&render_queue[item++], i, vga_get_height() - 1 - i, center_x, i, vga_get_width() - 1 - i, vga_get_height() - 1 - i, COLOR_GREEN);
+    sleep_ms(100);
+  }
+}
+
+static void demo_triangles_down() {
+  int item     = 0;
+  int center_x = vga_get_width() / 2;
+  draw_clear();
+  for (int i = 0; i < 125; i++) {
+    draw2d_triangle(&render_queue[item++], i, i, center_x, vga_get_height() - 1 - i, vga_get_width() - 1 - i, i, COLOR_GREEN);
+    sleep_ms(100);
+  }
+}
+
+static void demo_filled_triangles() {
+  int item = 0;
+  draw_clear();
+  for (int y = 0; y < vga_get_height(); y += vga_get_height() / 3) {
+    for (int x = 0; x < vga_get_width(); x += vga_get_width() / 4) {
+      draw2d_triangle_filled(&render_queue[item++], x + 25, y + 125, x + 125, y + 25, x + 100, y + 150, COLOR_MAGENTA);
+      sleep_ms(100);
+    }
+  }
+}
+
+static void demo_circles() {
+  int item = 0;
+  draw_clear();
+  for (int rad = 10; rad < 120; rad += 10) {
+    draw2d_circle(&render_queue[item++], vga_get_width() / 2, vga_get_height() / 2, rad, COLOR_TEAL);
+    sleep_ms(100);
+  }
+}
+
+static void demo_filled_circles() {
+  int item = 0;
+  draw_clear();
+  for (int y = 0; y < vga_get_height(); y += vga_get_height() / 3) {
+    for (int x = 0; x < vga_get_width(); x += vga_get_width() / 4) {
+      draw2d_circle_filled(&render_queue[item++], x + 50, y + 50, 50, COLOR_CYAN);
+      sleep_ms(100);
+    }
+  }
+}
+
+static void demo_polygon() {
+  uint16_t points[][2] = { { 87, 248 }, { 86, 19 }, { 141, 207 }, { 115, 175 }, { 1, 53 }, { 55, 151 }, { 4, 244 }, { 65, 197 }, { 211, 250 }, { 233, 77 } };
+  draw_clear();
+  draw2d_polygon(&render_queue[0], points, LEN(points), COLOR_GREEN);
+  sleep_ms(500);
+  draw_clear(); // Clear this one off immediately, since points[] is stack allocated
+}
+
+static void demo_polygon_filled() {
+  uint16_t points[][2] = { { 209, 221 }, { 201, 132 }, { 250, 139 }, { 22, 223 }, { 249, 91 }, { 85, 86 }, { 193, 23 }, { 93, 185 }, { 173, 210 }, { 144, 14 } };
+  draw_clear();
+  draw2d_polygon_filled(&render_queue[0], points, LEN(points), COLOR_GRAY);
+  sleep_ms(500);
+  draw_clear(); // Clear this one off immediately, since points[] is stack allocated
+}
+
+static void demo_string() {
+  const char str[] = "Hello, world!";
+  draw_clear();
+  draw2d_text(&render_queue[0], 100, 100, 300, str, COLOR_WHITE, false);
+  sleep_ms(500);
+  draw_clear(); // Clear this one off immediately, since str[] is stack allocated
+}
+
+static void demo_sprite() {
+  // 0x739000 -> 0x43 -- olive drab
+  // 0xFFA450 -> 0xC1 -- skin
+  // 0xF41414 -> 0x90 -- red
+  // Wa-hoo!
+  static const vga_color_t sprite[16][16] = {
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC1, 0xC1, 0xC1 },
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x00, 0x00, 0xC1, 0xC1, 0xC1 },
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0xC1, 0xC1 },
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x43, 0x43, 0x43, 0xC1, 0xC1, 0x43, 0xC1, 0x00, 0x43, 0x43, 0x43 },
+    { 0x00, 0x00, 0x00, 0x00, 0x43, 0xC1, 0x43, 0xC1, 0xC1, 0xC1, 0x43, 0xC1, 0xC1, 0x43, 0x43, 0x43 },
+    { 0x00, 0x00, 0x00, 0x00, 0x43, 0xC1, 0x43, 0x43, 0xC1, 0xC1, 0xC1, 0x43, 0xC1, 0xC1, 0xC1, 0x43 },
+    { 0x00, 0x00, 0x00, 0x00, 0x43, 0x43, 0xC1, 0xC1, 0xC1, 0xC1, 0x43, 0x43, 0x43, 0x43, 0x43, 0x00 },
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC1, 0xC1, 0xC1, 0xC1, 0xC1, 0xC1, 0xC1, 0x43, 0x00, 0x00 },
+    { 0x00, 0x00, 0x43, 0x43, 0x43, 0x43, 0x43, 0x90, 0x43, 0x43, 0x43, 0x90, 0x43, 0x00, 0x00, 0x00 },
+    { 0x00, 0x43, 0x43, 0x43, 0x43, 0x43, 0x43, 0x43, 0x90, 0x43, 0x43, 0x43, 0x90, 0x00, 0x00, 0x43 },
+    { 0xC1, 0xC1, 0x43, 0x43, 0x43, 0x43, 0x43, 0x43, 0x90, 0x90, 0x90, 0x90, 0x90, 0x00, 0x00, 0x43 },
+    { 0xC1, 0xC1, 0xC1, 0x00, 0x90, 0x90, 0x43, 0x90, 0x90, 0xC1, 0x90, 0x90, 0xC1, 0xC1, 0x43, 0x43 },
+    { 0x00, 0xC1, 0x00, 0x43, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x43, 0x43 },
+    { 0x00, 0x00, 0x43, 0x43, 0x43, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x43, 0x43 },
+    { 0x00, 0x43, 0x43, 0x43, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00 },
+    { 0x00, 0x43, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+  };
+
+  draw_clear();
+  draw2d_sprite(&render_queue[0], 100, 100, (vga_color_t *) sprite, 16, 16, COLOR_BLACK);
 }
 
 int main() {
@@ -42,78 +167,31 @@ int main() {
 
   vga_init(&display_conf);
 
+  demo_lines_up();
+  sleep_ms(500);
   demo_lines_down();
   sleep_ms(500);
-  draw_clear();
-  demo_lines_up();
-  /*for(uint16_t i = 0; i < frame_height; i += 10) {
-      drawLine(NULL, frame_width/2, frame_height/2, frame_width - 1, i, COLOR_GREEN, 0);
-      sleep_ms(15);
-  }
-  for(uint16_t i = frame_width - 1; i > 0; i -= 10) {
-      drawLine(NULL, frame_width/2, frame_height/2, i, frame_height - 1, COLOR_BLUE, 0);
-      sleep_ms(15);
-  }
-  for(uint16_t i = frame_height - 1; i > 0; i -= 10) {
-      drawLine(NULL, frame_width/2, frame_height/2, 0, i, COLOR_WHITE, 0);
-      sleep_ms(15);
-  }
-  sleep_ms(250);
-  clearScreen();
-  for(uint16_t i = 0; i < frame_width; i += 10) {
-      drawLine(NULL, 0, frame_width - 1, i, 0, COLOR_NAVY, 0);
-      sleep_ms(15);
-  }
-  for(uint16_t i = 0; i < frame_height; i += 10) {
-      drawLine(NULL, 0, frame_height, frame_width - 1, i, COLOR_PURPLE, 0);
-      sleep_ms(15);
-  }
-  sleep_ms(250);
-  clearScreen();
-  for(uint16_t i = frame_width - 1; i > 0; i -= 10) {
-      drawLine(NULL, frame_width - 1, frame_height - 1, i, 0, COLOR_YELLOW, 0);
-      sleep_ms(15);
-  }
-  for(uint16_t i = 0; i < frame_height; i += 10) {
-      drawLine(NULL, frame_height - 1, frame_height - 1, 0, i, COLOR_BLUE, 0);
-      sleep_ms(15);
-  }
-  sleep_ms(250);
-  clearScreen();
-
-  //Draw rectangles
-  for(uint8_t i = 0; i < 4; i++) {
-      for(uint8_t j = 0; j < 3; j++) {
-          drawRectangle(NULL, 25 + i*100, 25 + j*100, 75 + i*100, 75 + j*100, COLOR_MAGENTA);
-          sleep_ms(15);
-      }
-  }
-  sleep_ms(250);
-  clearScreen();
-
-  //Draw filled rectangles
-  for(uint8_t i = 0; i < 16; i++) {
-      drawFilledRectangle(NULL, i*25, i*25, frame_width - i*25, frame_height - i*25, 127 + 128*i, 127 + 128*i);
-      sleep_ms(15);
-  }
-  sleep_ms(250);
-  clearScreen();
-
-  //Draw circles
-  for(uint8_t i = 0; i < 32; i++) {
-      drawCircle(NULL, frame_width/2, frame_height/2, i*25, i*8);
-      sleep_ms(15);
-  }
-  sleep_ms(250);
-  clearScreen();
-
-  //Draw text
-  for(uint8_t i = 0; i < 255; i++) {
-      char s[2] = {i, '\0'};
-      drawText(NULL, 0, 0, frame_width, s, COLOR_WHITE, COLOR_BLACK, true, 0);
-  }
+  demo_rectangles();
   sleep_ms(500);
-  clearScreen();
-  */
+  demo_filled_rectangles();
+  sleep_ms(500);
+  demo_triangles_up();
+  sleep_ms(500);
+  demo_triangles_down();
+  sleep_ms(500);
+  demo_filled_triangles();
+  sleep_ms(500);
+  demo_circles();
+  sleep_ms(500);
+  demo_filled_circles();
+  sleep_ms(500);
+  demo_polygon();
+  sleep_ms(500);
+  demo_polygon_filled();
+  sleep_ms(500);
+  demo_string();
+  sleep_ms(500);
+  demo_sprite();
+
   while (true) {}
 }

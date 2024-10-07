@@ -25,4 +25,6 @@
 
 #define UNUSED(x) ((void) x)
 
+#define LEN(arr) (sizeof(arr) / sizeof(arr[0]))
+
 #endif

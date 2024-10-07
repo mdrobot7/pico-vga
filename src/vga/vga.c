@@ -56,8 +56,8 @@ static volatile uint8_t blank_data_dma = 0;
 static volatile uint8_t color_pio_sm = 0;
 
 static volatile uint8_t framebuffer[PV_FRAMEBUFFER_BYTES];
-static const volatile uint8_t blank[LARGEST_FRAME_WIDTH]             = { 0 }; // ~0.7kB
-static volatile uint8_t * frame_read_addr[LARGEST_FRAME_FULL_HEIGHT] = { 0 }; // ~5.2kB
+static const volatile uint8_t blank[LARGEST_FRAME_WIDTH]                 = { 0 }; // ~0.7kB
+static volatile uint8_t * frame_read_addr[LARGEST_FRAME_FULL_HEIGHT + 1] = { 0 }; // ~5.2kB
 
 /************************************
  * STATIC FUNCTIONS
@@ -65,9 +65,10 @@ static volatile uint8_t * frame_read_addr[LARGEST_FRAME_FULL_HEIGHT] = { 0 }; //
 
 // DMA Interrupt Callback
 static void update_frame_ptr() {
-  dma_channel_acknowledge_irq0(frame_ctrl_dma);
+  dma_channel_acknowledge_irq0(frame_data_dma);
 
-  // TODO: Add this back in
+  // TODO: Add this back in. This will need its own old DMA-style handler and init to work,
+  // or some sort of modification to work with the new DMA scheme
   // Grab the element in frameReadAddr that frame_ctrl_dma just wrote (hence the -1) and see if it was an
   // interpolated line. If so, incrememt the interpolated line counter and flag the renderer so it can start
   // re-rendering it.
@@ -76,10 +77,8 @@ static void update_frame_ptr() {
   //   irq_set_pending(lineInterpolationIRQ);
   // }
 
-  // If the DMA read "cursor" is past the end of the frame data, reset it to the beginning
-  if (dma_hw->ch[frame_ctrl_dma].read_addr >= (io_rw_32) &frame_read_addr[frame_size[vga_config->base_resolution][FRAME_HEIGHT_FULL_IDX]]) {
-    dma_hw->ch[frame_ctrl_dma].read_addr = (io_rw_32) frame_read_addr;
-  }
+  // The frame_ctrl_dma "cursor" hit the NULL, so reset and retrigger it
+  dma_hw->ch[frame_ctrl_dma].al3_read_addr_trig = (io_rw_32) frame_read_addr;
 }
 
 static void dma_init(vga_config_t * config) {
@@ -96,13 +95,15 @@ static void dma_init(vga_config_t * config) {
   dma_channel_configure(frame_ctrl_dma, &frame_ctrl_config, &dma_hw->ch[frame_data_dma].al3_read_addr_trig, frame_read_addr, 1, false);
 
   // frame_read_addr[i] -> pioX->txfifo (read from the address in frame_read_addr, send to PIO)
+  // frame_read_addr[height] = NULL, when that is written to the read address by frame_ctrl_dma
+  // then send IRQ
   dma_channel_config frame_data_config = dma_channel_get_default_config(frame_data_dma);
   channel_config_set_high_priority(&frame_data_config, true);
   channel_config_set_transfer_data_size(&frame_data_config, DMA_SIZE_32);
   channel_config_set_chain_to(&frame_data_config, blank_data_dma);
   channel_config_set_dreq(&frame_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
   channel_config_set_irq_quiet(&frame_data_config, true);
-  dma_channel_configure(frame_data_dma, &frame_data_config, &(config->pio)->txf[color_pio_sm], NULL, frame_width / 4, false);
+  dma_channel_configure(frame_data_dma, &frame_data_config, &(config->pio)->txf[color_pio_sm], frame_read_addr[0], frame_width / 4, false);
 
   // 0x00 -> pioX->txfifo (send 0s to the PIO for blanking time)
   dma_channel_config blank_data_config = dma_channel_get_default_config(blank_data_dma);
@@ -111,10 +112,9 @@ static void dma_init(vga_config_t * config) {
   channel_config_set_read_increment(&blank_data_config, false); // Defaults to true
   channel_config_set_chain_to(&blank_data_config, frame_ctrl_dma);
   channel_config_set_dreq(&blank_data_config, pio_get_dreq(config->pio, color_pio_sm, true));
-  channel_config_set_irq_quiet(&blank_data_config, true);
   dma_channel_configure(blank_data_dma, &blank_data_config, &(config->pio)->txf[color_pio_sm], blank, (frame_width_full - frame_width) / 4, false);
 
-  dma_channel_set_irq0_enabled(frame_ctrl_dma, true);
+  dma_channel_set_irq0_enabled(frame_data_dma, true);
   irq_set_priority(DMA_IRQ_0, 0); // Set the DMA interrupt to the highest priority
 
   irq_set_exclusive_handler(DMA_IRQ_0, (irq_handler_t) update_frame_ptr);
@@ -282,18 +282,14 @@ for (int i = 0, j = 0, k = 0; i < frame_height; i++) {
 }
 */
 
-  for (int i = 0; i < frame_height * config->scaled_resolution; i++) {
-    frame_read_addr[i] = (uint8_t *) framebuffer + frame_width * (i / config->scaled_resolution);
+  for (int i = 0; i < frame_size[config->base_resolution][FRAME_HEIGHT_FULL_IDX]; i++) {
+    if (i < frame_size[config->base_resolution][FRAME_HEIGHT_IDX]) {
+      frame_read_addr[i] = (uint8_t *) framebuffer + frame_width * (i / config->scaled_resolution);
+    } else {
+      frame_read_addr[i] = blank;
+    }
   }
-
-  // Fill in blanking time at the bottom of the screen
-  for (int i = frame_height * config->scaled_resolution; i < frame_height_full * config->scaled_resolution; i++) {
-    frame_read_addr[i] = blank;
-  }
-  // Hacky fix: Since the true height of 640x480 is 525 lines, integer division becomes an issue. This is the fix
-  if (config->base_resolution == RES_640x480) {
-    frame_read_addr[frame_size[RES_640x480][FRAME_HEIGHT_FULL_IDX] - 1] = blank;
-  }
+  frame_read_addr[frame_size[config->base_resolution][FRAME_HEIGHT_FULL_IDX]] = NULL;
 
   multicore_launch_core1(second_core_init);
   while (multicore_fifo_pop_blocking() != SECOND_CORE_MAGIC); // busy wait while the core is initializing
